@@ -13,7 +13,7 @@ import {
 import { auth } from "../../../firebase.config";
 
 // google provider
-const gooleProvider = new GoogleAuthProvider();
+const googleProvider = new GoogleAuthProvider();
 // facebook provider
 const facebookProvider = new FacebookAuthProvider();
 // github provider
@@ -24,19 +24,19 @@ const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // google
-  const useGoogle = () => {
+  const googleLogin = () => {
     setLoading(true);
-    return signInWithPopup(auth, gooleProvider);
+    return signInWithPopup(auth, googleProvider);
   };
 
   // facebook
-  const useFacebook = () => {
+  const facebookLogin = () => {
     setLoading(true);
     return signInWithPopup(auth, facebookProvider);
   };
 
   // github
-  const useGithub = () => {
+  const githubLogin = () => {
     setLoading(true);
     return signInWithPopup(auth, githubProvider);
   };
@@ -72,9 +72,9 @@ const AuthProvider = ({ children }) => {
   const userInfo = {
     user,
     loading,
-    useGoogle,
-    useFacebook,
-    useGithub,
+    googleLogin,
+    facebookLogin,
+    githubLogin,
     createUser,
     userLogin,
     userLogOut,
