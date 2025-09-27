@@ -1,25 +1,40 @@
 import React from 'react';
+import { useNavigate } from 'react-router';
 import { Search, Home, Users, Briefcase, MessageCircle, Bell, User, Building, Crown } from 'lucide-react';
 import Logo from '../Logo/Logo';
-// import useAuth from '../../../hooks/UseAuth/useAuth';
 import Loader from '../Loader/Loader';
-
-const useAuth = () => {
-  return {
-    user: {
-      name: 'John Doe',
-      profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-    },
-    loading: false
-  };
-};
+import useAuth from '../../../hooks/UseAuth/useAuth';
+import Swal from 'sweetalert2';
 
 const Navbar = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
-  if(loading){
-    return <Loader></Loader>
+  const avatar = "https://i.postimg.cc/0y6myZrg/businessman-character-avatar-isolated-24877-60111.avif";
+
+  if (loading) {
+    return <Loader />;
   }
+
+  // Handle Profile Click
+  const handleProfileClick = () => {
+    if (user) {
+      navigate('/profile');
+    } else {
+      Swal.fire({
+        title: 'Login Required',
+        text: 'You need to login first',
+        icon: 'warning',
+        showCancelButton: false,
+        confirmButtonText: 'Login',
+        confirmButtonColor: '#dc2626',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/auth/signin');
+        }
+      });
+    }
+  };
 
   return (
     <>
@@ -50,13 +65,14 @@ const Navbar = () => {
           <NavItem label="Notifications" />
           
           {/* Profile */}
-          <div className="flex flex-col items-center space-y-1 cursor-pointer group transition-all duration-200">
+          <div 
+            className="flex flex-col items-center space-y-1 cursor-pointer group transition-all duration-200"
+            onClick={handleProfileClick}
+          >
             <div className="relative">
-              {loading ? (
-                <div className="w-7 h-7 bg-gray-300 rounded-full animate-pulse"></div>
-              ) : user ? (
+              {user ? (
                 <img
-                  src={user.profilePicture}
+                  src={user.profilePicture || avatar}
                   alt={user.name}
                   className="w-7 h-7 rounded-full object-cover border-2 border-transparent group-hover:border-blue-500 transition-all duration-200"
                 />
@@ -121,13 +137,14 @@ const Navbar = () => {
             <MobileNavItem icon={Bell} />
             
             {/* Mobile Profile */}
-            <div className="flex flex-col items-center space-y-1 cursor-pointer group px-2 py-1 transition-all duration-200">
+            <div 
+              className="flex flex-col items-center space-y-1 cursor-pointer group px-2 py-1 transition-all duration-200"
+              onClick={handleProfileClick}
+            >
               <div className="relative">
-                {loading ? (
-                  <div className="w-6 h-6 bg-gray-300 rounded-full animate-pulse"></div>
-                ) : user ? (
+                {user ? (
                   <img
-                    src={user.profilePicture}
+                    src={user.profilePicture || avatar}
                     alt={user.name}
                     className="w-6 h-6 rounded-full object-cover border-2 border-transparent group-hover:border-blue-500 transition-all duration-200"
                   />

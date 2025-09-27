@@ -21,17 +21,19 @@ const SignUp = () => {
   });
 
   useEffect(() => {
-    if (user && !loading) navigate("/where-listen");
+    if (user && !loading) navigate("/");
   }, [user, loading, navigate]);
 
   // ---------------- Social Login Handlers ----------------
   const handleSocialLogin = async (loginFn, providerName) => {
-    try {
-      const userCredential = await loginFn();
-      const currentUser = userCredential.user;
-      const fullName = currentUser.displayName || currentUser.email.split("@")[0] || "User";
+  try {
+    const userCredential = await loginFn();
+    const currentUser = userCredential.user;
+    const fullName =
+      currentUser.displayName || currentUser.email.split("@")[0] || "User";
 
-      // Post user data to server
+    try {
+      // Try to create user in DB
       await axiosIntense.post("/v1/users", {
         fullName,
         email: currentUser.email,
@@ -39,24 +41,31 @@ const SignUp = () => {
         createdAt: new Date().toISOString(),
         creationDate: new Date().toLocaleDateString(),
       });
-
-      Swal.fire({
-        icon: "success",
-        title: `Signed up with ${providerName}`,
-        timer: 2000,
-        timerProgressBar: true,
-        showConfirmButton: false,
-      }).then(() => navigate("/where-listen"));
     } catch (error) {
-      console.error(`${providerName} login failed:`, error);
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: `${providerName} login failed. Try again!`,
-        confirmButtonColor: "#dc2626",
-      });
+      // If already exists, it's fine
+      if (error.response?.status !== 400) {
+        throw error;
+      }
     }
-  };
+
+    Swal.fire({
+      icon: "success",
+      title: `Signed in with ${providerName}`,
+      timer: 2000,
+      timerProgressBar: true,
+      showConfirmButton: false,
+    }).then(() => navigate("/auth/where-listen"));
+  } catch (error) {
+    console.error(`${providerName} login failed:`, error);
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: `${providerName} login failed. Try again!`,
+      confirmButtonColor: "#dc2626",
+    });
+  }
+};
+
 
   const handleGoogleLogin = () => handleSocialLogin(googleLogin, "Google");
   const handleFacebookLogin = () => handleSocialLogin(facebookLogin, "Facebook");
@@ -101,7 +110,7 @@ const SignUp = () => {
         timer: 2000,
         timerProgressBar: true,
         showConfirmButton: false,
-      }).then(() => navigate("/where-listen"));
+      }).then(() => navigate("/auth/where-listen"));
     } catch (error) {
       console.error("Signup failed:", error);
       Swal.fire({

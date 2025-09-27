@@ -6,17 +6,17 @@ import PopUp from '../../components/sharedItems/PopUp/PopUp';
 import useAuth from '../../hooks/UseAuth/useAuth';
 
 const RootLayout = () => {
-  const { user } = useAuth();
+  const { user , loading} = useAuth();
   const [showPopup, setShowPopup] = useState(false);
 
-  useEffect(() => {
-    // Check if popup already shown before
-    const popupShown = localStorage.getItem("popupShown");
+useEffect(() => {
+  const popupShown = localStorage.getItem("popupShown");
 
-    if (!user && !popupShown) {
-      setShowPopup(true);
-    }
-  }, [user]);
+  if (!loading && !user && !popupShown) {
+    setShowPopup(true);
+  }
+}, [user, loading]);
+
 
   const handleClosePopup = () => {
     setShowPopup(false);

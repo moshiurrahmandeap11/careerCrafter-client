@@ -4,6 +4,10 @@ import Home from "../../pages/Home/Home";
 import AuthLayout from "../../layouts/AuthLayout/AuthLayout";
 import SignUp from "../../components/SignUp/SignUp";
 import SignIn from "../../components/SignIn/SignIn";
+import WhereListen from "../../pages/WhereListen/WhereListen";
+import Profile from "../../pages/Profile/Profile";
+import Tags from "../../pages/Tags/Tags";
+import WhatToDo from "../../pages/WhatToDo/WhatToDo";
 
 export const route = createBrowserRouter([
     {
@@ -13,6 +17,10 @@ export const route = createBrowserRouter([
             {
                 index: true,
                 element: <Home></Home>
+            },
+            {
+                path: "/profile",
+                element: <Profile></Profile>
             }
         ]
     },
@@ -27,6 +35,18 @@ export const route = createBrowserRouter([
             {
                 path: "signin",
                 element: <SignIn></SignIn>
+            },
+            {
+                path: "where-listen",
+                element: <WhereListen></WhereListen>
+            },
+            {
+                path: "tags",
+                element: <Tags></Tags>
+            },
+            {
+                path: "what-to-do",
+                element: <WhatToDo></WhatToDo>
             }
         ]
     }
