@@ -75,12 +75,13 @@ const Navbar = () => {
   const handleNavClick = (navItem) => {
     setActiveNav(navItem);
     setIsMobileMenuOpen(false);
-    
-    switch(navItem) {
+
+    switch (navItem) {
       case 'Home':
         navigate('/');
         break;
       case 'My Network':
+      case 'Network':
         navigate('/network');
         break;
       case 'Jobs':
@@ -153,7 +154,7 @@ const Navbar = () => {
             <div className="flex items-center justify-between h-16">
               {/* Left Section - Logo */}
               <div className="flex items-center space-x-8 flex-shrink-0">
-                <div 
+                <div
                   className="flex items-center space-x-3 cursor-pointer group"
                   onClick={() => handleNavClick('Home')}
                 >
@@ -180,14 +181,14 @@ const Navbar = () => {
               <div className="flex items-center space-x-4 flex-shrink-0">
                 {/* Business & Premium */}
                 <div className="flex items-center space-x-3">
-                  <NavItem 
-                    label="Business" 
+                  <NavItem
+                    label="Business"
                     icon={Building}
                     active={activeNav === 'Business'}
                     onClick={() => handleNavClick('Business')}
                   />
-                  
-                  <div 
+
+                  <div
                     className="flex items-center space-x-2 cursor-pointer group p-2 rounded-lg hover:bg-amber-50 transition-colors duration-200"
                     onClick={() => handleNavClick('Premium')}
                   >
@@ -195,16 +196,15 @@ const Navbar = () => {
                       <Crown className="w-5 h-5 text-amber-500 group-hover:text-amber-600 transition-colors duration-200" />
                       <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
                     </div>
-                    <span className={`text-sm font-semibold transition-colors duration-200 ${
-                      activeNav === 'Premium' ? 'text-amber-700' : 'text-amber-600 group-hover:text-amber-700'
-                    }`}>
+                    <span className={`text-sm font-semibold transition-colors duration-200 ${activeNav === 'Premium' ? 'text-amber-700' : 'text-amber-600 group-hover:text-amber-700'
+                      }`}>
                       Premium
                     </span>
                   </div>
                 </div>
 
                 {/* Profile */}
-                <div 
+                <div
                   className="flex items-center space-x-3 cursor-pointer group p-2 rounded-lg hover:bg-blue-50 transition-colors duration-200"
                   onClick={handleProfileClick}
                 >
@@ -221,11 +221,10 @@ const Navbar = () => {
                       </div>
                     )}
                   </div>
-                  <span className={`text-sm font-medium transition-colors duration-200 ${
-                    activeNav === 'Profile' 
-                      ? 'text-blue-600' 
+                  <span className={`text-sm font-medium transition-colors duration-200 ${activeNav === 'Profile'
+                      ? 'text-blue-600'
                       : 'text-gray-700 group-hover:text-blue-600'
-                  }`}>
+                    }`}>
                     Profile
                   </span>
                 </div>
@@ -241,7 +240,7 @@ const Navbar = () => {
               {/* Main Navigation */}
               <div className="flex items-center space-x-1">
                 {mainNavItems.map((item) => (
-                  <NavItem 
+                  <NavItem
                     key={item.label}
                     label={item.label}
                     icon={item.icon}
@@ -259,7 +258,7 @@ const Navbar = () => {
                   <span className="text-sm font-semibold text-purple-700">AI Tools</span>
                 </div>
                 {aiNavItems.map((item) => (
-                  <NavItem 
+                  <NavItem
                     key={item.label}
                     label={item.label}
                     icon={item.icon}
@@ -290,8 +289,8 @@ const Navbar = () => {
                   <Menu className="w-6 h-6 text-gray-700" />
                 )}
               </button>
-              
-              <div 
+
+              <div
                 className="flex items-center space-x-2 cursor-pointer flex-shrink-0"
                 onClick={() => handleNavClick('Home')}
               >
@@ -311,7 +310,7 @@ const Navbar = () => {
               </button>
 
               {/* Notifications */}
-              <button 
+              <button
                 className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
                 onClick={() => handleNavClick('Notifications')}
               >
@@ -338,7 +337,7 @@ const Navbar = () => {
         {/* Mobile Side Menu */}
         {isMobileMenuOpen && (
           <div className="fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setIsMobileMenuOpen(false)}>
-            <div 
+            <div
               className="absolute left-0 top-0 bottom-0 w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out"
               onClick={(e) => e.stopPropagation()}
             >
@@ -351,7 +350,7 @@ const Navbar = () => {
 
               <div className="p-4 space-y-2 max-h-[calc(100vh-100px)] overflow-y-auto">
                 {/* User Profile Section */}
-                <div 
+                <div
                   className="flex items-center space-x-3 p-4 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors duration-200 border border-gray-100"
                   onClick={handleProfileClick}
                 >
@@ -385,7 +384,7 @@ const Navbar = () => {
                     <span className="font-semibold text-purple-700">AI Career Tools</span>
                   </div>
                   {aiNavItems.map((item) => (
-                    <MobileNavItem 
+                    <MobileNavItem
                       key={item.label}
                       label={item.label}
                       icon={item.icon}
@@ -402,7 +401,7 @@ const Navbar = () => {
                     <span className="font-semibold text-gray-700">More</span>
                   </div>
                   {additionalMenuItems.map((item) => (
-                    <MobileNavItem 
+                    <MobileNavItem
                       key={item.label}
                       label={item.label}
                       icon={item.icon}
@@ -442,16 +441,15 @@ const Navbar = () => {
 
 // Desktop Navigation Item Component
 const NavItem = ({ label, icon: Icon, active = false, onClick, hasNotification = false, premium = false }) => (
-  <div 
-    className={`flex flex-col items-center cursor-pointer group relative p-3 rounded-xl transition-all duration-200 min-w-20 ${
-      active 
-        ? premium 
-          ? 'text-amber-600 bg-amber-50' 
+  <div
+    className={`flex flex-col items-center cursor-pointer group relative p-3 rounded-xl transition-all duration-200 min-w-20 ${active
+        ? premium
+          ? 'text-amber-600 bg-amber-50'
           : 'text-blue-600 bg-blue-50'
         : premium
           ? 'text-amber-600 hover:text-amber-700 hover:bg-amber-50'
           : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
-    }`}
+      }`}
     onClick={onClick}
   >
     <div className="relative">
@@ -465,25 +463,23 @@ const NavItem = ({ label, icon: Icon, active = false, onClick, hasNotification =
     </div>
     <span className="font-medium text-xs mt-1">{label}</span>
     {active && (
-      <div className={`absolute -bottom-1 left-3 right-3 h-0.5 rounded-full ${
-        premium ? 'bg-amber-600' : 'bg-blue-600'
-      }`}></div>
+      <div className={`absolute -bottom-1 left-3 right-3 h-0.5 rounded-full ${premium ? 'bg-amber-600' : 'bg-blue-600'
+        }`}></div>
     )}
   </div>
 );
 
 // Mobile Menu Item Component
 const MobileNavItem = ({ label, icon: Icon, active = false, onClick, hasNotification = false, premium = false }) => (
-  <div 
-    className={`flex items-center space-x-4 p-4 rounded-xl cursor-pointer transition-all duration-200 ${
-      active 
+  <div
+    className={`flex items-center space-x-4 p-4 rounded-xl cursor-pointer transition-all duration-200 ${active
         ? premium
           ? 'text-amber-600 bg-amber-50 border border-amber-100'
           : 'text-blue-600 bg-blue-50 border border-blue-100'
-        : premium 
-          ? 'text-amber-600 hover:bg-amber-50 border border-amber-100' 
+        : premium
+          ? 'text-amber-600 hover:bg-amber-50 border border-amber-100'
           : 'text-gray-700 hover:bg-gray-50 border border-transparent'
-    }`}
+      }`}
     onClick={onClick}
   >
     <div className="relative">
@@ -499,21 +495,19 @@ const MobileNavItem = ({ label, icon: Icon, active = false, onClick, hasNotifica
       {label}
     </span>
     {active && (
-      <div className={`ml-auto w-2 h-2 rounded-full ${
-        premium ? 'bg-amber-600' : 'bg-blue-600'
-      }`}></div>
+      <div className={`ml-auto w-2 h-2 rounded-full ${premium ? 'bg-amber-600' : 'bg-blue-600'
+        }`}></div>
     )}
   </div>
 );
 
 // Mobile Bottom Navigation Item Component
 const MobileBottomNavItem = ({ icon: Icon, label, active = false, onClick, hasNotification = false }) => (
-  <button 
-    className={`flex flex-col items-center cursor-pointer group p-2 rounded-xl transition-all duration-200 flex-1 max-w-20 ${
-      active 
-        ? 'text-blue-600 bg-blue-50' 
+  <button
+    className={`flex flex-col items-center cursor-pointer group p-2 rounded-xl transition-all duration-200 flex-1 max-w-20 ${active
+        ? 'text-blue-600 bg-blue-50'
         : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
-    }`}
+      }`}
     onClick={onClick}
   >
     <div className="relative">

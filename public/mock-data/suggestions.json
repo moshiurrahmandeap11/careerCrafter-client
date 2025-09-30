@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "name": "Tom Anderson",
+    "title": "Full Stack Developer",
+    "company": "TechStart",
+    "location": "Miami, FL",
+    "avatar": "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?w=150&h=150&fit=crop&crop=face",
+    "mutual": 3
+  },
+  {
+    "id": 2,
+    "name": "Rachel Green",
+    "title": "HR Manager",
+    "company": "TalentFind",
+    "location": "Denver, CO",
+    "avatar": "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=150&h=150&fit=crop&crop=face",
+    "mutual": 7
+  }
+]

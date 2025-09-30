@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "name": "David Kim",
+    "title": "Frontend Developer",
+    "company": "WebSolutions",
+    "location": "Remote",
+    "avatar": "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=150&h=150&fit=crop&crop=face",
+    "message": "Hi! We met at the React Conference last month"
+  },
+  {
+    "id": 2,
+    "name": "Lisa Wang",
+    "title": "Product Designer",
+    "company": "DesignCo",
+    "location": "Los Angeles, CA",
+    "avatar": "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=150&h=150&fit=crop&crop=face",
+    "message": "Love your work on the career platform!"
+  }
+]
