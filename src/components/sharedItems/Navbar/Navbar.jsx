@@ -149,7 +149,7 @@ const Navbar = () => {
          sticky top-0 z-50`}>
         {/* First Row - Logo, Search & Main Actions */}
         <div className="border-b border-gray-100">
-          <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+          <div className=" mx-auto w-11/12 px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* Left Section - Logo */}
               <div className="flex items-center space-x-8 flex-shrink-0">
@@ -236,7 +236,7 @@ const Navbar = () => {
 
         {/* Second Row - Navigation & AI Features */}
         <div className="bg-white">
-          <div className="max-w-7xl mx-auto pb-5 w-full px-4 sm:px-6 lg:px-8">
+          <div className="w-11/12 mx-auto pb-5 px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-12">
               {/* Main Navigation */}
               <div className="flex items-center space-x-1">
