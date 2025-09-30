@@ -8,6 +8,7 @@ import WhereListen from "../../pages/WhereListen/WhereListen";
 import Profile from "../../pages/Profile/Profile";
 import Tags from "../../pages/Tags/Tags";
 import WhatToDo from "../../pages/WhatToDo/WhatToDo";
+import MyNetwork from "../../pages/myNetwork/MyNetwork";
 
 export const route = createBrowserRouter([
     {
@@ -21,6 +22,10 @@ export const route = createBrowserRouter([
             {
                 path: "/profile",
                 element: <Profile></Profile>
+            },
+            {
+                path: '/network',
+                element: <MyNetwork />
             }
         ]
     },
