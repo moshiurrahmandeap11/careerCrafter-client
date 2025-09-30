@@ -18,13 +18,13 @@ const Navbar = () => {
   const avatar = "https://i.postimg.cc/0y6myZrg/businessman-character-avatar-isolated-24877-60111.avif";
 
   // Handle scroll effect
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     setIsScrolled(window.scrollY > 10);
+  //   };
+  //   window.addEventListener('scroll', handleScroll);
+  //   return () => window.removeEventListener('scroll', handleScroll);
+  // }, []);
 
   // Set active nav based on current route
   useEffect(() => {
@@ -145,14 +145,11 @@ const Navbar = () => {
   return (
     <>
       {/* Desktop & Tablet Navbar - Double Row Layout */}
-      <nav className={`hidden lg:block w-full transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white backdrop-blur-lg shadow-lg border-b border-gray-200/50' 
-          : 'bg-white border-b border-gray-100'
-      } sticky top-0 z-50`}>
+      <nav className={`hidden lg:block w-full transition-all duration-300 bg-white  shadow-lg border-b border-gray-200/50
+         sticky top-0 z-50`}>
         {/* First Row - Logo, Search & Main Actions */}
         <div className="border-b border-gray-100">
-          <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+          <div className=" mx-auto w-11/12 px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* Left Section - Logo */}
               <div className="flex items-center space-x-8 flex-shrink-0">
@@ -239,7 +236,7 @@ const Navbar = () => {
 
         {/* Second Row - Navigation & AI Features */}
         <div className="bg-white">
-          <div className="max-w-7xl mx-auto pb-5 w-full px-4 sm:px-6 lg:px-8">
+          <div className="w-11/12 mx-auto pb-5 px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-12">
               {/* Main Navigation */}
               <div className="flex items-center space-x-1">
@@ -278,11 +275,7 @@ const Navbar = () => {
       </nav>
 
       {/* Mobile Top Bar */}
-      <nav className={`lg:hidden w-full transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/95 backdrop-blur-lg shadow-lg border-b border-gray-200/50' 
-          : 'bg-white border-b border-gray-100'
-      } sticky top-0 z-50`}>
+      <nav className={`lg:hidden w-full transition-all duration-300 bg-white shadow-lg border-b border-gray-200/50 sticky top-0 z-50`}>
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             {/* Left: Menu Button & Logo */}
@@ -356,7 +349,7 @@ const Navbar = () => {
                 </div>
               </div>
 
-              <div className="p-4 space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
+              <div className="p-4 space-y-2 max-h-[calc(100vh-100px)] overflow-y-auto">
                 {/* User Profile Section */}
                 <div 
                   className="flex items-center space-x-3 p-4 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors duration-200 border border-gray-100"
