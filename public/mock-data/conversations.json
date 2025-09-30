@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "name": "Sarah Chen",
+    "avatar": "/api/placeholder/48/48",
+    "company": "Google",
+    "title": "Senior Product Designer",
+    "isOnline": true,
+    "lastMessage": "Looking forward to our meeting tomorrow!",
+    "timestamp": "2024-01-15T14:30:00Z",
+    "messages": [
+      {
+        "id": 1,
+        "text": "Hi Sarah! Thanks for connecting with me.",
+        "timestamp": "2024-01-15T10:00:00Z",
+        "isSender": true,
+        "status": "read"
+      },
+      {
+        "id": 2,
+        "text": "Hello! Great to connect with you too. I've been following your work at TechCorp.",
+        "timestamp": "2024-01-15T10:05:00Z",
+        "isSender": false,
+        "status": "read"
+      },
+      {
+        "id": 3,
+        "text": "That means a lot! I'd love to learn more about your design process at Google.",
+        "timestamp": "2024-01-15T10:10:00Z",
+        "isSender": true,
+        "status": "read"
+      },
+      {
+        "id": 4,
+        "text": "Absolutely! We should schedule a call to discuss. How about tomorrow at 2 PM?",
+        "timestamp": "2024-01-15T14:25:00Z",
+        "isSender": false,
+        "status": "read"
+      },
+      {
+        "id": 5,
+        "text": "Looking forward to our meeting tomorrow!",
+        "timestamp": "2024-01-15T14:30:00Z",
+        "isSender": false,
+        "status": "read"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Marcus Johnson",
+    "avatar": "/api/placeholder/48/48",
+    "company": "Microsoft",
+    "title": "Engineering Manager",
+    "isOnline": false,
+    "lastMessage": "The project specs look great, let's discuss next week",
+    "timestamp": "2024-01-14T16:45:00Z",
+    "messages": []
+  },
+  {
+    "id": 3,
+    "name": "Emily Rodriguez",
+    "avatar": "/api/placeholder/48/48",
+    "company": "Apple",
+    "title": "Product Marketing Lead",
+    "isOnline": true,
+    "lastMessage": "Can you share the latest analytics report?",
+    "timestamp": "2024-01-14T11:20:00Z",
+    "messages": []
+  },
+  {
+    "id": 4,
+    "name": "David Kim",
+    "avatar": "/api/placeholder/48/48",
+    "company": "Netflix",
+    "title": "Data Scientist",
+    "isOnline": false,
+    "lastMessage": "Thanks for the introduction!",
+    "timestamp": "2024-01-13T09:15:00Z",
+    "messages": []
+  }
+]
