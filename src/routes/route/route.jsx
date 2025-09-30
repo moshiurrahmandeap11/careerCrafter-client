@@ -10,6 +10,7 @@ import Tags from "../../pages/Tags/Tags";
 import WhatToDo from "../../pages/WhatToDo/WhatToDo";
 import MyNetwork from "../../pages/myNetwork/MyNetwork";
 import MessagesPage from "../../pages/messages/MessagesPage";
+import JobsPage from "../../pages/jobs/JobsPage";
 
 export const route = createBrowserRouter([
     {
@@ -31,6 +32,10 @@ export const route = createBrowserRouter([
             {
                 path:'/messages',
                 element: <MessagesPage />
+            },
+            {
+                path: '/jobs',
+                element: <JobsPage />
             }
         ]
     },
