@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { Search, Home, Users, Briefcase, MessageCircle, Bell, User, Building, Crown, Menu, X, FileText, Sparkles, Target, Bot } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Logo from '../Logo/Logo';
 import Loader from '../Loader/Loader';
 import useAuth from '../../../hooks/UseAuth/useAuth';
@@ -14,17 +15,84 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeNav, setActiveNav] = useState('Home');
   const [showSearch, setShowSearch] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
 
   const avatar = "https://i.postimg.cc/0y6myZrg/businessman-character-avatar-isolated-24877-60111.avif";
 
-  // Handle scroll effect
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     setIsScrolled(window.scrollY > 10);
-  //   };
-  //   window.addEventListener('scroll', handleScroll);
-  //   return () => window.removeEventListener('scroll', handleScroll);
-  // }, []);
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: -20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 24
+      }
+    }
+  };
+
+  const mobileMenuVariants = {
+    closed: {
+      x: "-100%",
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 40
+      }
+    },
+    open: {
+      x: 0,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 40
+      }
+    }
+  };
+
+  const overlayVariants = {
+    closed: {
+      opacity: 0,
+      transition: {
+        duration: 0.2
+      }
+    },
+    open: {
+      opacity: 1,
+      transition: {
+        duration: 0.2
+      }
+    }
+  };
+
+  const searchVariants = {
+    collapsed: {
+      width: 0,
+      opacity: 0,
+      transition: {
+        duration: 0.2
+      }
+    },
+    expanded: {
+      width: "100%",
+      opacity: 1,
+      transition: {
+        duration: 0.3
+      }
+    }
+  };
 
   // Set active nav based on current route
   useEffect(() => {
@@ -113,6 +181,14 @@ const Navbar = () => {
     }
   };
 
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchValue.trim()) {
+      // Implement search functionality
+      console.log('Searching for:', searchValue);
+      setShowSearch(false);
+    }
+  };
+
   // Main navigation items
   const mainNavItems = [
     { label: 'Home', icon: Home, path: '/' },
@@ -146,14 +222,22 @@ const Navbar = () => {
   return (
     <>
       {/* Desktop & Tablet Navbar - Double Row Layout */}
-      <nav className={`hidden lg:block w-full transition-all duration-300 bg-white  shadow-lg border-b border-gray-200/50
-         sticky top-0 z-50`}>
+      <motion.nav 
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className={`hidden lg:block w-full transition-all duration-300 bg-white shadow-lg border-b border-gray-200/50 sticky top-0 z-50`}
+      >
         {/* First Row - Logo, Search & Main Actions */}
-        <div className="border-b border-gray-100">
-          <div className=" mx-auto w-11/12 px-4 sm:px-6 lg:px-8">
+        <motion.div variants={itemVariants} className="border-b border-gray-100">
+          <div className="mx-auto w-11/12 px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* Left Section - Logo */}
-              <div className="flex items-center space-x-8 flex-shrink-0">
+              <motion.div 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex items-center space-x-8 flex-shrink-0"
+              >
                 <div
                   className="flex items-center space-x-3 cursor-pointer group"
                   onClick={() => handleNavClick('Home')}
@@ -163,22 +247,29 @@ const Navbar = () => {
                     Career Crafter
                   </h1>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Search Bar */}
-              <div className="flex-1 max-w-2xl mx-8">
+              <motion.div 
+                variants={itemVariants}
+                className="flex-1 max-w-2xl mx-8"
+              >
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
+                  <motion.input
+                    whileFocus={{ scale: 1.02 }}
                     type="text"
                     placeholder="Search for jobs, people, or companies..."
                     className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm hover:bg-gray-100"
+                    onKeyPress={handleSearch}
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
                   />
                 </div>
-              </div>
+              </motion.div>
 
               {/* Right Section - Actions */}
-              <div className="flex items-center space-x-4 flex-shrink-0">
+              <motion.div variants={itemVariants} className="flex items-center space-x-4 flex-shrink-0">
                 {/* Business & Premium */}
                 <div className="flex items-center space-x-3">
                   <NavItem
@@ -188,37 +279,49 @@ const Navbar = () => {
                     onClick={() => handleNavClick('Business')}
                   />
 
-                  <div
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     className="flex items-center space-x-2 cursor-pointer group p-2 rounded-lg hover:bg-amber-50 transition-colors duration-200"
                     onClick={() => handleNavClick('Premium')}
                   >
                     <div className="relative">
                       <Crown className="w-5 h-5 text-amber-500 group-hover:text-amber-600 transition-colors duration-200" />
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
+                      <motion.div 
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"
+                      ></motion.div>
                     </div>
                     <span className={`text-sm font-semibold transition-colors duration-200 ${activeNav === 'Premium' ? 'text-amber-700' : 'text-amber-600 group-hover:text-amber-700'
                       }`}>
                       Premium
                     </span>
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* Profile */}
-                <div
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   className="flex items-center space-x-3 cursor-pointer group p-2 rounded-lg hover:bg-blue-50 transition-colors duration-200"
                   onClick={handleProfileClick}
                 >
                   <div className="relative">
                     {user ? (
-                      <img
+                      <motion.img
+                        whileHover={{ rotate: 5 }}
                         src={user.profilePicture || avatar}
                         alt={user.name}
                         className="w-8 h-8 rounded-full object-cover border-2 border-transparent group-hover:border-blue-500 transition-all duration-200"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center border-2 border-transparent group-hover:border-blue-500 transition-all duration-200">
+                      <motion.div 
+                        whileHover={{ rotate: 5 }}
+                        className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center border-2 border-transparent group-hover:border-blue-500 transition-all duration-200"
+                      >
                         <User className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors duration-200" />
-                      </div>
+                      </motion.div>
                     )}
                   </div>
                   <span className={`text-sm font-medium transition-colors duration-200 ${activeNav === 'Profile'
@@ -227,18 +330,23 @@ const Navbar = () => {
                     }`}>
                     Profile
                   </span>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Second Row - Navigation & AI Features */}
-        <div className="bg-white">
+        <motion.div variants={itemVariants} className="bg-white">
           <div className="w-11/12 mx-auto pb-5 px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-12">
               {/* Main Navigation */}
-              <div className="flex items-center space-x-1">
+              <motion.div 
+                className="flex items-center space-x-1"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
                 {mainNavItems.map((item) => (
                   <NavItem
                     key={item.label}
@@ -249,14 +357,27 @@ const Navbar = () => {
                     hasNotification={item.notification}
                   />
                 ))}
-              </div>
+              </motion.div>
 
               {/* AI Features Navigation */}
-              <div className="flex items-center space-x-1">
-                <div className="flex items-center space-x-2 mr-4 px-3 py-1 bg-gradient-to-r from-purple-50 to-blue-50 rounded-full border border-purple-200">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
+              <motion.div 
+                className="flex items-center space-x-1"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <motion.div 
+                  whileHover={{ scale: 1.05 }}
+                  className="flex items-center space-x-2 mr-4 px-3 py-1 bg-gradient-to-r from-purple-50 to-blue-50 rounded-full border border-purple-200"
+                >
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Sparkles className="w-4 h-4 text-purple-600" />
+                  </motion.div>
                   <span className="text-sm font-semibold text-purple-700">AI Tools</span>
-                </div>
+                </motion.div>
                 {aiNavItems.map((item) => (
                   <NavItem
                     key={item.label}
@@ -267,19 +388,26 @@ const Navbar = () => {
                     premium={item.premium}
                   />
                 ))}
-              </div>
+              </motion.div>
             </div>
           </div>
-        </div>
-      </nav>
+        </motion.div>
+      </motion.nav>
 
       {/* Mobile Top Bar */}
-      <nav className={`lg:hidden w-full transition-all duration-300 bg-white shadow-lg border-b border-gray-200/50 sticky top-0 z-50`}>
+      <motion.nav 
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className={`lg:hidden w-full transition-all duration-300 bg-white shadow-lg border-b border-gray-200/50 sticky top-0 z-50`}
+      >
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             {/* Left: Menu Button & Logo */}
             <div className="flex items-center space-x-3 flex-1">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex-shrink-0"
               >
@@ -288,139 +416,198 @@ const Navbar = () => {
                 ) : (
                   <Menu className="w-6 h-6 text-gray-700" />
                 )}
-              </button>
+              </motion.button>
 
-              <div
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 className="flex items-center space-x-2 cursor-pointer flex-shrink-0"
                 onClick={() => handleNavClick('Home')}
               >
                 <Logo />
                 <h1 className="font-bold text-lg text-gray-900">Career Crafter</h1>
-              </div>
+              </motion.div>
             </div>
 
             {/* Right: Search & Notifications */}
             <div className="flex items-center space-x-3">
               {/* Search Toggle */}
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setShowSearch(!showSearch)}
                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
               >
                 <Search className="w-5 h-5 text-gray-700" />
-              </button>
+              </motion.button>
 
               {/* Notifications */}
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
                 onClick={() => handleNavClick('Notifications')}
               >
                 <Bell className="w-5 h-5 text-gray-700" />
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></div>
-              </button>
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"
+                ></motion.div>
+              </motion.button>
             </div>
           </div>
 
           {/* Mobile Search Bar - Toggle */}
-          {showSearch && (
-            <div className="mt-3 relative animate-fadeIn">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search jobs, people, companies..."
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm"
-                autoFocus
-              />
-            </div>
-          )}
+          <AnimatePresence>
+            {showSearch && (
+              <motion.div
+                initial="collapsed"
+                animate="expanded"
+                exit="collapsed"
+                variants={searchVariants}
+                className="mt-3 relative overflow-hidden"
+              >
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search jobs, people, companies..."
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm"
+                  autoFocus
+                  onKeyPress={handleSearch}
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Mobile Side Menu */}
-        {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setIsMobileMenuOpen(false)}>
-            <div
-              className="absolute left-0 top-0 bottom-0 w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center space-x-3">
-                  <Logo />
-                  <h1 className="font-bold text-xl text-gray-900">Career Crafter</h1>
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <>
+              <motion.div
+                variants={overlayVariants}
+                initial="closed"
+                animate="open"
+                exit="closed"
+                className="fixed inset-0 z-50 bg-black bg-opacity-50"
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
+              <motion.div
+                variants={mobileMenuVariants}
+                initial="closed"
+                animate="open"
+                exit="closed"
+                className="fixed left-0 top-0 bottom-0 w-80 bg-white shadow-xl z-50"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-center space-x-3">
+                    <Logo />
+                    <h1 className="font-bold text-xl text-gray-900">Career Crafter</h1>
+                  </div>
                 </div>
-              </div>
 
-              <div className="p-4 space-y-2 max-h-[calc(100vh-100px)] overflow-y-auto">
-                {/* User Profile Section */}
-                <div
-                  className="flex items-center space-x-3 p-4 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors duration-200 border border-gray-100"
-                  onClick={handleProfileClick}
+                <motion.div 
+                  className="p-4 space-y-2 max-h-[calc(100vh-100px)] overflow-y-auto"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
                 >
-                  <div className="relative">
-                    {user ? (
-                      <img
-                        src={user.profilePicture || avatar}
-                        alt={user.name}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-blue-500"
+                  {/* User Profile Section */}
+                  <motion.div
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex items-center space-x-3 p-4 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors duration-200 border border-gray-100"
+                    onClick={handleProfileClick}
+                  >
+                    <div className="relative">
+                      {user ? (
+                        <motion.img
+                          whileHover={{ rotate: 5 }}
+                          src={user.profilePicture || avatar}
+                          alt={user.name}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-blue-500"
+                        />
+                      ) : (
+                        <motion.div 
+                          whileHover={{ rotate: 5 }}
+                          className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center border-2 border-blue-500"
+                        >
+                          <User className="w-6 h-6 text-gray-600" />
+                        </motion.div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">
+                        {user ? user.name : 'Guest User'}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {user ? 'View your profile' : 'Login to your account'}
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  {/* AI Features Section */}
+                  <motion.div variants={itemVariants} className="pt-4 pb-2">
+                    <div className="flex items-center space-x-2 px-4 mb-3">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                      >
+                        <Sparkles className="w-5 h-5 text-purple-600" />
+                      </motion.div>
+                      <span className="font-semibold text-purple-700">AI Career Tools</span>
+                    </div>
+                    {aiNavItems.map((item, index) => (
+                      <MobileNavItem
+                        key={item.label}
+                        label={item.label}
+                        icon={item.icon}
+                        active={activeNav === item.label}
+                        onClick={() => handleNavClick(item.label)}
+                        premium={item.premium}
+                        index={index}
                       />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center border-2 border-blue-500">
-                        <User className="w-6 h-6 text-gray-600" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">
-                      {user ? user.name : 'Guest User'}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {user ? 'View your profile' : 'Login to your account'}
-                    </p>
-                  </div>
-                </div>
+                    ))}
+                  </motion.div>
 
-                {/* AI Features Section */}
-                <div className="pt-4 pb-2">
-                  <div className="flex items-center space-x-2 px-4 mb-3">
-                    <Sparkles className="w-5 h-5 text-purple-600" />
-                    <span className="font-semibold text-purple-700">AI Career Tools</span>
-                  </div>
-                  {aiNavItems.map((item) => (
-                    <MobileNavItem
-                      key={item.label}
-                      label={item.label}
-                      icon={item.icon}
-                      active={activeNav === item.label}
-                      onClick={() => handleNavClick(item.label)}
-                      premium={item.premium}
-                    />
-                  ))}
-                </div>
-
-                {/* Additional Menu Items */}
-                <div className="pt-4 pb-2">
-                  <div className="px-4 mb-3">
-                    <span className="font-semibold text-gray-700">More</span>
-                  </div>
-                  {additionalMenuItems.map((item) => (
-                    <MobileNavItem
-                      key={item.label}
-                      label={item.label}
-                      icon={item.icon}
-                      active={activeNav === item.label}
-                      onClick={() => handleNavClick(item.label)}
-                      premium={item.premium}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </nav>
+                  {/* Additional Menu Items */}
+                  <motion.div variants={itemVariants} className="pt-4 pb-2">
+                    <div className="px-4 mb-3">
+                      <span className="font-semibold text-gray-700">More</span>
+                    </div>
+                    {additionalMenuItems.map((item, index) => (
+                      <MobileNavItem
+                        key={item.label}
+                        label={item.label}
+                        icon={item.icon}
+                        active={activeNav === item.label}
+                        onClick={() => handleNavClick(item.label)}
+                        premium={item.premium}
+                        index={index + aiNavItems.length}
+                      />
+                    ))}
+                  </motion.div>
+                </motion.div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </motion.nav>
 
       {/* Mobile Bottom Navigation - All items except Notifications */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 shadow-2xl backdrop-blur-sm">
+      <motion.nav 
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 shadow-2xl backdrop-blur-sm"
+      >
         <div className="flex items-center justify-around px-2 py-2">
-          {mobileBottomNavItems.map((item) => (
+          {mobileBottomNavItems.map((item, index) => (
             <MobileBottomNavItem
               key={item.label}
               icon={item.icon}
@@ -428,20 +615,20 @@ const Navbar = () => {
               active={activeNav === item.label}
               onClick={() => handleNavClick(item.label)}
               hasNotification={item.notification}
+              index={index}
             />
           ))}
         </div>
-      </nav>
-
-      {/* Spacer for mobile bottom navigation */}
-      <div className="lg:hidden h-16"></div>
+      </motion.nav>
     </>
   );
 };
 
 // Desktop Navigation Item Component
 const NavItem = ({ label, icon: Icon, active = false, onClick, hasNotification = false, premium = false }) => (
-  <div
+  <motion.div
+    whileHover={{ scale: 1.05, y: -2 }}
+    whileTap={{ scale: 0.95 }}
     className={`flex flex-col items-center cursor-pointer group relative p-3 rounded-xl transition-all duration-200 min-w-20 ${active
         ? premium
           ? 'text-amber-600 bg-amber-50'
@@ -455,23 +642,49 @@ const NavItem = ({ label, icon: Icon, active = false, onClick, hasNotification =
     <div className="relative">
       <Icon className="w-5 h-5" />
       {hasNotification && (
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></div>
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"
+        ></motion.div>
       )}
       {premium && (
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full border-2 border-white animate-pulse"></div>
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full border-2 border-white"
+        ></motion.div>
       )}
     </div>
     <span className="font-medium text-xs mt-1">{label}</span>
     {active && (
-      <div className={`absolute -bottom-1 left-3 right-3 h-0.5 rounded-full ${premium ? 'bg-amber-600' : 'bg-blue-600'
-        }`}></div>
+      <motion.div 
+        layoutId="activeNavIndicator"
+        className={`absolute -bottom-1 left-3 right-3 h-0.5 rounded-full ${premium ? 'bg-amber-600' : 'bg-blue-600'
+          }`}
+      ></motion.div>
     )}
-  </div>
+  </motion.div>
 );
 
 // Mobile Menu Item Component
-const MobileNavItem = ({ label, icon: Icon, active = false, onClick, hasNotification = false, premium = false }) => (
-  <div
+const MobileNavItem = ({ label, icon: Icon, active = false, onClick, hasNotification = false, premium = false, index = 0 }) => (
+  <motion.div
+    variants={{
+      hidden: { x: -50, opacity: 0 },
+      visible: {
+        x: 0,
+        opacity: 1,
+        transition: {
+          type: "spring",
+          stiffness: 300,
+          damping: 24,
+          delay: index * 0.1
+        }
+      }
+    }}
+    whileHover={{ scale: 1.02, x: 5 }}
+    whileTap={{ scale: 0.98 }}
     className={`flex items-center space-x-4 p-4 rounded-xl cursor-pointer transition-all duration-200 ${active
         ? premium
           ? 'text-amber-600 bg-amber-50 border border-amber-100'
@@ -485,25 +698,51 @@ const MobileNavItem = ({ label, icon: Icon, active = false, onClick, hasNotifica
     <div className="relative">
       <Icon className="w-6 h-6" />
       {hasNotification && (
-        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"
+        ></motion.div>
       )}
       {premium && (
-        <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full border-2 border-white animate-pulse"></div>
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full border-2 border-white"
+        ></motion.div>
       )}
     </div>
     <span className={`font-medium text-lg ${premium ? 'font-semibold' : ''}`}>
       {label}
     </span>
     {active && (
-      <div className={`ml-auto w-2 h-2 rounded-full ${premium ? 'bg-amber-600' : 'bg-blue-600'
-        }`}></div>
+      <motion.div 
+        layoutId="mobileActiveIndicator"
+        className={`ml-auto w-2 h-2 rounded-full ${premium ? 'bg-amber-600' : 'bg-blue-600'
+          }`}
+      ></motion.div>
     )}
-  </div>
+  </motion.div>
 );
 
 // Mobile Bottom Navigation Item Component
-const MobileBottomNavItem = ({ icon: Icon, label, active = false, onClick, hasNotification = false }) => (
-  <button
+const MobileBottomNavItem = ({ icon: Icon, label, active = false, onClick, hasNotification = false, index = 0 }) => (
+  <motion.button
+    variants={{
+      hidden: { y: 50, opacity: 0 },
+      visible: {
+        y: 0,
+        opacity: 1,
+        transition: {
+          type: "spring",
+          stiffness: 300,
+          damping: 24,
+          delay: index * 0.1
+        }
+      }
+    }}
+    whileHover={{ scale: 1.1, y: -2 }}
+    whileTap={{ scale: 0.9 }}
     className={`flex flex-col items-center cursor-pointer group p-2 rounded-xl transition-all duration-200 flex-1 max-w-20 ${active
         ? 'text-blue-600 bg-blue-50'
         : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
@@ -513,14 +752,21 @@ const MobileBottomNavItem = ({ icon: Icon, label, active = false, onClick, hasNo
     <div className="relative">
       <Icon className="w-5 h-5" />
       {hasNotification && (
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></div>
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"
+        ></motion.div>
       )}
     </div>
     <span className="text-xs font-medium mt-1">{label}</span>
     {active && (
-      <div className="absolute -bottom-1 left-3 right-3 h-0.5 bg-blue-600 rounded-full"></div>
+      <motion.div 
+        layoutId="bottomNavIndicator"
+        className="absolute -bottom-1 left-3 right-3 h-0.5 bg-blue-600 rounded-full"
+      ></motion.div>
     )}
-  </button>
+  </motion.button>
 );
 
 export default Navbar;

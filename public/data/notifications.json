@@ -1,0 +1,95 @@
+[
+  {
+    "id": 1,
+    "type": "connection",
+    "senderName": "Sarah Chen",
+    "senderAvatar": "/avatars/sarah-chen.jpg",
+    "message": "wants to connect with you",
+    "time": "2m ago",
+    "read": false,
+    "priority": "high",
+    "mutualConnections": 12,
+    "actions": ["accept", "ignore"]
+  },
+  {
+    "id": 2,
+    "type": "reaction",
+    "senderName": "Alex Rodriguez",
+    "senderAvatar": "/avatars/alex-rodriguez.jpg",
+    "message": "liked your post about React best practices",
+    "time": "15m ago",
+    "read": false,
+    "priority": "medium",
+    "postPreview": "Just published a comprehensive guide on React performance optimization techniques. Sharing some hard-earned lessons from scaling large applications...",
+    "actions": ["view"]
+  },
+  {
+    "id": 3,
+    "type": "message",
+    "senderName": "Marketing Team",
+    "senderAvatar": "/avatars/marketing-team.jpg",
+    "message": "sent you a message about the upcoming campaign",
+    "time": "1h ago",
+    "read": true,
+    "priority": "high",
+    "actions": ["reply"]
+  },
+  {
+    "id": 4,
+    "type": "mention",
+    "senderName": "Tech Community",
+    "senderAvatar": "/avatars/tech-community.jpg",
+    "message": "mentioned you in a discussion about AI trends",
+    "time": "3h ago",
+    "read": true,
+    "priority": "medium",
+    "postPreview": "What are your thoughts on the future of AI in web development? @YourName I'd love to hear your perspective.",
+    "actions": ["view"]
+  },
+  {
+    "id": 5,
+    "type": "job",
+    "senderName": "Google Recruiter",
+    "senderAvatar": "/avatars/google-recruiter.jpg",
+    "message": "thinks you'd be a great fit for Senior Frontend Engineer",
+    "time": "5h ago",
+    "read": false,
+    "priority": "high",
+    "actions": ["apply", "view"]
+  },
+  {
+    "id": 6,
+    "type": "recommendation",
+    "senderName": "Michael Johnson",
+    "senderAvatar": "/avatars/michael-johnson.jpg",
+    "message": "endorsed you for React.js and TypeScript",
+    "time": "1d ago",
+    "read": true,
+    "priority": "low",
+    "actions": ["thank"]
+  },
+  {
+    "id": 7,
+    "type": "connection",
+    "senderName": "Emma Wilson",
+    "senderAvatar": "/avatars/emma-wilson.jpg",
+    "message": "wants to connect with you",
+    "time": "1d ago",
+    "read": true,
+    "priority": "medium",
+    "mutualConnections": 8,
+    "actions": ["accept", "ignore"]
+  },
+  {
+    "id": 8,
+    "type": "reaction",
+    "senderName": "David Kim",
+    "senderAvatar": "/avatars/david-kim.jpg",
+    "message": "commented on your article",
+    "time": "2d ago",
+    "read": true,
+    "priority": "medium",
+    "postPreview": "Great insights! I've been implementing similar patterns in our codebase and can confirm these approaches work well at scale.",
+    "actions": ["view"]
+  }
+]

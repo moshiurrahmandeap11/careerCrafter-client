@@ -1,0 +1,66 @@
+[
+  {
+    "id": 1,
+    "title": "Senior Frontend Developer",
+    "company": "TechInnovate",
+    "companyLogo": "/api/placeholder/48/48",
+    "location": "San Francisco, CA",
+    "appliedDate": "2 weeks ago",
+    "status": "In Review",
+    "updates": [
+      "Application under review by hiring team",
+      "Technical assessment scheduled for next week"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Full Stack Engineer",
+    "company": "WebSolutions Inc.",
+    "companyLogo": "/api/placeholder/48/48",
+    "location": "Remote",
+    "appliedDate": "3 weeks ago",
+    "status": "Interview",
+    "updates": [
+      "First round interview completed",
+      "Technical interview scheduled for Friday"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "UX Designer",
+    "company": "CreativeMinds",
+    "companyLogo": "/api/placeholder/48/48",
+    "location": "New York, NY",
+    "appliedDate": "1 month ago",
+    "status": "Rejected",
+    "updates": [
+      "Position filled internally",
+      "Keep an eye on future openings"
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Data Analyst",
+    "company": "AnalyticsPro",
+    "companyLogo": "/api/placeholder/48/48",
+    "location": "Chicago, IL",
+    "appliedDate": "5 days ago",
+    "status": "In Review",
+    "updates": [
+      "Application received and being processed"
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Backend Developer",
+    "company": "ServerTech",
+    "companyLogo": "/api/placeholder/48/48",
+    "location": "Austin, TX",
+    "appliedDate": "2 months ago",
+    "status": "Offer",
+    "updates": [
+      "Offer letter sent",
+      "Congratulations! Welcome to the team"
+    ]
+  }
+]
