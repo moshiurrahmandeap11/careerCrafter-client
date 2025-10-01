@@ -1,0 +1,53 @@
+[
+  {
+    "id": 2,
+    "title": "Product Designer",
+    "company": "DesignStudio",
+    "companyLogo": "/api/placeholder/48/48",
+    "location": "Remote",
+    "type": "Full-time",
+    "posted": "1 week ago",
+    "salary": "$90,000 - $130,000",
+    "description": "Join our design team to create beautiful and intuitive user experiences. You'll work closely with product managers and engineers to design features from concept to implementation.",
+    "skills": ["Figma", "UI/UX Design", "Prototyping", "User Research", "Wireframing"],
+    "applicants": 28,
+    "easyApply": true,
+    "featured": false,
+    "urgent": true,
+    "saved": true
+  },
+  {
+    "id": 4,
+    "title": "DevOps Engineer",
+    "company": "CloudNative Tech",
+    "companyLogo": "/api/placeholder/48/48",
+    "location": "Austin, TX",
+    "type": "Contract",
+    "posted": "5 days ago",
+    "salary": "$80 - $120/hr",
+    "description": "Implement and maintain CI/CD pipelines, manage cloud infrastructure, and ensure system reliability. Strong experience with Kubernetes and Terraform required.",
+    "skills": ["Kubernetes", "Docker", "Terraform", "AWS", "CI/CD", "Linux"],
+    "applicants": 19,
+    "easyApply": true,
+    "featured": false,
+    "urgent": false,
+    "saved": true
+  },
+  {
+    "id": 7,
+    "title": "Mobile Developer",
+    "company": "AppWorks",
+    "companyLogo": "/api/placeholder/48/48",
+    "location": "Remote",
+    "type": "Full-time",
+    "posted": "6 days ago",
+    "salary": "$95,000 - $135,000",
+    "description": "Build cross-platform mobile applications using React Native. Collaborate with designers and backend developers to deliver high-quality user experiences.",
+    "skills": ["React Native", "JavaScript", "iOS", "Android", "REST APIs", "Firebase"],
+    "applicants": 22,
+    "easyApply": true,
+    "featured": false,
+    "urgent": false,
+    "saved": true
+  }
+]

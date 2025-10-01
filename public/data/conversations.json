@@ -1,0 +1,234 @@
+[
+  {
+    "id": 1,
+    "user": {
+      "name": "Sarah Chen",
+      "title": "Senior Product Designer",
+      "company": "TechCorp Inc.",
+      "avatar": "/avatars/sarah-chen.jpg",
+      "online": true
+    },
+    "lastMessage": "Looking forward to collaborating on the new project!",
+    "lastMessageTime": "2m ago",
+    "unread": 3,
+    "messages": [
+      {
+        "id": 1,
+        "content": "Hi there! I came across your profile and was impressed by your work at DesignStudio.",
+        "timestamp": "2024-01-15T10:30:00Z",
+        "isSender": false,
+        "read": true
+      },
+      {
+        "id": 2,
+        "content": "Thank you! I've been following your design work as well. The recent mobile app redesign was excellent.",
+        "timestamp": "2024-01-15T10:32:00Z",
+        "isSender": true,
+        "read": true
+      },
+      {
+        "id": 3,
+        "content": "I'm glad you liked it! Actually, I'm starting a new project and would love to get your insights.",
+        "timestamp": "2024-01-15T14:20:00Z",
+        "isSender": false,
+        "read": true
+      },
+      {
+        "id": 4,
+        "content": "That sounds interesting. What's the project about?",
+        "timestamp": "2024-01-15T14:25:00Z",
+        "isSender": true,
+        "read": true
+      },
+      {
+        "id": 5,
+        "content": "It's a fintech mobile app focused on investment tracking. We're building the MVP next month.",
+        "timestamp": "2024-01-16T09:15:00Z",
+        "isSender": false,
+        "read": true
+      },
+      {
+        "id": 6,
+        "content": "That's right up my alley! I'd be happy to share some thoughts.",
+        "timestamp": "2024-01-16T09:18:00Z",
+        "isSender": true,
+        "read": true
+      },
+      {
+        "id": 7,
+        "content": "Perfect! Could we schedule a quick call next week to discuss?",
+        "timestamp": "2024-01-16T09:20:00Z",
+        "isSender": false,
+        "read": true
+      },
+      {
+        "id": 8,
+        "content": "Looking forward to collaborating on the new project!",
+        "timestamp": "2024-01-16T11:30:00Z",
+        "isSender": false,
+        "read": false
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "user": {
+      "name": "Marcus Johnson",
+      "title": "Engineering Manager",
+      "company": "StartupXYZ",
+      "avatar": "/avatars/marcus-johnson.jpg",
+      "online": false
+    },
+    "lastMessage": "The deployment was successful. Thanks for your help!",
+    "lastMessageTime": "1h ago",
+    "unread": 0,
+    "messages": [
+      {
+        "id": 1,
+        "content": "Hey! Are you available for the production deployment tonight?",
+        "timestamp": "2024-01-14T18:30:00Z",
+        "isSender": false,
+        "read": true
+      },
+      {
+        "id": 2,
+        "content": "Yes, I'll be online. What time are we starting?",
+        "timestamp": "2024-01-14T18:35:00Z",
+        "isSender": true,
+        "read": true
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "user": {
+      "name": "Emily Rodriguez",
+      "title": "Marketing Director",
+      "company": "GlobalBrands Ltd",
+      "avatar": "/avatars/emily-rodriguez.jpg",
+      "online": true
+    },
+    "lastMessage": "The analytics dashboard is ready for review",
+    "lastMessageTime": "3h ago",
+    "unread": 1,
+    "messages": [
+      {
+        "id": 1,
+        "content": "Following up on our campaign performance metrics",
+        "timestamp": "2024-01-14T14:20:00Z",
+        "isSender": false,
+        "read": true
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "user": {
+      "name": "David Kim",
+      "title": "CTO & Co-founder",
+      "company": "InnovateTech",
+      "avatar": "/avatars/david-kim.jpg",
+      "online": false
+    },
+    "lastMessage": "Let's connect next quarter about potential collaboration",
+    "lastMessageTime": "1d ago",
+    "unread": 0,
+    "messages": [
+      {
+        "id": 1,
+        "content": "It was great meeting you at the conference last week",
+        "timestamp": "2024-01-13T16:45:00Z",
+        "isSender": false,
+        "read": true
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "user": {
+      "name": "Lisa Wang",
+      "title": "Product Manager",
+      "company": "Enterprise Solutions",
+      "avatar": "/avatars/lisa-wang.jpg",
+      "online": true
+    },
+    "lastMessage": "The user research findings are ready to share",
+    "lastMessageTime": "2d ago",
+    "unread": 0,
+    "messages": [
+      {
+        "id": 1,
+        "content": "We completed the first round of user testing",
+        "timestamp": "2024-01-12T11:20:00Z",
+        "isSender": false,
+        "read": true
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "user": {
+      "name": "Alex Thompson",
+      "title": "Senior Developer",
+      "company": "DevStudio",
+      "avatar": "/avatars/alex-thompson.jpg",
+      "online": false
+    },
+    "lastMessage": "Thanks for the referral! I start next Monday",
+    "lastMessageTime": "3d ago",
+    "unread": 0,
+    "messages": [
+      {
+        "id": 1,
+        "content": "I got the job! Can't thank you enough for the reference",
+        "timestamp": "2024-01-11T09:15:00Z",
+        "isSender": false,
+        "read": true
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "user": {
+      "name": "Maria Gonzalez",
+      "title": "UX Researcher",
+      "company": "DesignCo",
+      "avatar": "/avatars/maria-gonzalez.jpg",
+      "online": true
+    },
+    "lastMessage": "The workshop materials are attached",
+    "lastMessageTime": "4d ago",
+    "unread": 2,
+    "messages": [
+      {
+        "id": 1,
+        "content": "Preparing for next week's design thinking workshop",
+        "timestamp": "2024-01-10T13:40:00Z",
+        "isSender": false,
+        "read": true
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "user": {
+      "name": "James Wilson",
+      "title": "Business Development",
+      "company": "Growth Partners",
+      "avatar": "/avatars/james-wilson.jpg",
+      "online": false
+    },
+    "lastMessage": "Looking forward to our partnership meeting",
+    "lastMessageTime": "1w ago",
+    "unread": 0,
+    "messages": [
+      {
+        "id": 1,
+        "content": "The partnership proposal looks promising",
+        "timestamp": "2024-01-08T15:20:00Z",
+        "isSender": false,
+        "read": true
+      }
+    ]
+  }
+]

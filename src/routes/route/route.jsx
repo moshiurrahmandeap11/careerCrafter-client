@@ -11,6 +11,7 @@ import WhatToDo from "../../pages/WhatToDo/WhatToDo";
 import MyNetwork from "../../pages/myNetwork/MyNetwork";
 import MessagesPage from "../../pages/messages/MessagesPage";
 import JobsPage from "../../pages/jobs/JobsPage";
+import NotificationPage from "../../pages/notifications/NotificationPage";
 
 export const route = createBrowserRouter([
     {
@@ -36,6 +37,10 @@ export const route = createBrowserRouter([
             {
                 path: '/jobs',
                 element: <JobsPage />
+            },
+            {
+                path: '/notifications',
+                element: <NotificationPage />
             }
         ]
     },
