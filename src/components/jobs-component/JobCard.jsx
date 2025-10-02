@@ -22,8 +22,7 @@ const cardVariants = {
     }
 };
 
-
-export const JobCard = ({ job }) => (
+export const JobCard = ({ job, onToggleSave }) => (
     <motion.div
         variants={cardVariants}
         initial="hidden"
@@ -83,7 +82,7 @@ export const JobCard = ({ job }) => (
                 </div>
             </div>
             <motion.button
-                onClick={() => toggleSaveJob(job.id)}
+                onClick={() => onToggleSave(job.id)}
                 className={`p-2 rounded-lg transition-all duration-200 ${job.saved
                         ? 'text-amber-500 bg-amber-50 hover:bg-amber-100'
                         : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'

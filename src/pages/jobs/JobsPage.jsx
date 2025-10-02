@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { 
   Search, 
   MapPin, 
@@ -11,68 +12,79 @@ import {
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ReTitle } from 're-title';
+
+import {
+  fetchJobs,
+  fetchSavedJobs,
+  fetchApplications,
+  setSearchTerm,
+  setLocation,
+  setActiveTab,
+  toggleSaveJob,
+  clearError
+} from '../../store/jobsSlice';
+import {
+  selectFilteredJobs,
+  selectSavedJobs,
+  selectApplications,
+  selectLoading,
+  selectError,
+  selectSearchTerm,
+  selectLocation,
+  selectActiveTab,
+  selectTabCounts
+} from '../../store/jobsSelectors';
 import { ApplicationCard } from '../../components/jobs-component/ApplicationCard';
 import { JobCard } from '../../components/jobs-component/JobCard';
 import { SavedJobCard } from '../../components/jobs-component/SavedJobCard';
 
 const JobsPage = () => {
-  const [activeTab, setActiveTab] = useState('recommended');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [location, setLocation] = useState('');
-  const [jobs, setJobs] = useState([]);
-  const [savedJobs, setSavedJobs] = useState([]);
-  const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dispatch = useDispatch();
+  
+  const activeTab = useSelector(selectActiveTab);
+  const searchTerm = useSelector(selectSearchTerm);
+  const location = useSelector(selectLocation);
+  const filteredJobs = useSelector(selectFilteredJobs);
+  const savedJobs = useSelector(selectSavedJobs);
+  const applications = useSelector(selectApplications);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+  const tabCounts = useSelector(selectTabCounts);
+  
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   useEffect(() => {
-    fetchJobsData();
-  }, []);
+    dispatch(fetchJobs())
+      .unwrap()
+      .then(() => {
+        dispatch(fetchSavedJobs());
+        dispatch(fetchApplications());
+      })
+      .catch((error) => {
+        console.error('Error fetching jobs:', error);
+      });
+  }, [dispatch]);
 
-  const fetchJobsData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Fetch data from public folder
-      const [jobsResponse, savedResponse, applicationsResponse] = await Promise.all([
-        fetch('/data/jobs.json'),
-        fetch('/data/saved-jobs.json'),
-        fetch('/data/applications.json')
-      ]);
-
-      if (!jobsResponse.ok || !savedResponse.ok || !applicationsResponse.ok) {
-        throw new Error('Failed to fetch jobs data');
-      }
-
-      const [jobsData, savedData, applicationsData] = await Promise.all([
-        jobsResponse.json(),
-        savedResponse.json(),
-        applicationsResponse.json()
-      ]);
-
-      setJobs(jobsData);
-      setSavedJobs(savedData);
-      setApplications(applicationsData);
-
-    } catch (error) {
-      console.error('Error fetching jobs data:', error);
-      setError('Failed to load jobs data. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
+  const handleRetry = () => {
+    dispatch(clearError());
+    dispatch(fetchJobs())
+      .unwrap()
+      .then(() => {
+        dispatch(fetchSavedJobs());
+        dispatch(fetchApplications());
+      });
   };
 
+  const handleToggleSaveJob = (jobId) => {
+    dispatch(toggleSaveJob(jobId));
+  };
 
+  const handleSearch = () => {
+    // Search is already handled by the filteredJobs selector
+    console.log('Search triggered with:', { searchTerm, location });
+  };
 
-  const filteredJobs = jobs.filter(job =>
-    job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    job.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -126,11 +138,10 @@ const JobsPage = () => {
     }
   };
 
-
   const tabs = [
-    { id: 'recommended', label: 'Recommended', count: jobs.length, icon: Target, description: 'Jobs matching your profile' },
-    { id: 'saved', label: 'Saved Jobs', count: savedJobs.length, icon: Bookmark, description: 'Your bookmarked positions' },
-    { id: 'applications', label: 'My Applications', count: applications.length, icon: Heart, description: 'Track your applications' },
+    { id: 'recommended', label: 'Recommended', count: tabCounts.recommended, icon: Target, description: 'Jobs matching your profile' },
+    { id: 'saved', label: 'Saved Jobs', count: tabCounts.saved, icon: Bookmark, description: 'Your bookmarked positions' },
+    { id: 'applications', label: 'My Applications', count: tabCounts.applications, icon: Heart, description: 'Track your applications' },
   ];
 
   const TabNavigation = () => (
@@ -145,7 +156,7 @@ const JobsPage = () => {
           <motion.button
             key={tab.id}
             onClick={() => {
-              setActiveTab(tab.id);
+              dispatch(setActiveTab(tab.id));
               setIsMobileMenuOpen(false);
             }}
             className={`w-full text-left p-4 rounded-xl border-l-4 transition-all duration-200 flex items-center justify-between group ${
@@ -241,7 +252,7 @@ const JobsPage = () => {
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Jobs Error</h3>
           <p className="text-gray-600 mb-6">{error}</p>
           <motion.button 
-            onClick={fetchJobsData}
+            onClick={handleRetry}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -255,6 +266,7 @@ const JobsPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <ReTitle title='Jobs' />
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div 
@@ -301,7 +313,7 @@ const JobsPage = () => {
                 type="text"
                 placeholder="Job title, skills, or company"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => dispatch(setSearchTerm(e.target.value))}
                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               />
             </div>
@@ -311,7 +323,7 @@ const JobsPage = () => {
                 type="text"
                 placeholder="Location"
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                onChange={(e) => dispatch(setLocation(e.target.value))}
                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               />
             </div>
@@ -325,6 +337,7 @@ const JobsPage = () => {
                 <span>Filters</span>
               </motion.button>
               <motion.button 
+                onClick={handleSearch}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -397,7 +410,7 @@ const JobsPage = () => {
                       <h2 className="text-2xl font-bold text-gray-900">
                         Recommended for You
                       </h2>
-                      <span className="text-gray-500">{jobs.length} jobs</span>
+                      <span className="text-gray-500">{filteredJobs.length} jobs</span>
                     </div>
                     <motion.div 
                       className="grid gap-6"
@@ -406,9 +419,24 @@ const JobsPage = () => {
                       animate="visible"
                     >
                       {filteredJobs.map((job) => (
-                        <JobCard key={job.id} job={job} />
+                        <JobCard 
+                          key={job.id} 
+                          job={job} 
+                          onToggleSave={handleToggleSaveJob}
+                        />
                       ))}
                     </motion.div>
+                    {filteredJobs.length === 0 && (
+                      <motion.div 
+                        className="text-center py-12 bg-white rounded-xl border border-gray-200"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        <Briefcase className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No jobs found</h3>
+                        <p className="text-gray-600 mb-6">Try adjusting your search criteria or check back later</p>
+                      </motion.div>
+                    )}
                   </>
                 )}
 
@@ -427,9 +455,24 @@ const JobsPage = () => {
                       animate="visible"
                     >
                       {savedJobs.map((job) => (
-                        <SavedJobCard key={job.id} job={job} />
+                        <SavedJobCard 
+                          key={job.id} 
+                          job={job} 
+                          onToggleSave={handleToggleSaveJob}
+                        />
                       ))}
                     </motion.div>
+                    {savedJobs.length === 0 && (
+                      <motion.div 
+                        className="text-center py-12 bg-white rounded-xl border border-gray-200"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        <Bookmark className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No saved jobs</h3>
+                        <p className="text-gray-600 mb-6">Start saving jobs that interest you</p>
+                      </motion.div>
+                    )}
                   </>
                 )}
 
@@ -451,44 +494,18 @@ const JobsPage = () => {
                         <ApplicationCard key={application.id} application={application} />
                       ))}
                     </motion.div>
+                    {applications.length === 0 && (
+                      <motion.div 
+                        className="text-center py-12 bg-white rounded-xl border border-gray-200"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No applications yet</h3>
+                        <p className="text-gray-600 mb-6">Start applying to jobs to track your progress</p>
+                      </motion.div>
+                    )}
                   </>
-                )}
-
-                {/* Empty states */}
-                {activeTab === 'recommended' && jobs.length === 0 && (
-                  <motion.div 
-                    className="text-center py-12 bg-white rounded-xl border border-gray-200"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    <Briefcase className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No jobs found</h3>
-                    <p className="text-gray-600 mb-6">Try adjusting your search criteria or check back later</p>
-                  </motion.div>
-                )}
-
-                {activeTab === 'saved' && savedJobs.length === 0 && (
-                  <motion.div 
-                    className="text-center py-12 bg-white rounded-xl border border-gray-200"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    <Bookmark className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No saved jobs</h3>
-                    <p className="text-gray-600 mb-6">Start saving jobs that interest you</p>
-                  </motion.div>
-                )}
-
-                {activeTab === 'applications' && applications.length === 0 && (
-                  <motion.div 
-                    className="text-center py-12 bg-white rounded-xl border border-gray-200"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No applications yet</h3>
-                    <p className="text-gray-600 mb-6">Start applying to jobs to track your progress</p>
-                  </motion.div>
                 )}
               </motion.div>
             </AnimatePresence>
