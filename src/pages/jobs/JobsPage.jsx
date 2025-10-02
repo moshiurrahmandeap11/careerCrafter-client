@@ -23,7 +23,7 @@ import {
   setActiveTab,
   toggleSaveJob,
   clearError
-} from '../../store/jobsSlice';
+} from '../../redux-slices/jobsSlice';
 import {
   selectFilteredJobs,
   selectSavedJobs,
@@ -34,10 +34,11 @@ import {
   selectLocation,
   selectActiveTab,
   selectTabCounts
-} from '../../store/jobsSelectors';
+} from '../../redux-selectors/jobsSelectors';
 import { ApplicationCard } from '../../components/jobs-component/ApplicationCard';
 import { JobCard } from '../../components/jobs-component/JobCard';
 import { SavedJobCard } from '../../components/jobs-component/SavedJobCard';
+
 
 const JobsPage = () => {
   const dispatch = useDispatch();
