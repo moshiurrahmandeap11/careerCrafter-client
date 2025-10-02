@@ -12,6 +12,7 @@ import MyNetwork from "../../pages/myNetwork/MyNetwork";
 import MessagesPage from "../../pages/messages/MessagesPage";
 import JobsPage from "../../pages/jobs/JobsPage";
 import NotificationPage from "../../pages/notifications/NotificationPage";
+import PremiumPage from "../../pages/premium/PremiumPage";
 
 export const route = createBrowserRouter([
     {
@@ -41,6 +42,10 @@ export const route = createBrowserRouter([
             {
                 path: '/notifications',
                 element: <NotificationPage />
+            },
+            {
+                path: '/premium',
+                element: <PremiumPage />
             }
         ]
     },

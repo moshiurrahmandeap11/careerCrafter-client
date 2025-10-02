@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  MoreHorizontal, 
-  Check, 
-  MessageCircle, 
-  User,
-  Clock,
+import {
+  Search,
+  MessageCircle,
   Send,
   Paperclip,
   Smile,
@@ -13,14 +9,11 @@ import {
   Phone,
   Info,
   ArrowLeft,
-  Filter,
-  Archive,
-  Delete,
-  Mail,
-  MailOpen,
-  Circle
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { MessageBubble } from '../../components/messages-components/MessageBubble';
+import { ConversationItem } from '../../components/messages-components/ConvertationItem';
+
 
 const MessagesPage = () => {
   const [conversations, setConversations] = useState([]);
@@ -107,130 +100,22 @@ const MessagesPage = () => {
     }
   };
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 24
-      }
-    }
-  };
 
-  const messageVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        stiffness: 500,
-        damping: 30
-      }
-    }
-  };
-
-  const ConversationItem = ({ conversation, isSelected, onClick }) => (
-    <motion.div
-      variants={itemVariants}
-      className={`p-4 border-b border-gray-100 cursor-pointer transition-all duration-200 group ${
-        isSelected ? 'bg-blue-50 border-l-4 border-l-blue-500' : 'hover:bg-gray-50'
-      }`}
-      onClick={onClick}
-    >
-      <div className="flex items-start space-x-3">
-        <div className="relative">
-          <img
-            src={conversation.user.avatar}
-            alt={conversation.user.name}
-            className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
-          />
-          {conversation.user.online && (
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-          )}
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-1">
-            <h3 className={`font-semibold truncate ${
-              isSelected ? 'text-blue-700' : 'text-gray-900'
-            }`}>
-              {conversation.user.name}
-            </h3>
-            <span className="text-xs text-gray-500 whitespace-nowrap">
-              {conversation.lastMessageTime}
-            </span>
-          </div>
-          
-          <p className="text-sm text-gray-600 truncate mb-1">
-            {conversation.user.title} · {conversation.user.company}
-          </p>
-          
-          <div className="flex items-center justify-between">
-            <p className={`text-sm truncate ${
-              conversation.unread ? 'font-semibold text-gray-900' : 'text-gray-600'
-            }`}>
-              {conversation.lastMessage}
-            </p>
-            {conversation.unread && (
-              <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-xs text-blue-600 font-medium">{conversation.unread}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-
-  const MessageBubble = ({ message }) => (
-    <motion.div
-      variants={messageVariants}
-      initial="hidden"
-      animate="visible"
-      className={`flex ${message.isSender ? 'justify-end' : 'justify-start'} mb-4`}
-    >
-      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
-        message.isSender
-          ? 'bg-blue-600 text-white rounded-br-none'
-          : 'bg-gray-100 text-gray-900 rounded-bl-none'
-      }`}>
-        <p className="text-sm">{message.content}</p>
-        <div className={`text-xs mt-1 flex items-center justify-end space-x-1 ${
-          message.isSender ? 'text-blue-200' : 'text-gray-500'
-        }`}>
-          <span>
-            {new Date(message.timestamp).toLocaleTimeString([], { 
-              hour: '2-digit', 
-              minute: '2-digit' 
-            })}
-          </span>
-          {message.isSender && message.read && (
-            <Check className="w-3 h-3" />
-          )}
-        </div>
-      </div>
-    </motion.div>
-  );
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
-        <motion.div 
+        <motion.div
           className="text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
           <motion.div
-            animate={{ 
+            animate={{
               rotate: 360,
               scale: [1, 1.1, 1]
             }}
-            transition={{ 
+            transition={{
               rotate: { duration: 2, repeat: Infinity, ease: "linear" },
               scale: { duration: 1, repeat: Infinity }
             }}
@@ -254,7 +139,7 @@ const MessagesPage = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
-        <motion.div 
+        <motion.div
           className="text-center bg-white p-8 rounded-xl shadow-sm border border-gray-200 max-w-md"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -264,7 +149,7 @@ const MessagesPage = () => {
           </div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Messages Error</h3>
           <p className="text-gray-600 mb-6">{error}</p>
-          <motion.button 
+          <motion.button
             onClick={fetchMessagesData}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200"
             whileHover={{ scale: 1.05 }}
@@ -281,7 +166,7 @@ const MessagesPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <motion.div 
+        <motion.div
           className="mb-8"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -291,7 +176,7 @@ const MessagesPage = () => {
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Messages</h1>
               <p className="text-lg text-gray-600">Connect and collaborate with your network</p>
             </div>
-            <motion.button 
+            <motion.button
               className="bg-blue-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200 flex items-center space-x-2 shadow-sm"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -306,10 +191,9 @@ const MessagesPage = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="flex h-[600px]">
             {/* Conversations List */}
-            <motion.div 
-              className={`w-full lg:w-96 border-r border-gray-200 flex flex-col ${
-                mobileView === 'chat' ? 'hidden lg:flex' : 'flex'
-              }`}
+            <motion.div
+              className={`w-full lg:w-96 border-r border-gray-200 flex flex-col ${mobileView === 'chat' ? 'hidden lg:flex' : 'flex'
+                }`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
             >
@@ -348,7 +232,7 @@ const MessagesPage = () => {
                 </motion.div>
 
                 {filteredConversations.length === 0 && (
-                  <motion.div 
+                  <motion.div
                     className="text-center py-12"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -366,10 +250,9 @@ const MessagesPage = () => {
             </motion.div>
 
             {/* Chat Area */}
-            <motion.div 
-              className={`flex-1 flex flex-col ${
-                mobileView === 'list' ? 'hidden lg:flex' : 'flex'
-              }`}
+            <motion.div
+              className={`flex-1 flex flex-col ${mobileView === 'list' ? 'hidden lg:flex' : 'flex'
+                }`}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
             >
@@ -378,7 +261,7 @@ const MessagesPage = () => {
                   {/* Chat Header */}
                   <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <button 
+                      <button
                         onClick={() => setMobileView('list')}
                         className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                       >
@@ -401,21 +284,21 @@ const MessagesPage = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
-                      <motion.button 
+                      <motion.button
                         className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
                         whileHover={{ scale: 1.1 }}
                       >
                         <Video className="w-5 h-5" />
                       </motion.button>
-                      <motion.button 
+                      <motion.button
                         className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
                         whileHover={{ scale: 1.1 }}
                       >
                         <Phone className="w-5 h-5" />
                       </motion.button>
-                      <motion.button 
+                      <motion.button
                         className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
                         whileHover={{ scale: 1.1 }}
                       >
@@ -441,7 +324,7 @@ const MessagesPage = () => {
                   {/* Message Input */}
                   <div className="p-4 border-t border-gray-200">
                     <div className="flex items-center space-x-2">
-                      <motion.button 
+                      <motion.button
                         className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
                         whileHover={{ scale: 1.1 }}
                       >
@@ -456,21 +339,20 @@ const MessagesPage = () => {
                           rows="1"
                           className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
                         />
-                        <motion.button 
+                        <motion.button
                           className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-blue-600 transition-colors duration-200"
                           whileHover={{ scale: 1.1 }}
                         >
                           <Smile className="w-5 h-5" />
                         </motion.button>
                       </div>
-                      <motion.button 
+                      <motion.button
                         onClick={handleSendMessage}
                         disabled={!newMessage.trim()}
-                        className={`p-3 rounded-lg transition-all duration-200 ${
-                          newMessage.trim() 
-                            ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                        className={`p-3 rounded-lg transition-all duration-200 ${newMessage.trim()
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        }`}
+                          }`}
                         whileHover={newMessage.trim() ? { scale: 1.05 } : {}}
                         whileTap={newMessage.trim() ? { scale: 0.95 } : {}}
                       >
@@ -481,7 +363,7 @@ const MessagesPage = () => {
                 </>
               ) : (
                 <div className="flex-1 flex items-center justify-center">
-                  <motion.div 
+                  <motion.div
                     className="text-center"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

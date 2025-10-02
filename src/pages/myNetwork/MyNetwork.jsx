@@ -2,22 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   UserPlus, 
-  Users, 
-  Mail, 
-  MoreHorizontal, 
-  Check, 
-  MessageCircle, 
-  Building, 
+  Users,  
   Sparkles,
   Network,
   UserCheck,
   Clock,
-  Zap,
   Settings,
   Menu,
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ConnectionCard } from '../../components/network-components/ConnectionCard';
+import { PendingCard } from '../../components/network-components/PendingCard';
+import { SuggestionCard } from '../../components/network-components/SuggestionCard';
 
 const MyNetwork = () => {
   const [activeTab, setActiveTab] = useState('connections');
@@ -91,26 +88,7 @@ const MyNetwork = () => {
     }
   };
 
-  const cardVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 24
-      }
-    },
-    hover: {
-      y: -2,
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 17
-      }
-    }
-  };
+
 
   const tabVariants = {
     hidden: { x: -10, opacity: 0 },
@@ -166,198 +144,8 @@ const MyNetwork = () => {
     }
   };
 
-  const ConnectionCard = ({ connection }) => (
-    <motion.div
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      whileHover="hover"
-      className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 group"
-    >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-start space-x-3 flex-1">
-          <div className="relative">
-            <img
-              src={connection.avatar}
-              alt={connection.name}
-              className="w-12 h-12 rounded-xl object-cover border-2 border-white shadow-sm"
-            />
-            {connection.online && (
-              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2">
-              <h3 className="font-semibold text-gray-900 truncate">{connection.name}</h3>
-              {connection.online && (
-                <Sparkles className="w-3 h-3 text-green-500" />
-              )}
-            </div>
-            <p className="text-gray-600 text-sm truncate">{connection.title}</p>
-            <div className="flex items-center space-x-2 mt-1 text-xs text-gray-500">
-              <Building className="w-3 h-3" />
-              <span className="truncate">{connection.company}</span>
-            </div>
-          </div>
-        </div>
-        <motion.button 
-          className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
-          whileHover={{ scale: 1.1 }}
-        >
-          <MoreHorizontal className="w-4 h-4" />
-        </motion.button>
-      </div>
 
-      <div className="flex flex-wrap gap-1 mb-3">
-        {connection.tags?.slice(0, 3).map((tag, index) => (
-          <span
-            key={index}
-            className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-lg border border-blue-100"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
 
-      <div className="flex items-center justify-between text-xs text-gray-500">
-        <div className="flex items-center space-x-1">
-          <Users className="w-3 h-3" />
-          <span>{connection.mutual} mutual</span>
-        </div>
-        <span className="text-gray-400">{connection.connectedDate}</span>
-      </div>
-
-      <div className="flex space-x-2 mt-4 pt-4 border-t border-gray-100">
-        <motion.button 
-          className="flex-1 bg-blue-50 text-blue-700 py-2 px-3 rounded-lg font-medium hover:bg-blue-100 transition-all duration-200 text-sm flex items-center justify-center space-x-1"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <MessageCircle className="w-3 h-3" />
-          <span>Message</span>
-        </motion.button>
-        <motion.button 
-          className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg font-medium hover:bg-gray-200 transition-all duration-200 text-sm"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          View Profile
-        </motion.button>
-      </div>
-    </motion.div>
-  );
-
-  const PendingCard = ({ invitation }) => (
-    <motion.div
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      whileHover="hover"
-      className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300"
-    >
-      <div className="flex items-start space-x-3 mb-4">
-        <img
-          src={invitation.avatar}
-          alt={invitation.name}
-          className="w-12 h-12 rounded-xl object-cover border-2 border-white shadow-sm"
-        />
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900">{invitation.name}</h3>
-          <p className="text-gray-600 text-sm">{invitation.title} · {invitation.company}</p>
-          <p className="text-gray-500 text-xs mt-1">{invitation.location}</p>
-          <div className="flex items-center space-x-2 mt-1 text-xs text-blue-600">
-            <Users className="w-3 h-3" />
-            <span>{invitation.mutualConnections} mutual connections</span>
-          </div>
-        </div>
-        <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-lg">
-          {invitation.daysAgo}d ago
-        </div>
-      </div>
-
-      <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg mb-4 italic border border-gray-100">
-        "{invitation.message}"
-      </p>
-
-      <div className="flex space-x-2">
-        <motion.button 
-          className="flex-1 bg-blue-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200 text-sm flex items-center justify-center space-x-2"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <Check className="w-4 h-4" />
-          <span>Accept</span>
-        </motion.button>
-        <motion.button 
-          className="flex-1 bg-gray-100 text-gray-700 py-2.5 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-200 text-sm"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          Ignore
-        </motion.button>
-      </div>
-    </motion.div>
-  );
-
-  const SuggestionCard = ({ suggestion }) => (
-    <motion.div
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      whileHover="hover"
-      className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300"
-    >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-start space-x-3 flex-1">
-          <img
-            src={suggestion.avatar}
-            alt={suggestion.name}
-            className="w-12 h-12 rounded-xl object-cover border-2 border-white shadow-sm"
-          />
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900">{suggestion.name}</h3>
-            <p className="text-gray-600 text-sm">{suggestion.title} · {suggestion.company}</p>
-            <p className="text-gray-500 text-xs mt-1">{suggestion.location}</p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-lg">
-          <Zap className="w-3 h-3" />
-          <span>{suggestion.score}%</span>
-        </div>
-      </div>
-
-      <div className="text-xs text-gray-600 mb-3">
-        <span className="font-medium">Why connect:</span> {suggestion.reason}
-      </div>
-
-      <div className="flex items-center text-xs text-gray-500 mb-4">
-        <Users className="w-3 h-3 mr-1" />
-        <span>{suggestion.mutual} mutual connections</span>
-      </div>
-
-      {suggestion.sharedSkills && (
-        <div className="flex flex-wrap gap-1 mb-4">
-          {suggestion.sharedSkills.map((skill, index) => (
-            <span
-              key={index}
-              className="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded-lg border border-purple-100"
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
-      )}
-
-      <motion.button 
-        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 text-sm flex items-center justify-center space-x-2"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <UserPlus className="w-4 h-4" />
-        <span>Connect</span>
-      </motion.button>
-    </motion.div>
-  );
 
   const tabs = [
     { id: 'connections', label: 'My Connections', count: connections.length, icon: UserCheck, description: 'Manage your professional network' },
@@ -552,16 +340,6 @@ const MyNetwork = () => {
                   Grow and manage your professional connections
                 </motion.p>
               </div>
-              
-              {/* Mobile Menu Button */}
-              <motion.button
-                onClick={() => setMobileMenuOpen(true)}
-                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <Menu className="w-6 h-6 text-gray-600" />
-              </motion.button>
             </div>
             
             <div className="flex items-center space-x-3">
@@ -609,7 +387,7 @@ const MyNetwork = () => {
 
             {/* Tabs Navigation */}
             <motion.div 
-              className="space-y-2"
+              className="space-y-2 sticky top-8"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
