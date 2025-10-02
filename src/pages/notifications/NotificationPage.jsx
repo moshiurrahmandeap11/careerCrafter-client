@@ -18,9 +18,11 @@ import {
   Mail,
   Clock,
   Sparkles,
-  X
+  X,
+  Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { NotificationItem } from '../../components/notification-components/NotificationItem';
 
 const NotificationPage = () => {
   const [activeFilter, setActiveFilter] = useState('all');
@@ -30,6 +32,7 @@ const NotificationPage = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showSettings, setShowSettings] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [notificationSettings, setNotificationSettings] = useState({
     messages: true,
     connectionRequests: true,
@@ -46,15 +49,58 @@ const NotificationPage = () => {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/data/notifications.json');
+      // Mock data since we don't have actual API
+      const mockNotifications = [
+        {
+          id: 1,
+          type: 'connection',
+          senderName: 'Sarah Johnson',
+          senderAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
+          message: 'sent you a connection request',
+          time: '2h ago',
+          read: false,
+          priority: 'high',
+          actions: ['accept'],
+          mutualConnections: 5
+        },
+        {
+          id: 2,
+          type: 'reaction',
+          senderName: 'Mike Chen',
+          senderAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+          message: 'liked your post',
+          time: '4h ago',
+          read: true,
+          priority: 'medium',
+          actions: ['view'],
+          postPreview: 'Just launched our new product! Excited to share the journey...'
+        },
+        {
+          id: 3,
+          type: 'message',
+          senderName: 'Emma Davis',
+          senderAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
+          message: 'sent you a message',
+          time: '1d ago',
+          read: false,
+          priority: 'high',
+          actions: ['reply']
+        },
+        {
+          id: 4,
+          type: 'job',
+          senderName: 'TechCorp Inc',
+          senderAvatar: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop&crop=face',
+          message: 'has a new job opening that matches your profile',
+          time: '2d ago',
+          read: true,
+          priority: 'medium',
+          actions: ['apply']
+        }
+      ];
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch notifications');
-      }
-      
-      const data = await response.json();
-      setNotifications(data);
-      setUnreadCount(data.filter(notification => !notification.read).length);
+      setNotifications(mockNotifications);
+      setUnreadCount(mockNotifications.filter(notification => !notification.read).length);
     } catch (error) {
       console.error('Error fetching notifications:', error);
       setError('Failed to load notifications. Please try again later.');
@@ -119,180 +165,96 @@ const NotificationPage = () => {
     }
   };
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 24
-      }
-    },
-    hover: {
-      y: -2,
-      backgroundColor: "rgba(249, 250, 251, 1)",
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 17
-      }
-    }
-  };
 
-  const NotificationIcon = ({ type, priority }) => {
-    const getIconProps = () => {
-      switch (type) {
-        case 'connection':
-          return { icon: UserPlus, color: 'text-blue-600', bgColor: 'bg-blue-50' };
-        case 'reaction':
-          return { icon: ThumbsUp, color: 'text-green-600', bgColor: 'bg-green-50' };
-        case 'message':
-          return { icon: MessageCircle, color: 'text-purple-600', bgColor: 'bg-purple-50' };
-        case 'mention':
-          return { icon: Share2, color: 'text-orange-600', bgColor: 'bg-orange-50' };
-        case 'job':
-          return { icon: Award, color: 'text-amber-600', bgColor: 'bg-amber-50' };
-        case 'recommendation':
-          return { icon: Users, color: 'text-indigo-600', bgColor: 'bg-indigo-50' };
-        default:
-          return { icon: Bell, color: 'text-gray-600', bgColor: 'bg-gray-50' };
-      }
-    };
 
-    const { icon: Icon, color, bgColor } = getIconProps();
-    
-    return (
-      <div className={`p-2 rounded-lg ${bgColor} ${color} relative`}>
-        <Icon className="w-4 h-4" />
-        {priority === 'high' && (
-          <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
-        )}
-      </div>
-    );
-  };
 
-  const NotificationItem = ({ notification }) => (
-    <motion.div
-      variants={itemVariants}
-      initial="hidden"
-      animate="visible"
-      whileHover="hover"
-      className={`p-4 rounded-xl border transition-all duration-300 ${
-        notification.read 
-          ? 'bg-white border-gray-200' 
-          : 'bg-blue-50 border-blue-200 shadow-sm'
-      }`}
-    >
-      <div className="flex items-start space-x-3">
-        {/* Avatar */}
-        <div className="relative">
-          <img
-            src={notification.senderAvatar}
-            alt={notification.senderName}
-            className="w-12 h-12 rounded-xl object-cover border-2 border-white shadow-sm"
-          />
-          <div className="absolute -bottom-1 -right-1">
-            <NotificationIcon type={notification.type} priority={notification.priority} />
-          </div>
-        </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex-1">
-              <p className="text-gray-900 text-sm leading-relaxed">
-                <span className="font-semibold">{notification.senderName}</span>
-                {' '}{notification.message}
-              </p>
-              
-              {notification.postPreview && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-600 text-sm italic">"{notification.postPreview}"</p>
-                </div>
-              )}
-              
-              {notification.mutualConnections && (
-                <div className="flex items-center space-x-1 mt-2 text-xs text-blue-600">
-                  <Users className="w-3 h-3" />
-                  <span>{notification.mutualConnections} mutual connections</span>
-                </div>
-              )}
-            </div>
 
-            {/* Time and Actions */}
-            <div className="flex items-start space-x-2 ml-2">
-              <span className="text-xs text-gray-500 whitespace-nowrap">
-                {notification.time}
-              </span>
-              <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                {!notification.read && (
-                  <motion.button
-                    onClick={() => markAsRead(notification.id)}
-                    className="p-1 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors duration-200"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <Check className="w-3 h-3" />
-                  </motion.button>
-                )}
-                <motion.button
-                  onClick={() => deleteNotification(notification.id)}
-                  className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors duration-200"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+
+  // Mobile Filters Component
+  const MobileFilters = () => (
+    <AnimatePresence>
+      {showMobileFilters && (
+        <motion.div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setShowMobileFilters(false)}
+        >
+          <motion.div
+            className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 h-full overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Filters</h3>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                 >
-                  <X className="w-3 h-3" />
-                </motion.button>
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-            </div>
-          </div>
 
-          {/* Actions */}
-          {notification.actions && (
-            <div className="flex items-center space-x-2 mt-3 pt-3 border-t border-gray-100">
-              {notification.actions.includes('accept') && (
-                <motion.button
-                  className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Accept
-                </motion.button>
-              )}
-              {notification.actions.includes('reply') && (
-                <motion.button
-                  className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors duration-200"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Reply
-                </motion.button>
-              )}
-              {notification.actions.includes('view') && (
-                <motion.button
-                  className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors duration-200"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  View Post
-                </motion.button>
-              )}
-              {notification.actions.includes('apply') && (
-                <motion.button
-                  className="px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-colors duration-200"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Apply Now
-                </motion.button>
-              )}
+              {/* Search */}
+              <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search notifications..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm"
+                />
+              </div>
+
+              {/* Filters */}
+              <motion.div 
+                className="space-y-2"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <div className="flex items-center space-x-2 mb-4">
+                  <Filter className="w-4 h-4 text-gray-400" />
+                  <h3 className="font-semibold text-gray-900">Filter By</h3>
+                </div>
+                
+                {filters.map((filter) => (
+                  <motion.button
+                    key={filter.id}
+                    onClick={() => {
+                      setActiveFilter(filter.id);
+                      setShowMobileFilters(false);
+                    }}
+                    className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${
+                      activeFilter === filter.id
+                        ? 'bg-blue-50 text-blue-700 shadow-sm'
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                    whileHover={{ x: 4 }}
+                  >
+                    <span className="font-medium text-sm">{filter.label}</span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      activeFilter === filter.id
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {filter.count}
+                    </span>
+                  </motion.button>
+                ))}
+              </motion.div>
             </div>
-          )}
-        </div>
-      </div>
-    </motion.div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 
   if (loading) {
@@ -380,6 +342,16 @@ const NotificationPage = () => {
             </div>
             
             <div className="flex items-center space-x-3">
+              {/* Mobile Filter Button */}
+              <motion.button 
+                onClick={() => setShowMobileFilters(true)}
+                className="lg:hidden bg-blue-600 text-white p-3 rounded-xl shadow-sm hover:bg-blue-700 transition-colors duration-200"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Filter className="w-5 h-5" />
+              </motion.button>
+
               <motion.button 
                 onClick={() => setShowSettings(true)}
                 className="hidden sm:flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 p-2 hover:bg-gray-100 rounded-lg"
@@ -405,59 +377,61 @@ const NotificationPage = () => {
 
         {/* Two Column Layout */}
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Column - Filters */}
+          {/* Left Column - Filters (Desktop) */}
           <motion.div 
-            className="lg:w-80 flex-shrink-0"
+            className="hidden lg:block lg:w-80 flex-shrink-0"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
-            {/* Search */}
-            <div className="relative mb-6">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search notifications..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm"
-              />
-            </div>
-
-            {/* Filters */}
-            <motion.div 
-              className="space-y-2 bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              <div className="flex items-center space-x-2 mb-4">
-                <Filter className="w-4 h-4 text-gray-400" />
-                <h3 className="font-semibold text-gray-900">Filters</h3>
+            <div className="sticky top-18">
+              {/* Search */}
+              <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search notifications..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm"
+                />
               </div>
-              
-              {filters.map((filter) => (
-                <motion.button
-                  key={filter.id}
-                  onClick={() => setActiveFilter(filter.id)}
-                  className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${
-                    activeFilter === filter.id
-                      ? 'bg-blue-50 text-blue-700 shadow-sm'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                  whileHover={{ x: 4 }}
-                >
-                  <span className="font-medium text-sm">{filter.label}</span>
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    activeFilter === filter.id
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {filter.count}
-                  </span>
-                </motion.button>
-              ))}
-            </motion.div>
+
+              {/* Filters */}
+              <motion.div 
+                className="space-y-2 bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <div className="flex items-center space-x-2 mb-4">
+                  <Filter className="w-4 h-4 text-gray-400" />
+                  <h3 className="font-semibold text-gray-900">Filters</h3>
+                </div>
+                
+                {filters.map((filter) => (
+                  <motion.button
+                    key={filter.id}
+                    onClick={() => setActiveFilter(filter.id)}
+                    className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${
+                      activeFilter === filter.id
+                        ? 'bg-blue-50 text-blue-700 shadow-sm'
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                    whileHover={{ x: 4 }}
+                  >
+                    <span className="font-medium text-sm">{filter.label}</span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      activeFilter === filter.id
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {filter.count}
+                    </span>
+                  </motion.button>
+                ))}
+              </motion.div>
+            </div>
           </motion.div>
 
           {/* Right Column - Notifications */}
@@ -467,6 +441,22 @@ const NotificationPage = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
           >
+            {/* Active Filter Display (Mobile) */}
+            <div className="lg:hidden mb-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">
+                  Active filter: <span className="font-semibold capitalize">{activeFilter}</span>
+                </span>
+                <button
+                  onClick={() => setShowMobileFilters(true)}
+                  className="text-blue-600 text-sm font-medium flex items-center space-x-1"
+                >
+                  <Filter className="w-4 h-4" />
+                  <span>Change</span>
+                </button>
+              </div>
+            </div>
+
             {/* Notifications List */}
             <motion.div 
               className="space-y-4"
@@ -511,6 +501,9 @@ const NotificationPage = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* Mobile Filters Sidebar */}
+      <MobileFilters />
 
       {/* Settings Modal */}
       <AnimatePresence>

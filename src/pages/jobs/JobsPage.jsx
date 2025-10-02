@@ -3,25 +3,17 @@ import {
   Search, 
   MapPin, 
   Briefcase, 
-  Building, 
-  Clock,
-  DollarSign,
-  Star,
   Bookmark,
-  Share2,
   Filter,
-  ChevronRight,
-  TrendingUp,
-  Users,
   Heart,
-  Zap,
   Target,
-  Code,
-  Palette,
-  BarChart3,
-
+  Menu,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ApplicationCard } from '../../components/jobs-component/ApplicationCard';
+import { JobCard } from '../../components/jobs-component/JobCard';
+import { SavedJobCard } from '../../components/jobs-component/SavedJobCard';
 
 const JobsPage = () => {
   const [activeTab, setActiveTab] = useState('recommended');
@@ -32,6 +24,7 @@ const JobsPage = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchJobsData();
@@ -71,20 +64,7 @@ const JobsPage = () => {
     }
   };
 
-  const toggleSaveJob = (jobId) => {
-    setJobs(prev => prev.map(job => 
-      job.id === jobId ? { ...job, saved: !job.saved } : job
-    ));
-    setSavedJobs(prev => {
-      const isSaved = prev.some(job => job.id === jobId);
-      if (isSaved) {
-        return prev.filter(job => job.id !== jobId);
-      } else {
-        const jobToSave = jobs.find(job => job.id === jobId);
-        return jobToSave ? [...prev, { ...jobToSave, saved: true }] : prev;
-      }
-    });
-  };
+
 
   const filteredJobs = jobs.filter(job =>
     job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -99,27 +79,6 @@ const JobsPage = () => {
       opacity: 1,
       transition: {
         staggerChildren: 0.1
-      }
-    }
-  };
-
-  const cardVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 24
-      }
-    },
-    hover: {
-      y: -2,
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 17
       }
     }
   };
@@ -146,241 +105,27 @@ const JobsPage = () => {
     }
   };
 
-  const JobCard = ({ job }) => (
-    <motion.div
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      whileHover="hover"
-      className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 group"
-    >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-start space-x-4 flex-1">
-          <div className="relative">
-            <img
-              src={job.companyLogo}
-              alt={job.company}
-              className="w-14 h-14 rounded-xl object-cover border-2 border-white shadow-sm"
-            />
-            {job.featured && (
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full border-2 border-white flex items-center justify-center">
-                <Star className="w-2.5 h-2.5 text-white" />
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2 mb-1">
-              <h3 className="font-bold text-gray-900 text-lg">{job.title}</h3>
-              {job.urgent && (
-                <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-medium">
-                  Urgent
-                </span>
-              )}
-            </div>
-            <div className="flex items-center space-x-3 text-gray-600 mb-2">
-              <div className="flex items-center space-x-1">
-                <Building className="w-4 h-4" />
-                <span className="font-medium">{job.company}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <MapPin className="w-4 h-4" />
-                <span>{job.location}</span>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
-              <div className="flex items-center space-x-1">
-                <Briefcase className="w-4 h-4" />
-                <span>{job.type}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Clock className="w-4 h-4" />
-                <span>{job.posted}</span>
-              </div>
-              {job.salary && (
-                <div className="flex items-center space-x-1">
-                  <DollarSign className="w-4 h-4" />
-                  <span>{job.salary}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        <motion.button 
-          onClick={() => toggleSaveJob(job.id)}
-          className={`p-2 rounded-lg transition-all duration-200 ${
-            job.saved 
-              ? 'text-amber-500 bg-amber-50 hover:bg-amber-100' 
-              : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
-          }`}
-          whileHover={{ scale: 1.1 }}
-        >
-          <Bookmark className={`w-5 h-5 ${job.saved ? 'fill-current' : ''}`} />
-        </motion.button>
-      </div>
+  const mobileMenuVariants = {
+    closed: {
+      x: '-100%',
+      opacity: 0,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 40
+      }
+    },
+    open: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 40
+      }
+    }
+  };
 
-      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{job.description}</p>
-
-      <div className="flex flex-wrap gap-2 mb-4">
-        {job.skills.slice(0, 4).map((skill, index) => (
-          <span
-            key={index}
-            className="px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded-lg border border-blue-100 font-medium"
-          >
-            {skill}
-          </span>
-        ))}
-        {job.skills.length > 4 && (
-          <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-lg">
-            +{job.skills.length - 4} more
-          </span>
-        )}
-      </div>
-
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-        <div className="flex items-center space-x-2 text-sm text-gray-500">
-          <Users className="w-4 h-4" />
-          <span>{job.applicants} applicants</span>
-          {job.easyApply && (
-            <span className="flex items-center space-x-1 text-green-600">
-              <Zap className="w-4 h-4" />
-              <span>Easy Apply</span>
-            </span>
-          )}
-        </div>
-        <div className="flex space-x-2">
-          <motion.button 
-            className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-all duration-200 text-sm"
-            whileHover={{ scale: 1.05 }}
-          >
-            <Share2 className="w-4 h-4" />
-          </motion.button>
-          <motion.button 
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 text-sm"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Apply Now
-          </motion.button>
-        </div>
-      </div>
-    </motion.div>
-  );
-
-  const SavedJobCard = ({ job }) => (
-    <motion.div
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
-    >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-start space-x-4 flex-1">
-          <img
-            src={job.companyLogo}
-            alt={job.company}
-            className="w-12 h-12 rounded-lg object-cover border-2 border-white shadow-sm"
-          />
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-gray-900">{job.title}</h3>
-            <p className="text-gray-600">{job.company} · {job.location}</p>
-            <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
-              <span>{job.type}</span>
-              <span>{job.posted}</span>
-            </div>
-          </div>
-        </div>
-        <button 
-          onClick={() => toggleSaveJob(job.id)}
-          className="text-amber-500 hover:text-amber-600 transition-colors duration-200"
-        >
-          <Bookmark className="w-5 h-5 fill-current" />
-        </button>
-      </div>
-      <div className="flex space-x-2">
-        <motion.button 
-          className="flex-1 bg-blue-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200 text-sm"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          Apply Now
-        </motion.button>
-        <motion.button 
-          className="flex-1 bg-gray-100 text-gray-700 py-2.5 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-200 text-sm"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          View Details
-        </motion.button>
-      </div>
-    </motion.div>
-  );
-
-  const ApplicationCard = ({ application }) => (
-    <motion.div
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
-    >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-start space-x-4 flex-1">
-          <img
-            src={application.companyLogo}
-            alt={application.company}
-            className="w-12 h-12 rounded-lg object-cover border-2 border-white shadow-sm"
-          />
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-gray-900">{application.title}</h3>
-            <p className="text-gray-600">{application.company} · {application.location}</p>
-            <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
-              <span>Applied {application.appliedDate}</span>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                application.status === 'In Review' ? 'bg-blue-100 text-blue-700' :
-                application.status === 'Interview' ? 'bg-amber-100 text-amber-700' :
-                application.status === 'Rejected' ? 'bg-red-100 text-red-700' :
-                'bg-green-100 text-green-700'
-              }`}>
-                {application.status}
-              </span>
-            </div>
-          </div>
-        </div>
-        <ChevronRight className="w-5 h-5 text-gray-400" />
-      </div>
-      {application.updates && application.updates.length > 0 && (
-        <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
-          <strong>Latest update:</strong> {application.updates[0]}
-        </div>
-      )}
-    </motion.div>
-  );
-
-  const IndustryCard = ({ industry }) => (
-    <motion.div
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      whileHover="hover"
-      className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group"
-    >
-      <div className="flex items-center space-x-4 mb-3">
-        <div className={`p-3 rounded-xl ${industry.color} text-white`}>
-          <industry.icon className="w-6 h-6" />
-        </div>
-        <div>
-          <h3 className="font-bold text-gray-900">{industry.name}</h3>
-          <p className="text-gray-600 text-sm">{industry.jobs} jobs available</p>
-        </div>
-      </div>
-      <div className="flex items-center justify-between text-sm text-gray-500">
-        <span>+{industry.growth}% growth</span>
-        <span className="flex items-center space-x-1 text-blue-600 group-hover:translate-x-1 transition-transform duration-200">
-          <span>Explore</span>
-          <ChevronRight className="w-4 h-4" />
-        </span>
-      </div>
-    </motion.div>
-  );
 
   const tabs = [
     { id: 'recommended', label: 'Recommended', count: jobs.length, icon: Target, description: 'Jobs matching your profile' },
@@ -388,12 +133,65 @@ const JobsPage = () => {
     { id: 'applications', label: 'My Applications', count: applications.length, icon: Heart, description: 'Track your applications' },
   ];
 
-  const industries = [
-    { name: 'Technology', jobs: '12.4K', growth: 24, color: 'bg-blue-500', icon: Code },
-    { name: 'Design', jobs: '8.7K', growth: 18, color: 'bg-purple-500', icon: Palette },
-    { name: 'Business', jobs: '15.2K', growth: 12, color: 'bg-green-500', icon: BarChart3 },
-    { name: 'Marketing', jobs: '9.3K', growth: 16, color: 'bg-amber-500', icon: TrendingUp },
-  ];
+  const TabNavigation = () => (
+    <motion.div 
+      className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm lg:sticky lg:top-35"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.4 }}
+    >
+      <div className="space-y-2">
+        {tabs.map((tab) => (
+          <motion.button
+            key={tab.id}
+            onClick={() => {
+              setActiveTab(tab.id);
+              setIsMobileMenuOpen(false);
+            }}
+            className={`w-full text-left p-4 rounded-xl border-l-4 transition-all duration-200 flex items-center justify-between group ${
+              activeTab === tab.id
+                ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-sm'
+                : 'border-transparent text-gray-600 hover:bg-gray-50'
+            }`}
+            variants={tabVariants}
+            whileHover="hover"
+          >
+            <div className="flex items-center space-x-3">
+              <tab.icon className={`w-5 h-5 ${
+                activeTab === tab.id ? 'text-blue-600' : 'text-gray-400'
+              }`} />
+              <div className="text-left">
+                <div className="font-semibold text-sm">{tab.label}</div>
+                <div className="text-xs text-gray-500 mt-0.5">{tab.description}</div>
+              </div>
+            </div>
+            <div className={`px-2 py-1 text-xs rounded-full ${
+              activeTab === tab.id
+                ? 'bg-blue-100 text-blue-700'
+                : 'bg-gray-100 text-gray-600'
+            }`}>
+              {tab.count}
+            </div>
+          </motion.button>
+        ))}
+      </div>
+    </motion.div>
+  );
+
+  const MobileMenuButton = () => (
+    <motion.button
+      onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      className="lg:hidden bg-white p-3 rounded-xl border border-gray-200 shadow-sm"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {isMobileMenuOpen ? (
+        <X className="w-6 h-6 text-gray-600" />
+      ) : (
+        <Menu className="w-6 h-6 text-gray-600" />
+      )}
+    </motion.button>
+  );
 
   if (loading) {
     return (
@@ -465,23 +263,26 @@ const JobsPage = () => {
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <motion.h1 
-                className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-              >
-                Find Your Dream Job
-              </motion.h1>
-              <motion.p 
-                className="text-lg text-gray-600"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                Discover opportunities that match your skills and aspirations
-              </motion.p>
+            <div className="flex items-center justify-between">
+              <div>
+                <motion.h1 
+                  className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  Find Your Dream Job
+                </motion.h1>
+                <motion.p 
+                  className="text-lg text-gray-600"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  Discover opportunities that match your skills and aspirations
+                </motion.p>
+              </div>
+              <MobileMenuButton />
             </div>
           </div>
         </motion.div>
@@ -535,66 +336,44 @@ const JobsPage = () => {
         </motion.div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Column - Tabs & Industries */}
-          <div className="lg:w-80 flex-shrink-0">
-            {/* Tabs Navigation */}
-            <motion.div 
-              className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm mb-6"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <div className="space-y-2">
-                {tabs.map((tab) => (
-                  <motion.button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full text-left p-4 rounded-xl border-l-4 transition-all duration-200 flex items-center justify-between group ${
-                      activeTab === tab.id
-                        ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-sm'
-                        : 'border-transparent text-gray-600 hover:bg-gray-50'
-                    }`}
-                    variants={tabVariants}
-                    whileHover="hover"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <tab.icon className={`w-5 h-5 ${
-                        activeTab === tab.id ? 'text-blue-600' : 'text-gray-400'
-                      }`} />
-                      <div className="text-left">
-                        <div className="font-semibold text-sm">{tab.label}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">{tab.description}</div>
-                      </div>
+          {/* Mobile Menu Overlay */}
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <>
+                <motion.div
+                  className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                />
+                <motion.div
+                  className="fixed left-0 top-0 h-full w-80 bg-white z-50 lg:hidden shadow-xl"
+                  variants={mobileMenuVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                >
+                  <div className="p-6 h-full overflow-y-auto">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-xl font-bold text-gray-900">Navigation</h2>
+                      <button 
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                      >
+                        <X className="w-5 h-5 text-gray-600" />
+                      </button>
                     </div>
-                    <div className={`px-2 py-1 text-xs rounded-full ${
-                      activeTab === tab.id
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      {tab.count}
-                    </div>
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
+                    <TabNavigation />
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
 
-            {/* Trending Industries */}
-            <motion.div 
-              className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <h3 className="font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                <TrendingUp className="w-5 h-5 text-blue-600" />
-                <span>Trending Industries</span>
-              </h3>
-              <div className="space-y-3">
-                {industries.map((industry, index) => (
-                  <IndustryCard key={index} industry={industry} />
-                ))}
-              </div>
-            </motion.div>
+          {/* Left Column - Tabs Navigation (Desktop) */}
+          <div className="hidden lg:block lg:w-80 flex-shrink-0">
+            <TabNavigation />
           </div>
 
           {/* Right Column - Content */}
