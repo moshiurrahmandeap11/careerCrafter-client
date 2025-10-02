@@ -22,26 +22,7 @@ const cardVariants = {
     }
 };
 
-
-const toggleSaveJob = (jobId) => {
-    setJobs(prev => prev.map(job =>
-        job.id === jobId ? { ...job, saved: !job.saved } : job
-    ));
-    setSavedJobs(prev => {
-        const isSaved = prev.some(job => job.id === jobId);
-        if (isSaved) {
-            return prev.filter(job => job.id !== jobId);
-        } else {
-            const jobToSave = jobs.find(job => job.id === jobId);
-            return jobToSave ? [...prev, { ...jobToSave, saved: true }] : prev;
-        }
-    });
-};
-
-export const SavedJobCard = ({ job }) => (
-
-
-
+export const SavedJobCard = ({ job, onToggleSave }) => (
     <motion.div
         variants={cardVariants}
         initial="hidden"
@@ -65,7 +46,7 @@ export const SavedJobCard = ({ job }) => (
                 </div>
             </div>
             <button
-                onClick={() => toggleSaveJob(job.id)}
+                onClick={() => onToggleSave(job.id)}
                 className="text-amber-500 hover:text-amber-600 transition-colors duration-200"
             >
                 <Bookmark className="w-5 h-5 fill-current" />

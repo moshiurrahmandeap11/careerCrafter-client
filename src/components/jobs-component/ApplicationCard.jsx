@@ -22,8 +22,6 @@ const cardVariants = {
     }
 };
 
-
-
 export const ApplicationCard = ({ application }) => (
     <motion.div
         variants={cardVariants}
