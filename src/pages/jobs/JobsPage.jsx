@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ApplicationCard } from '../../components/jobs-component/ApplicationCard';
 import { JobCard } from '../../components/jobs-component/JobCard';
 import { SavedJobCard } from '../../components/jobs-component/SavedJobCard';
+import { ReTitle } from 're-title';
 
 const JobsPage = () => {
   const [activeTab, setActiveTab] = useState('recommended');
@@ -255,6 +256,7 @@ const JobsPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <ReTitle title='Jobs' />
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div 

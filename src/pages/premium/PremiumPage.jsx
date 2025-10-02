@@ -21,7 +21,8 @@ import {
   Clock,
   Mail,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { ReTitle } from 're-title';
 
 const PremiumPage = () => {
   const [selectedPlan, setSelectedPlan] = useState('standard');
@@ -294,6 +295,7 @@ const PremiumPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <ReTitle title='Premium'/>
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <motion.div

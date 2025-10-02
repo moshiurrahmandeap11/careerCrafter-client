@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NotificationItem } from '../../components/notification-components/NotificationItem';
+import { ReTitle } from 're-title';
 
 const NotificationPage = () => {
   const [activeFilter, setActiveFilter] = useState('all');
@@ -319,6 +320,7 @@ const NotificationPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <ReTitle title='Notifications'/>
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div 

@@ -13,6 +13,7 @@ import {
 import { motion } from 'framer-motion';
 import { MessageBubble } from '../../components/messages-components/MessageBubble';
 import { ConversationItem } from '../../components/messages-components/ConvertationItem';
+import { ReTitle } from 're-title';
 
 
 const MessagesPage = () => {
@@ -164,6 +165,7 @@ const MessagesPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <ReTitle title='Messages'/>
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div
