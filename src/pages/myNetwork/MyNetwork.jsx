@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { 
   Search, 
   UserPlus, 
@@ -17,66 +18,68 @@ import { PendingCard } from '../../components/network-components/PendingCard';
 import { SuggestionCard } from '../../components/network-components/SuggestionCard';
 import { ReTitle } from 're-title';
 
+// Import Redux actions and selectors
+import {
+  fetchAllNetworkData,
+  setSearchTerm,
+  setActiveTab,
+  acceptInvitation,
+  ignoreInvitation,
+  connectWithSuggestion,
+  removeConnection
+} from '../../redux-slices/networkSlice';
+import {
+  selectConnections,
+  selectPendingInvitations,
+  selectSuggestions,
+  selectLoading,
+  selectError,
+  selectSearchTerm,
+  selectActiveTab,
+  selectFilteredConnections,
+  selectTabCounts
+} from '../../redux-selectors/networkSelectors';
+
 const MyNetwork = () => {
-  const [activeTab, setActiveTab] = useState('connections');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [connections, setConnections] = useState([]);
-  const [pendingInvitations, setPendingInvitations] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const dispatch = useDispatch();
+  
+  // Select data from Redux store
+  const connections = useSelector(selectConnections);
+  const pendingInvitations = useSelector(selectPendingInvitations);
+  const suggestions = useSelector(selectSuggestions);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+  const searchTerm = useSelector(selectSearchTerm);
+  const activeTab = useSelector(selectActiveTab);
+  const filteredConnections = useSelector(selectFilteredConnections);
+  const tabCounts = useSelector(selectTabCounts);
+
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   useEffect(() => {
-    fetchNetworkData();
-  }, []);
-
-  const fetchNetworkData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Fetch data from public folder
-      const [connectionsResponse, pendingResponse, suggestionsResponse] = await Promise.all([
-        fetch('/data/connections.json'),
-        fetch('/data/pending-invitations.json'),
-        fetch('/data/suggestions.json')
-      ]);
-
-      // Check if all responses are ok
-      if (!connectionsResponse.ok || !pendingResponse.ok || !suggestionsResponse.ok) {
-        throw new Error('Failed to fetch network data');
-      }
-
-      // Parse JSON responses
-      const [connectionsData, pendingData, suggestionsData] = await Promise.all([
-        connectionsResponse.json(),
-        pendingResponse.json(),
-        suggestionsResponse.json()
-      ]);
-
-      setConnections(connectionsData);
-      setPendingInvitations(pendingData);
-      setSuggestions(suggestionsData);
-
-    } catch (error) {
-      console.error('Error fetching network data:', error);
-      setError('Failed to load network data. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    dispatch(fetchAllNetworkData());
+  }, [dispatch]);
 
   const handleTabClick = (tabId) => {
-    setActiveTab(tabId);
+    dispatch(setActiveTab(tabId));
     setMobileMenuOpen(false);
   };
 
-  const filteredConnections = connections.filter(connection =>
-    connection.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    connection.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    connection.company.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleAcceptInvitation = (invitationId) => {
+    dispatch(acceptInvitation(invitationId));
+  };
+
+  const handleIgnoreInvitation = (invitationId) => {
+    dispatch(ignoreInvitation(invitationId));
+  };
+
+  const handleConnectWithSuggestion = (suggestionId) => {
+    dispatch(connectWithSuggestion(suggestionId));
+  };
+
+  const handleRemoveConnection = (connectionId) => {
+    dispatch(removeConnection(connectionId));
+  };
 
   // Animation variants
   const containerVariants = {
@@ -88,8 +91,6 @@ const MyNetwork = () => {
       }
     }
   };
-
-
 
   const tabVariants = {
     hidden: { x: -10, opacity: 0 },
@@ -145,13 +146,28 @@ const MyNetwork = () => {
     }
   };
 
-
-
-
   const tabs = [
-    { id: 'connections', label: 'My Connections', count: connections.length, icon: UserCheck, description: 'Manage your professional network' },
-    { id: 'pending', label: 'Pending Invitations', count: pendingInvitations.length, icon: Clock, description: 'Review connection requests' },
-    { id: 'suggestions', label: 'Suggestions', count: suggestions.length, icon: Sparkles, description: 'People you may know' },
+    { 
+      id: 'connections', 
+      label: 'My Connections', 
+      count: tabCounts.connections, 
+      icon: UserCheck, 
+      description: 'Manage your professional network' 
+    },
+    { 
+      id: 'pending', 
+      label: 'Pending Invitations', 
+      count: tabCounts.pending, 
+      icon: Clock, 
+      description: 'Review connection requests' 
+    },
+    { 
+      id: 'suggestions', 
+      label: 'Suggestions', 
+      count: tabCounts.suggestions, 
+      icon: Sparkles, 
+      description: 'People you may know' 
+    },
   ];
 
   // Mobile Menu Component
@@ -199,7 +215,7 @@ const MyNetwork = () => {
                   type="text"
                   placeholder="Search network..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => dispatch(setSearchTerm(e.target.value))}
                   className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
@@ -297,7 +313,7 @@ const MyNetwork = () => {
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Network Error</h3>
           <p className="text-gray-600 mb-6">{error}</p>
           <motion.button 
-            onClick={fetchNetworkData}
+            onClick={() => dispatch(fetchAllNetworkData())}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -382,7 +398,7 @@ const MyNetwork = () => {
                 type="text"
                 placeholder="Search network..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => dispatch(setSearchTerm(e.target.value))}
                 className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm"
               />
             </div>
@@ -397,7 +413,7 @@ const MyNetwork = () => {
               {tabs.map((tab) => (
                 <motion.button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => dispatch(setActiveTab(tab.id))}
                   className={`w-full text-left p-4 rounded-xl border-l-4 transition-all duration-200 flex items-center justify-between group ${
                     activeTab === tab.id
                       ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-sm'
@@ -474,7 +490,11 @@ const MyNetwork = () => {
                     animate="visible"
                   >
                     {filteredConnections.map((connection, index) => (
-                      <ConnectionCard key={connection.id} connection={connection} />
+                      <ConnectionCard 
+                        key={connection.id} 
+                        connection={connection}
+                        onRemove={() => handleRemoveConnection(connection.id)}
+                      />
                     ))}
                   </motion.div>
                 )}
@@ -487,7 +507,12 @@ const MyNetwork = () => {
                     animate="visible"
                   >
                     {pendingInvitations.map((invitation, index) => (
-                      <PendingCard key={invitation.id} invitation={invitation} />
+                      <PendingCard 
+                        key={invitation.id} 
+                        invitation={invitation}
+                        onAccept={() => handleAcceptInvitation(invitation.id)}
+                        onIgnore={() => handleIgnoreInvitation(invitation.id)}
+                      />
                     ))}
                   </motion.div>
                 )}
@@ -500,7 +525,11 @@ const MyNetwork = () => {
                     animate="visible"
                   >
                     {suggestions.map((suggestion, index) => (
-                      <SuggestionCard key={suggestion.id} suggestion={suggestion} />
+                      <SuggestionCard 
+                        key={suggestion.id} 
+                        suggestion={suggestion}
+                        onConnect={() => handleConnectWithSuggestion(suggestion.id)}
+                      />
                     ))}
                   </motion.div>
                 )}
@@ -560,7 +589,7 @@ const MyNetwork = () => {
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">No connections found</h3>
                   <p className="text-gray-600 mb-6">Try adjusting your search criteria</p>
                   <button
-                    onClick={() => setSearchTerm('')}
+                    onClick={() => dispatch(setSearchTerm(''))}
                     className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200"
                   >
                     Clear Search
