@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Search,
   MessageCircle,
@@ -15,71 +16,68 @@ import { MessageBubble } from '../../components/messages-components/MessageBubbl
 import { ConversationItem } from '../../components/messages-components/ConvertationItem';
 import { ReTitle } from 're-title';
 
+// Import Redux actions and selectors
+import {
+  fetchConversations,
+  sendMessage,
+  setSearchTerm,
+  setSelectedConversation,
+  setMobileView,
+  markConversationAsRead,
+  clearError
+} from '../../redux-slices/messagesSlice';
+import {
+  selectConversations,
+  selectSelectedConversation, // Fixed: renamed selector
+  selectSearchTerm,
+  selectLoading,
+  selectError,
+  selectMobileView,
+  selectSendingMessage,
+  selectFilteredConversations,
+  selectUnreadCount
+} from '../../redux-selectors/messagesSelectors';
 
 const MessagesPage = () => {
-  const [conversations, setConversations] = useState([]);
-  const [selectedConversation, setSelectedConversation] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const dispatch = useDispatch();
+  
+  // Selectors - fixed naming
+  const conversations = useSelector(selectConversations);
+  const selectedConversation = useSelector(selectSelectedConversation); // Fixed: using renamed selector
+  const searchTerm = useSelector(selectSearchTerm);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+  const mobileView = useSelector(selectMobileView);
+  const sendingMessage = useSelector(selectSendingMessage);
+  const filteredConversations = useSelector(selectFilteredConversations);
+  const unreadCount = useSelector(selectUnreadCount);
+  
   const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [mobileView, setMobileView] = useState('list');
 
   useEffect(() => {
-    fetchMessagesData();
-  }, []);
+    dispatch(fetchConversations());
+  }, [dispatch]);
 
-  const fetchMessagesData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch('/data/conversations.json');
-      if (!response.ok) {
-        throw new Error('Failed to fetch messages data');
-      }
-
-      const conversationsData = await response.json();
-      setConversations(conversationsData);
-
-    } catch (error) {
-      console.error('Error fetching messages data:', error);
-      setError('Failed to load messages. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
+  const handleSearchChange = (term) => {
+    dispatch(setSearchTerm(term));
   };
 
-  const filteredConversations = conversations.filter(conversation =>
-    conversation.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conversation.user.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conversation.lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleConversationSelect = (conversation) => {
+    dispatch(setSelectedConversation(conversation));
+    dispatch(setMobileView('chat'));
+    // Mark as read when selected
+    if (conversation.unread > 0) {
+      dispatch(markConversationAsRead(conversation.id));
+    }
+  };
 
   const handleSendMessage = () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
-    const updatedConversations = conversations.map(conv => {
-      if (conv.id === selectedConversation.id) {
-        const newMsg = {
-          id: Date.now(),
-          content: newMessage,
-          timestamp: new Date().toISOString(),
-          isSender: true,
-          read: true
-        };
-        return {
-          ...conv,
-          lastMessage: newMessage,
-          lastMessageTime: 'Just now',
-          messages: [...conv.messages, newMsg]
-        };
-      }
-      return conv;
-    });
-
-    setConversations(updatedConversations);
-    setSelectedConversation(updatedConversations.find(conv => conv.id === selectedConversation.id));
+    dispatch(sendMessage({
+      conversationId: selectedConversation.id,
+      messageContent: newMessage.trim()
+    }));
     setNewMessage('');
   };
 
@@ -88,6 +86,15 @@ const MessagesPage = () => {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const handleBackToList = () => {
+    dispatch(setMobileView('list'));
+  };
+
+  const handleRetry = () => {
+    dispatch(clearError());
+    dispatch(fetchConversations());
   };
 
   // Animation variants
@@ -100,8 +107,6 @@ const MessagesPage = () => {
       }
     }
   };
-
-
 
   if (loading) {
     return (
@@ -151,7 +156,7 @@ const MessagesPage = () => {
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Messages Error</h3>
           <p className="text-gray-600 mb-6">{error}</p>
           <motion.button
-            onClick={fetchMessagesData}
+            onClick={handleRetry}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -165,7 +170,7 @@ const MessagesPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <ReTitle title='Messages'/>
+      <ReTitle title={`Messages${unreadCount > 0 ? ` (${unreadCount})` : ''}`}/>
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div
@@ -175,7 +180,9 @@ const MessagesPage = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Messages</h1>
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+                Messages{unreadCount > 0 && ` (${unreadCount})`}
+              </h1>
               <p className="text-lg text-gray-600">Connect and collaborate with your network</p>
             </div>
             <motion.button
@@ -194,8 +201,9 @@ const MessagesPage = () => {
           <div className="flex h-[600px]">
             {/* Conversations List */}
             <motion.div
-              className={`w-full lg:w-96 border-r border-gray-200 flex flex-col ${mobileView === 'chat' ? 'hidden lg:flex' : 'flex'
-                }`}
+              className={`w-full lg:w-96 border-r border-gray-200 flex flex-col ${
+                mobileView === 'chat' ? 'hidden lg:flex' : 'flex'
+              }`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
             >
@@ -207,7 +215,7 @@ const MessagesPage = () => {
                     type="text"
                     placeholder="Search messages..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => handleSearchChange(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   />
                 </div>
@@ -225,10 +233,7 @@ const MessagesPage = () => {
                       key={conversation.id}
                       conversation={conversation}
                       isSelected={selectedConversation?.id === conversation.id}
-                      onClick={() => {
-                        setSelectedConversation(conversation);
-                        setMobileView('chat');
-                      }}
+                      onClick={() => handleConversationSelect(conversation)}
                     />
                   ))}
                 </motion.div>
@@ -253,8 +258,9 @@ const MessagesPage = () => {
 
             {/* Chat Area */}
             <motion.div
-              className={`flex-1 flex flex-col ${mobileView === 'list' ? 'hidden lg:flex' : 'flex'
-                }`}
+              className={`flex-1 flex flex-col ${
+                mobileView === 'list' ? 'hidden lg:flex' : 'flex'
+              }`}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
             >
@@ -264,7 +270,7 @@ const MessagesPage = () => {
                   <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <button
-                        onClick={() => setMobileView('list')}
+                        onClick={handleBackToList}
                         className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                       >
                         <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -317,7 +323,7 @@ const MessagesPage = () => {
                       animate="visible"
                       className="space-y-1"
                     >
-                      {selectedConversation.messages.map((message) => (
+                      {selectedConversation.messages?.map((message) => (
                         <MessageBubble key={message.id} message={message} />
                       ))}
                     </motion.div>
@@ -340,6 +346,7 @@ const MessagesPage = () => {
                           placeholder="Type a message..."
                           rows="1"
                           className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                          disabled={sendingMessage}
                         />
                         <motion.button
                           className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-blue-600 transition-colors duration-200"
@@ -350,15 +357,24 @@ const MessagesPage = () => {
                       </div>
                       <motion.button
                         onClick={handleSendMessage}
-                        disabled={!newMessage.trim()}
-                        className={`p-3 rounded-lg transition-all duration-200 ${newMessage.trim()
+                        disabled={!newMessage.trim() || sendingMessage}
+                        className={`p-3 rounded-lg transition-all duration-200 ${
+                          newMessage.trim() && !sendingMessage
                             ? 'bg-blue-600 text-white hover:bg-blue-700'
                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          }`}
-                        whileHover={newMessage.trim() ? { scale: 1.05 } : {}}
-                        whileTap={newMessage.trim() ? { scale: 0.95 } : {}}
+                        }`}
+                        whileHover={newMessage.trim() && !sendingMessage ? { scale: 1.05 } : {}}
+                        whileTap={newMessage.trim() && !sendingMessage ? { scale: 0.95 } : {}}
                       >
-                        <Send className="w-5 h-5" />
+                        {sendingMessage ? (
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                          />
+                        ) : (
+                          <Send className="w-5 h-5" />
+                        )}
                       </motion.button>
                     </div>
                   </div>
