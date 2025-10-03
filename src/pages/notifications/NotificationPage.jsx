@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { 
   Bell, 
   Check, 
@@ -11,93 +12,92 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { NotificationItem } from '../../components/notification-components/NotificationItem';
 import { ReTitle } from 're-title';
 
+// Import actions and selectors
+import {
+  fetchNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
+  setActiveFilter,
+  setSearchTerm,
+  setShowSettings,
+  setShowMobileFilters,
+  toggleNotificationSetting,
+  clearError
+} from '../../redux-slices/notificationsSlice';
+import {
+  selectNotifications,
+  selectNotificationsLoading,
+  selectNotificationsError,
+  selectActiveFilter,
+  selectSearchTerm,
+  selectShowSettings,
+  selectShowMobileFilters,
+  selectNotificationSettings,
+  selectUnreadCount,
+  selectFilteredNotifications,
+  selectFilters
+} from '../../redux-selectors/notificationsSelectors';
+
 const NotificationPage = () => {
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showSettings, setShowSettings] = useState(false);
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [notificationSettings, setNotificationSettings] = useState({
-    messages: true,
-    connectionRequests: true,
-    reactions: true,
-    mentions: true,
-    jobAlerts: true,
-    recommendations: true
-  });
+  const dispatch = useDispatch();
+  
+  // Selectors
+  const notifications = useSelector(selectNotifications);
+  const loading = useSelector(selectNotificationsLoading);
+  const error = useSelector(selectNotificationsError);
+  const activeFilter = useSelector(selectActiveFilter);
+  const searchTerm = useSelector(selectSearchTerm);
+  const showSettings = useSelector(selectShowSettings);
+  const showMobileFilters = useSelector(selectShowMobileFilters);
+  const notificationSettings = useSelector(selectNotificationSettings);
+  const unreadCount = useSelector(selectUnreadCount);
+  const filteredNotifications = useSelector(selectFilteredNotifications);
+  const filters = useSelector(selectFilters);
 
   useEffect(() => {
-    fetchNotifications();
-  }, []);
+    dispatch(fetchNotifications());
+  }, [dispatch]);
 
-  const fetchNotifications = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/data/notifications.json');
-      if (!response.ok) {
-        throw new Error('Failed to fetch notifications');
-      }
-      const data = await response.json();
-      
-      setNotifications(data);
-      setUnreadCount(data.filter(notification => !notification.read).length);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-      setError('Failed to load notifications. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
+  const handleMarkAsRead = (id) => {
+    dispatch(markNotificationAsRead(id));
   };
 
-  const markAsRead = (id) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id ? { ...notification, read: true } : notification
-      )
-    );
-    setUnreadCount(prev => Math.max(0, prev - 1));
+  const handleMarkAllAsRead = () => {
+    dispatch(markAllNotificationsAsRead());
   };
 
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, read: true }))
-    );
-    setUnreadCount(0);
+  const handleDeleteNotification = (id) => {
+    dispatch(deleteNotification(id));
   };
 
-  const deleteNotification = (id) => {
-    const notification = notifications.find(n => n.id === id);
-    if (notification && !notification.read) {
-      setUnreadCount(prev => Math.max(0, prev - 1));
-    }
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
+  const handleSetActiveFilter = (filter) => {
+    dispatch(setActiveFilter(filter));
   };
 
-  const filteredNotifications = notifications.filter(notification => {
-    const matchesFilter = activeFilter === 'all' || 
-      (activeFilter === 'unread' && !notification.read) ||
-      notification.type === activeFilter;
-    
-    const matchesSearch = searchTerm === '' || 
-      notification.senderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      notification.message.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    return matchesFilter && matchesSearch;
-  });
+  const handleSetSearchTerm = (term) => {
+    dispatch(setSearchTerm(term));
+  };
 
-  const filters = [
-    { id: 'all', label: 'All', count: notifications.length },
-    { id: 'unread', label: 'Unread', count: unreadCount },
-    { id: 'connection', label: 'Connections', count: notifications.filter(n => n.type === 'connection').length },
-    { id: 'reaction', label: 'Reactions', count: notifications.filter(n => n.type === 'reaction').length },
-    { id: 'message', label: 'Messages', count: notifications.filter(n => n.type === 'message').length },
-    { id: 'mention', label: 'Mentions', count: notifications.filter(n => n.type === 'mention').length },
-    { id: 'job', label: 'Jobs', count: notifications.filter(n => n.type === 'job').length },
-    { id: 'recommendation', label: 'Recommendations', count: notifications.filter(n => n.type === 'recommendation').length }
-  ];
+  const handleSetShowSettings = (show) => {
+    dispatch(setShowSettings(show));
+  };
+
+  const handleSetShowMobileFilters = (show) => {
+    dispatch(setShowMobileFilters(show));
+  };
+
+  const handleToggleNotificationSetting = (setting) => {
+    dispatch(toggleNotificationSetting(setting));
+  };
+
+  const handleClearError = () => {
+    dispatch(clearError());
+  };
+
+  const handleRetry = () => {
+    dispatch(fetchNotifications());
+  };
 
   // Animation variants
   const containerVariants = {
@@ -119,7 +119,7 @@ const NotificationPage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={() => setShowMobileFilters(false)}
+          onClick={() => handleSetShowMobileFilters(false)}
         >
           <motion.div
             className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl"
@@ -133,7 +133,7 @@ const NotificationPage = () => {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900">Filters</h3>
                 <button
-                  onClick={() => setShowMobileFilters(false)}
+                  onClick={() => handleSetShowMobileFilters(false)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                 >
                   <X className="w-5 h-5" />
@@ -147,7 +147,7 @@ const NotificationPage = () => {
                   type="text"
                   placeholder="Search notifications..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => handleSetSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm"
                 />
               </div>
@@ -168,8 +168,8 @@ const NotificationPage = () => {
                   <motion.button
                     key={filter.id}
                     onClick={() => {
-                      setActiveFilter(filter.id);
-                      setShowMobileFilters(false);
+                      handleSetActiveFilter(filter.id);
+                      handleSetShowMobileFilters(false);
                     }}
                     className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${
                       activeFilter === filter.id
@@ -244,7 +244,7 @@ const NotificationPage = () => {
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Notification Error</h3>
           <p className="text-gray-600 mb-6">{error}</p>
           <motion.button 
-            onClick={fetchNotifications}
+            onClick={handleRetry}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -284,7 +284,7 @@ const NotificationPage = () => {
             <div className="flex items-center space-x-3">
               {/* Mobile Filter Button */}
               <motion.button 
-                onClick={() => setShowMobileFilters(true)}
+                onClick={() => handleSetShowMobileFilters(true)}
                 className="lg:hidden bg-blue-600 text-white p-3 rounded-xl shadow-sm hover:bg-blue-700 transition-colors duration-200"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -293,7 +293,7 @@ const NotificationPage = () => {
               </motion.button>
 
               <motion.button 
-                onClick={() => setShowSettings(true)}
+                onClick={() => handleSetShowSettings(true)}
                 className="hidden sm:flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 p-2 hover:bg-gray-100 rounded-lg"
                 whileHover={{ scale: 1.05 }}
               >
@@ -302,7 +302,7 @@ const NotificationPage = () => {
               
               {unreadCount > 0 && (
                 <motion.button 
-                  onClick={markAllAsRead}
+                  onClick={handleMarkAllAsRead}
                   className="bg-blue-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200 flex items-center space-x-2 shadow-sm"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -332,7 +332,7 @@ const NotificationPage = () => {
                   type="text"
                   placeholder="Search notifications..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => handleSetSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm"
                 />
               </div>
@@ -352,7 +352,7 @@ const NotificationPage = () => {
                 {filters.map((filter) => (
                   <motion.button
                     key={filter.id}
-                    onClick={() => setActiveFilter(filter.id)}
+                    onClick={() => handleSetActiveFilter(filter.id)}
                     className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${
                       activeFilter === filter.id
                         ? 'bg-blue-50 text-blue-700 shadow-sm'
@@ -388,7 +388,7 @@ const NotificationPage = () => {
                   Active filter: <span className="font-semibold capitalize">{activeFilter}</span>
                 </span>
                 <button
-                  onClick={() => setShowMobileFilters(true)}
+                  onClick={() => handleSetShowMobileFilters(true)}
                   className="text-blue-600 text-sm font-medium flex items-center space-x-1"
                 >
                   <Filter className="w-4 h-4" />
@@ -408,8 +408,8 @@ const NotificationPage = () => {
                 <NotificationItem 
                   key={notification.id} 
                   notification={notification}
-                  onMarkAsRead={markAsRead}
-                  onDelete={deleteNotification}
+                  onMarkAsRead={handleMarkAsRead}
+                  onDelete={handleDeleteNotification}
                 />
               ))}
             </motion.div>
@@ -432,7 +432,7 @@ const NotificationPage = () => {
                 </p>
                 {searchTerm && (
                   <button
-                    onClick={() => setSearchTerm('')}
+                    onClick={() => handleSetSearchTerm('')}
                     className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200"
                   >
                     Clear Search
@@ -455,7 +455,7 @@ const NotificationPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowSettings(false)}
+            onClick={() => handleSetShowSettings(false)}
           >
             <motion.div
               className="bg-white rounded-2xl p-6 w-full max-w-md"
@@ -467,7 +467,7 @@ const NotificationPage = () => {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900">Notification Settings</h3>
                 <button
-                  onClick={() => setShowSettings(false)}
+                  onClick={() => handleSetShowSettings(false)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                 >
                   <X className="w-5 h-5" />
@@ -481,10 +481,7 @@ const NotificationPage = () => {
                       {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
                     </span>
                     <button
-                      onClick={() => setNotificationSettings(prev => ({
-                        ...prev,
-                        [key]: !value
-                      }))}
+                      onClick={() => handleToggleNotificationSetting(key)}
                       className={`w-12 h-6 rounded-full transition-colors duration-200 ${
                         value ? 'bg-blue-600' : 'bg-gray-300'
                       }`}
