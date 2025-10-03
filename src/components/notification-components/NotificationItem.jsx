@@ -24,16 +24,17 @@ const itemVariants = {
     }
 };
 
-export const NotificationItem = ({ notification }) => (
+export const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => (
     <motion.div
         variants={itemVariants}
         initial="hidden"
         animate="visible"
         whileHover="hover"
-        className={`p-4 rounded-xl border transition-all duration-300 ${notification.read
+        className={`p-4 rounded-xl border transition-all duration-300 group ${
+            notification.read
             ? 'bg-white border-gray-200'
             : 'bg-blue-50 border-blue-200 shadow-sm'
-            }`}
+        }`}
     >
         <div className="flex items-start space-x-3">
             {/* Avatar */}
@@ -79,7 +80,7 @@ export const NotificationItem = ({ notification }) => (
                         <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                             {!notification.read && (
                                 <motion.button
-                                    onClick={() => markAsRead(notification.id)}
+                                    onClick={() => onMarkAsRead(notification.id)}
                                     className="p-1 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors duration-200"
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
@@ -88,7 +89,7 @@ export const NotificationItem = ({ notification }) => (
                                 </motion.button>
                             )}
                             <motion.button
-                                onClick={() => deleteNotification(notification.id)}
+                                onClick={() => onDelete(notification.id)}
                                 className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors duration-200"
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
@@ -109,6 +110,15 @@ export const NotificationItem = ({ notification }) => (
                                 whileTap={{ scale: 0.95 }}
                             >
                                 Accept
+                            </motion.button>
+                        )}
+                        {notification.actions.includes('ignore') && (
+                            <motion.button
+                                className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                Ignore
                             </motion.button>
                         )}
                         {notification.actions.includes('reply') && (
@@ -136,6 +146,15 @@ export const NotificationItem = ({ notification }) => (
                                 whileTap={{ scale: 0.95 }}
                             >
                                 Apply Now
+                            </motion.button>
+                        )}
+                        {notification.actions.includes('thank') && (
+                            <motion.button
+                                className="px-3 py-1.5 bg-purple-600 text-white text-xs font-medium rounded-lg hover:bg-purple-700 transition-colors duration-200"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                Thank
                             </motion.button>
                         )}
                     </div>

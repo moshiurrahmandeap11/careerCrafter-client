@@ -1,7 +1,5 @@
 import { Award, Bell, MessageCircle, Share2, ThumbsUp, UserPlus, Users } from "lucide-react";
 
-
-
 export const NotificationIcon = ({ type, priority }) => {
     const getIconProps = () => {
         switch (type) {

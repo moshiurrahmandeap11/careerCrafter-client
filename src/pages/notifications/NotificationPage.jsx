@@ -2,24 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { 
   Bell, 
   Check, 
-  MoreHorizontal, 
-  UserPlus, 
-  MessageCircle, 
-  ThumbsUp, 
-  Share2, 
-  Users,
-  Calendar,
-  Award,
-  Eye,
-  EyeOff,
   Filter,
   Search,
   Settings,
-  Mail,
-  Clock,
-  Sparkles,
   X,
-  Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NotificationItem } from '../../components/notification-components/NotificationItem';
@@ -50,58 +36,14 @@ const NotificationPage = () => {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      // Mock data since we don't have actual API
-      const mockNotifications = [
-        {
-          id: 1,
-          type: 'connection',
-          senderName: 'Sarah Johnson',
-          senderAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
-          message: 'sent you a connection request',
-          time: '2h ago',
-          read: false,
-          priority: 'high',
-          actions: ['accept'],
-          mutualConnections: 5
-        },
-        {
-          id: 2,
-          type: 'reaction',
-          senderName: 'Mike Chen',
-          senderAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
-          message: 'liked your post',
-          time: '4h ago',
-          read: true,
-          priority: 'medium',
-          actions: ['view'],
-          postPreview: 'Just launched our new product! Excited to share the journey...'
-        },
-        {
-          id: 3,
-          type: 'message',
-          senderName: 'Emma Davis',
-          senderAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
-          message: 'sent you a message',
-          time: '1d ago',
-          read: false,
-          priority: 'high',
-          actions: ['reply']
-        },
-        {
-          id: 4,
-          type: 'job',
-          senderName: 'TechCorp Inc',
-          senderAvatar: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop&crop=face',
-          message: 'has a new job opening that matches your profile',
-          time: '2d ago',
-          read: true,
-          priority: 'medium',
-          actions: ['apply']
-        }
-      ];
+      const response = await fetch('/data/notifications.json');
+      if (!response.ok) {
+        throw new Error('Failed to fetch notifications');
+      }
+      const data = await response.json();
       
-      setNotifications(mockNotifications);
-      setUnreadCount(mockNotifications.filter(notification => !notification.read).length);
+      setNotifications(data);
+      setUnreadCount(data.filter(notification => !notification.read).length);
     } catch (error) {
       console.error('Error fetching notifications:', error);
       setError('Failed to load notifications. Please try again later.');
@@ -152,7 +94,9 @@ const NotificationPage = () => {
     { id: 'connection', label: 'Connections', count: notifications.filter(n => n.type === 'connection').length },
     { id: 'reaction', label: 'Reactions', count: notifications.filter(n => n.type === 'reaction').length },
     { id: 'message', label: 'Messages', count: notifications.filter(n => n.type === 'message').length },
-    { id: 'job', label: 'Jobs', count: notifications.filter(n => n.type === 'job').length }
+    { id: 'mention', label: 'Mentions', count: notifications.filter(n => n.type === 'mention').length },
+    { id: 'job', label: 'Jobs', count: notifications.filter(n => n.type === 'job').length },
+    { id: 'recommendation', label: 'Recommendations', count: notifications.filter(n => n.type === 'recommendation').length }
   ];
 
   // Animation variants
@@ -165,12 +109,6 @@ const NotificationPage = () => {
       }
     }
   };
-
-
-
-
-
-
 
   // Mobile Filters Component
   const MobileFilters = () => (
@@ -469,7 +407,9 @@ const NotificationPage = () => {
               {filteredNotifications.map((notification) => (
                 <NotificationItem 
                   key={notification.id} 
-                  notification={notification} 
+                  notification={notification}
+                  onMarkAsRead={markAsRead}
+                  onDelete={deleteNotification}
                 />
               ))}
             </motion.div>
