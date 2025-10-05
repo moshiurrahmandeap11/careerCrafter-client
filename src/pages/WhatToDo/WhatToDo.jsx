@@ -75,7 +75,7 @@ const WhatToDo = () => {
     const checkUserPurpose = async () => {
       if (!email) return;
       try {
-        const res = await axiosIntense.get(`/v1/users/email/${email}`);
+        const res = await axiosIntense.get(`/users/email/${email}`);
         if (res?.data?.purpose) {
           navigate("/profile");
         }
