@@ -24,7 +24,7 @@ const Profile = () => {
         try {
             setProfileLoading(true);
             setError(null);
-            const response = await axiosIntense.get(`/v1/users/email/${user?.email}`);
+            const response = await axiosIntense.get(`/users/email/${user?.email}`);
             if (response.data) {
                 setProfile(response.data);
             }

@@ -161,7 +161,7 @@ const EditProfile = ({ profile, onClose, onUpdate }) => {
                 }
             }
 
-            await axiosIntense.patch(`/v1/users/email/${profile.email}`, updatedFormData);
+            await axiosIntense.patch(`/users/email/${profile.email}`, updatedFormData);
             setSuccess(true);
             setTimeout(() => {
                 onUpdate(); // Refresh profile data

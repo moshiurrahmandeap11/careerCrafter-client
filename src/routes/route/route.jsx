@@ -13,6 +13,8 @@ import MessagesPage from "../../pages/messages/MessagesPage";
 import JobsPage from "../../pages/jobs/JobsPage";
 import NotificationPage from "../../pages/notifications/NotificationPage";
 import PremiumPage from "../../pages/premium/PremiumPage";
+import DashboardLayout from "../../layouts/DashboardLayout/DashboardLayout";
+import AdminDashboard from "../../components/DashboardItems/AdminDashboard/AdminDashboard";
 
 export const route = createBrowserRouter([
     {
@@ -72,6 +74,16 @@ export const route = createBrowserRouter([
             {
                 path: "what-to-do",
                 element: <WhatToDo></WhatToDo>
+            }
+        ]
+    },
+    {
+        path: "/dashboard",
+        element: <DashboardLayout></DashboardLayout>,
+        children: [
+            {
+                path: "admin",
+                element: <AdminDashboard></AdminDashboard>
             }
         ]
     }
