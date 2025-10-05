@@ -55,7 +55,7 @@ const WhereListen = () => {
       });
 
       if (response.status === 200 || response.status === 201) {
-        navigate("/tags");
+        navigate("/auth/tags");
       } else {
         console.error("Failed to submit sources");
       }

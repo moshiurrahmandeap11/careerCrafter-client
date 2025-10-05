@@ -96,7 +96,7 @@ const Tags = () => {
       });
 
       if (response.status === 200 || response.status === 201) {
-        navigate("/what-to-do");
+        navigate("/auth/what-to-do");
       }
     } catch (error) {
       console.error("Error submitting tags:", error.response?.data || error.message);

@@ -72,7 +72,7 @@ const MessagesPage = () => {
     }
 
     try {
-      const url = `/v1/messageUsers/messages?userEmail=${encodeURIComponent(
+      const url = `/messageUsers/messages?userEmail=${encodeURIComponent(
         user.email
       )}&friendEmail=${encodeURIComponent(friendEmail)}`;
 
@@ -108,7 +108,7 @@ const MessagesPage = () => {
     const fetchUser = async () => {
       try {
         const res = await axiosIntense.get(
-          `/v1/messageUsers/usersEmail?email=${user?.email}`
+          `/messageUsers/usersEmail?email=${user?.email}`
         );
         setAllUser(res.data);
       } catch (err) {
