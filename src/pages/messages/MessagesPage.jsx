@@ -16,7 +16,7 @@ import { MessageBubble } from "../../components/messages-components/MessageBubbl
 import { ConversationItem } from "../../components/messages-components/ConvertationItem";
 import { ReTitle } from "re-title";
 
-// Import Redux actions and selectors
+// Redux imports
 import {
   fetchConversations,
   sendMessage,
@@ -28,7 +28,7 @@ import {
 } from "../../redux-slices/messagesSlice";
 import {
   selectConversations,
-  selectSelectedConversation, // Fixed: renamed selector
+  selectSelectedConversation,
   selectSearchTerm,
   selectLoading,
   selectError,
@@ -46,9 +46,10 @@ const MessagesPage = () => {
   const { user, loading: emailLoading } = useAuth();
   const socket = useRef(null);
   const dispatch = useDispatch();
-  // Selectors - fixed naming
+
+  // Selectors
   const conversations = useSelector(selectConversations);
-  const selectedConversation = useSelector(selectSelectedConversation); // Fixed: using renamed selector
+  const selectedConversation = useSelector(selectSelectedConversation);
   const searchTerm = useSelector(selectSearchTerm);
   const loading = useSelector(selectLoading);
   const error = useSelector(selectError);
@@ -60,15 +61,49 @@ const MessagesPage = () => {
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [allUser, setAllUser] = useState(null);
+  const fetchMessages = async (friendEmail) => {
+    if (!user?.email) {
+      console.warn("fetchMessages aborted: user.email not ready yet");
+      return;
+    }
+    if (!friendEmail) {
+      console.warn("fetchMessages aborted: friendEmail is missing");
+      return;
+    }
+
+    try {
+      const url = `/v1/messageUsers/messages?userEmail=${encodeURIComponent(
+        user.email
+      )}&friendEmail=${encodeURIComponent(friendEmail)}`;
+
+      const res = await axiosIntense.get(url);
+      const payload = res.data;
+      const chats = Array.isArray(payload)
+        ? payload
+        : payload.data || payload.chats || [];
+
+      setMessages(chats || []);
+    } catch (err) {
+      console.error(
+        "Error fetching messages:",
+        err?.response?.status,
+        err?.response?.data || err.message
+      );
+    }
+  };
+
+  // --- SOCKET CONNECTION ---
   useEffect(() => {
     socket.current = connectWS();
     socket.current.on("connect", () => {
-      socket.current.emit("joinRoom", user?.displayName);
+      socket.current.emit("joinRoom", user?.email);
       socket.current.on("chatMessage", (msg) => {
         setMessages((prev) => [...prev, msg]);
       });
     });
+
     dispatch(fetchConversations());
+
     if (!user?.email) return;
     const fetchUser = async () => {
       try {
@@ -82,13 +117,17 @@ const MessagesPage = () => {
     };
     fetchUser();
   }, [dispatch, user]);
+
+  // --- FUNCTIONS ---
   const handleSearchChange = (term) => {
     dispatch(setSearchTerm(term));
   };
+
   const handleConversationSelect = (conversation) => {
     dispatch(setSelectedConversation(conversation));
     dispatch(setMobileView("chat"));
-    // Mark as read when selected
+    fetchMessages(conversation.email);
+
     if (conversation.unread > 0) {
       dispatch(markConversationAsRead(conversation.id));
     }
@@ -97,17 +136,22 @@ const MessagesPage = () => {
   const handleSendMessage = () => {
     const text = newMessage.trim();
     if (!text) return;
+
     const msg = {
-      senderName: user?.displayName,
-      text,
-      date: new Date(),
+      fromEmail: user?.email,
+      toEmail: selectedConversation?.email,
+      message: text,
+      timestamp: new Date(),
     };
+
     setMessages((m) => [...m, msg]);
+
     socket.current.emit("privateMessage", {
       senderEmail: user?.email,
-      receiverEmail: selectedConversation?.email, 
+      receiverEmail: selectedConversation?.email,
       text: newMessage,
     });
+
     setNewMessage("");
   };
 
@@ -127,16 +171,16 @@ const MessagesPage = () => {
     dispatch(fetchConversations());
   };
 
-  // Animation variants
+  // --- Animations ---
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
+      transition: { staggerChildren: 0.1 },
     },
   };
+
+  // --- UI Loading States ---
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
@@ -199,6 +243,7 @@ const MessagesPage = () => {
     );
   }
 
+  // --- MAIN LAYOUT ---
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <ReTitle
@@ -242,7 +287,7 @@ const MessagesPage = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
             >
-              {/* Search Bar */}
+              {/* Search */}
               <div className="p-4 border-b border-gray-200">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -329,9 +374,6 @@ const MessagesPage = () => {
                             alt={selectedConversation.fullName}
                             className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
                           />
-                          {/* {selectedConversation.user.online && (
-                            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                          )} */}
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900">
@@ -374,13 +416,13 @@ const MessagesPage = () => {
                       animate="visible"
                       className="space-y-1"
                     >
-                      {messages?.map((message) => (
-                        <MessageBubble key={message.id} message={message} />
+                      {messages?.map((message, index) => (
+                        <MessageBubble key={index} message={message} />
                       ))}
                     </motion.div>
                   </div>
 
-                  {/* Message Input */}
+                  {/* Input */}
                   <div className="p-4 border-t border-gray-200">
                     <div className="flex items-center space-x-2">
                       <motion.button
