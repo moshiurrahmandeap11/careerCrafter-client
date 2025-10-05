@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Search,
   MessageCircle,
@@ -10,11 +10,11 @@ import {
   Phone,
   Info,
   ArrowLeft,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { MessageBubble } from '../../components/messages-components/MessageBubble';
-import { ConversationItem } from '../../components/messages-components/ConvertationItem';
-import { ReTitle } from 're-title';
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { MessageBubble } from "../../components/messages-components/MessageBubble";
+import { ConversationItem } from "../../components/messages-components/ConvertationItem";
+import { ReTitle } from "re-title";
 
 // Import Redux actions and selectors
 import {
@@ -24,8 +24,8 @@ import {
   setSelectedConversation,
   setMobileView,
   markConversationAsRead,
-  clearError
-} from '../../redux-slices/messagesSlice';
+  clearError,
+} from "../../redux-slices/messagesSlice";
 import {
   selectConversations,
   selectSelectedConversation, // Fixed: renamed selector
@@ -35,12 +35,17 @@ import {
   selectMobileView,
   selectSendingMessage,
   selectFilteredConversations,
-  selectUnreadCount
-} from '../../redux-selectors/messagesSelectors';
+  selectUnreadCount,
+} from "../../redux-selectors/messagesSelectors";
+import useAuth from "../../hooks/UseAuth/useAuth";
+import axiosIntense from "../../hooks/AxiosIntense/axiosIntense";
+import { io } from "socket.io-client";
+import { connectWS } from "../../hooks/connect";
 
 const MessagesPage = () => {
+  const { user, loading: emailLoading } = useAuth();
+  const socket = useRef(null);
   const dispatch = useDispatch();
-  
   // Selectors - fixed naming
   const conversations = useSelector(selectConversations);
   const selectedConversation = useSelector(selectSelectedConversation); // Fixed: using renamed selector
@@ -51,20 +56,38 @@ const MessagesPage = () => {
   const sendingMessage = useSelector(selectSendingMessage);
   const filteredConversations = useSelector(selectFilteredConversations);
   const unreadCount = useSelector(selectUnreadCount);
-  
-  const [newMessage, setNewMessage] = useState('');
 
+  const [newMessage, setNewMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [allUser, setAllUser] = useState(null);
   useEffect(() => {
+    socket.current = connectWS();
+    socket.current.on("connect", () => {
+      socket.current.emit("joinRoom", user?.displayName);
+      socket.current.on("chatMessage", (msg) => {
+        setMessages((prev) => [...prev, msg]);
+      });
+    });
     dispatch(fetchConversations());
-  }, [dispatch]);
-
+    if (!user?.email) return;
+    const fetchUser = async () => {
+      try {
+        const res = await axiosIntense.get(
+          `/v1/messageUsers/usersEmail?email=${user?.email}`
+        );
+        setAllUser(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchUser();
+  }, [dispatch, user]);
   const handleSearchChange = (term) => {
     dispatch(setSearchTerm(term));
   };
-
   const handleConversationSelect = (conversation) => {
     dispatch(setSelectedConversation(conversation));
-    dispatch(setMobileView('chat'));
+    dispatch(setMobileView("chat"));
     // Mark as read when selected
     if (conversation.unread > 0) {
       dispatch(markConversationAsRead(conversation.id));
@@ -72,24 +95,31 @@ const MessagesPage = () => {
   };
 
   const handleSendMessage = () => {
-    if (!newMessage.trim() || !selectedConversation) return;
-
-    dispatch(sendMessage({
-      conversationId: selectedConversation.id,
-      messageContent: newMessage.trim()
-    }));
-    setNewMessage('');
+    const text = newMessage.trim();
+    if (!text) return;
+    const msg = {
+      senderName: user?.displayName,
+      text,
+      date: new Date(),
+    };
+    setMessages((m) => [...m, msg]);
+    socket.current.emit("privateMessage", {
+      senderEmail: user?.email,
+      receiverEmail: selectedConversation?.email, 
+      text: newMessage,
+    });
+    setNewMessage("");
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
 
   const handleBackToList = () => {
-    dispatch(setMobileView('list'));
+    dispatch(setMobileView("list"));
   };
 
   const handleRetry = () => {
@@ -103,11 +133,10 @@ const MessagesPage = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
@@ -119,11 +148,11 @@ const MessagesPage = () => {
           <motion.div
             animate={{
               rotate: 360,
-              scale: [1, 1.1, 1]
+              scale: [1, 1.1, 1],
             }}
             transition={{
               rotate: { duration: 2, repeat: Infinity, ease: "linear" },
-              scale: { duration: 1, repeat: Infinity }
+              scale: { duration: 1, repeat: Infinity },
             }}
             className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center"
           >
@@ -153,7 +182,9 @@ const MessagesPage = () => {
           <div className="w-16 h-16 bg-red-100 rounded-full mx-auto mb-4 flex items-center justify-center">
             <MessageCircle className="w-8 h-8 text-red-600" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Messages Error</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            Messages Error
+          </h3>
           <p className="text-gray-600 mb-6">{error}</p>
           <motion.button
             onClick={handleRetry}
@@ -170,7 +201,9 @@ const MessagesPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <ReTitle title={`Messages${unreadCount > 0 ? ` (${unreadCount})` : ''}`}/>
+      <ReTitle
+        title={`Messages${unreadCount > 0 ? ` (${unreadCount})` : ""}`}
+      />
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div
@@ -183,7 +216,9 @@ const MessagesPage = () => {
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                 Messages{unreadCount > 0 && ` (${unreadCount})`}
               </h1>
-              <p className="text-lg text-gray-600">Connect and collaborate with your network</p>
+              <p className="text-lg text-gray-600">
+                Connect and collaborate with your network
+              </p>
             </div>
             <motion.button
               className="bg-blue-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200 flex items-center space-x-2 shadow-sm"
@@ -202,7 +237,7 @@ const MessagesPage = () => {
             {/* Conversations List */}
             <motion.div
               className={`w-full lg:w-96 border-r border-gray-200 flex flex-col ${
-                mobileView === 'chat' ? 'hidden lg:flex' : 'flex'
+                mobileView === "chat" ? "hidden lg:flex" : "flex"
               }`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -228,17 +263,25 @@ const MessagesPage = () => {
                   initial="hidden"
                   animate="visible"
                 >
-                  {filteredConversations.map((conversation) => (
-                    <ConversationItem
-                      key={conversation.id}
-                      conversation={conversation}
-                      isSelected={selectedConversation?.id === conversation.id}
-                      onClick={() => handleConversationSelect(conversation)}
-                    />
-                  ))}
+                  {allUser
+                    ?.filter((user) =>
+                      user.fullName
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase())
+                    )
+                    .map((conversation) => (
+                      <ConversationItem
+                        key={conversation._id}
+                        conversation={conversation}
+                        isSelected={
+                          selectedConversation?._id === conversation._id
+                        }
+                        onClick={() => handleConversationSelect(conversation)}
+                      />
+                    ))}
                 </motion.div>
 
-                {filteredConversations.length === 0 && (
+                {allUser?.length === 0 && (
                   <motion.div
                     className="text-center py-12"
                     initial={{ opacity: 0 }}
@@ -246,10 +289,14 @@ const MessagesPage = () => {
                   >
                     <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {searchTerm ? 'No conversations found' : 'No messages yet'}
+                      {searchTerm
+                        ? "No conversations found"
+                        : "No messages yet"}
                     </h3>
                     <p className="text-gray-600 text-sm">
-                      {searchTerm ? 'Try adjusting your search' : 'Start a conversation with your connections'}
+                      {searchTerm
+                        ? "Try adjusting your search"
+                        : "Start a conversation with your connections"}
                     </p>
                   </motion.div>
                 )}
@@ -259,7 +306,7 @@ const MessagesPage = () => {
             {/* Chat Area */}
             <motion.div
               className={`flex-1 flex flex-col ${
-                mobileView === 'list' ? 'hidden lg:flex' : 'flex'
+                mobileView === "list" ? "hidden lg:flex" : "flex"
               }`}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -278,17 +325,21 @@ const MessagesPage = () => {
                       <div className="flex items-center space-x-3">
                         <div className="relative">
                           <img
-                            src={selectedConversation.user.avatar}
-                            alt={selectedConversation.user.name}
+                            src={selectedConversation.profileImage}
+                            alt={selectedConversation.fullName}
                             className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
                           />
-                          {selectedConversation.user.online && (
+                          {/* {selectedConversation.user.online && (
                             <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                          )}
+                          )} */}
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">{selectedConversation.user.name}</h3>
-                          <p className="text-sm text-gray-600">{selectedConversation.user.title}</p>
+                          <h3 className="font-semibold text-gray-900">
+                            {selectedConversation.fullName}
+                          </h3>
+                          <p className="text-sm text-gray-600 line-clamp-2">
+                            {selectedConversation.tags.join(" | ")}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -323,7 +374,7 @@ const MessagesPage = () => {
                       animate="visible"
                       className="space-y-1"
                     >
-                      {selectedConversation.messages?.map((message) => (
+                      {messages?.map((message) => (
                         <MessageBubble key={message.id} message={message} />
                       ))}
                     </motion.div>
@@ -360,16 +411,28 @@ const MessagesPage = () => {
                         disabled={!newMessage.trim() || sendingMessage}
                         className={`p-3 rounded-lg transition-all duration-200 ${
                           newMessage.trim() && !sendingMessage
-                            ? 'bg-blue-600 text-white hover:bg-blue-700'
-                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            ? "bg-blue-600 text-white hover:bg-blue-700"
+                            : "bg-gray-100 text-gray-400 cursor-not-allowed"
                         }`}
-                        whileHover={newMessage.trim() && !sendingMessage ? { scale: 1.05 } : {}}
-                        whileTap={newMessage.trim() && !sendingMessage ? { scale: 0.95 } : {}}
+                        whileHover={
+                          newMessage.trim() && !sendingMessage
+                            ? { scale: 1.05 }
+                            : {}
+                        }
+                        whileTap={
+                          newMessage.trim() && !sendingMessage
+                            ? { scale: 0.95 }
+                            : {}
+                        }
                       >
                         {sendingMessage ? (
                           <motion.div
                             animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            transition={{
+                              duration: 1,
+                              repeat: Infinity,
+                              ease: "linear",
+                            }}
                             className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
                           />
                         ) : (
@@ -387,8 +450,12 @@ const MessagesPage = () => {
                     animate={{ opacity: 1 }}
                   >
                     <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Select a conversation</h3>
-                    <p className="text-gray-600">Choose a conversation from the list to start messaging</p>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      Select a conversation
+                    </h3>
+                    <p className="text-gray-600">
+                      Choose a conversation from the list to start messaging
+                    </p>
                   </motion.div>
                 </div>
               )}
