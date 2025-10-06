@@ -12,21 +12,85 @@ export const fetchPremiumPlans = createAsyncThunk(
   }
 );
 
+// Async thunk for creating Stripe payment intent
+export const createStripePaymentIntent = createAsyncThunk(
+  'premium/createStripePaymentIntent',
+  async (paymentData, { rejectWithValue }) => {
+    try {
+      const response = await fetch('http://localhost:3000/v1/payments/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create payment intent');
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // Async thunk for processing payment
 export const processPayment = createAsyncThunk(
   'premium/processPayment',
-  async (paymentData, { getState }) => {
-    // Simulate API call
-    const response = await new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          success: true,
-          transactionId: 'TXN_' + Math.random().toString(36).substr(2, 9),
-          creditsAwarded: calculateCredits(paymentData.planId, getState().premium.billingCycle)
-        });
-      }, 2000);
-    });
-    return response;
+  async (paymentData, { getState, rejectWithValue }) => {
+    try {
+      // Calculate credits
+      const creditsAwarded = calculateCredits(paymentData.planId, getState().premium.billingCycle);
+      
+      // Prepare data for backend
+      const backendPaymentData = {
+        planId: paymentData.planId,
+        planName: paymentData.planName,
+        paymentMethod: paymentData.paymentMethod,
+        amount: paymentData.amount,
+        billingCycle: paymentData.billingCycle,
+        userEmail: paymentData.userEmail,
+        creditsAwarded: creditsAwarded,
+        paymentData: {
+          ...paymentData,
+          // Remove sensitive data or include only what's needed
+          cardNumber: paymentData.cardNumber ? '***' + paymentData.cardNumber.slice(-4) : undefined,
+          cvv: paymentData.cvv ? '***' : undefined
+        }
+      };
+
+      // Send payment data to backend
+      const response = await fetch('http://localhost:3000/v1/payments/process-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(backendPaymentData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Payment failed');
+      }
+
+      const result = await response.json();
+
+      return {
+        success: true,
+        transactionId: result.transactionId,
+        creditsAwarded: creditsAwarded,
+        paymentData: paymentData,
+        backendResponse: result
+      };
+
+    } catch (error) {
+      console.error('❌ Payment processing error:', error);
+      return rejectWithValue(error.message);
+    }
   }
 );
 
@@ -54,7 +118,9 @@ const premiumSlice = createSlice({
     selectedPlan: null,
     paymentProcessing: false,
     paymentSuccess: false,
-    awardedCredits: 0
+    awardedCredits: 0,
+    transactionId: null,
+    clientSecret: null
   },
   reducers: {
     setBillingCycle: (state, action) => {
@@ -70,6 +136,9 @@ const premiumSlice = createSlice({
       state.paymentProcessing = false;
       state.paymentSuccess = false;
       state.awardedCredits = 0;
+      state.transactionId = null;
+      state.clientSecret = null;
+      state.error = null;
     },
     showToast: (state, action) => {
       state.toast = action.payload;
@@ -92,6 +161,18 @@ const premiumSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
+      .addCase(createStripePaymentIntent.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createStripePaymentIntent.fulfilled, (state, action) => {
+        state.loading = false;
+        state.clientSecret = action.payload.clientSecret;
+      })
+      .addCase(createStripePaymentIntent.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       .addCase(processPayment.pending, (state) => {
         state.paymentProcessing = true;
         state.paymentSuccess = false;
@@ -101,12 +182,16 @@ const premiumSlice = createSlice({
         state.paymentProcessing = false;
         state.paymentSuccess = true;
         state.awardedCredits = action.payload.creditsAwarded;
+        state.transactionId = action.payload.transactionId;
         state.selectedPlan = null;
+        state.clientSecret = null;
       })
       .addCase(processPayment.rejected, (state, action) => {
         state.paymentProcessing = false;
         state.paymentSuccess = false;
-        state.error = action.error.message;
+        state.error = action.payload;
+        state.clientSecret = null;
+        console.error('❌ PAYMENT FAILED:', action.payload);
       });
   }
 });
