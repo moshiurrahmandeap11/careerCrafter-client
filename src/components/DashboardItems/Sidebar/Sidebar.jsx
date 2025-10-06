@@ -10,7 +10,8 @@ import {
   MessageSquare,
   ChevronDown,
   ChevronRight,
-  Globe
+  Globe,
+  Users2
 } from 'lucide-react';
 import { Link } from 'react-router';
 
@@ -19,7 +20,9 @@ const Sidebar = ({ isOpen, toggleSidebar, activeRoute, setActiveRoute }) => {
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'users', label: 'Users', icon: Users },
+    { id: 'users', label: 'Users', icon: Users, hasSubmenu: true, submenu: [
+      { id: "all-users", label: "All Users", icon: Users2}
+    ] },
     { id: 'jobs', label: 'Jobs', icon: Briefcase },
     { id: 'applications', label: 'Applications', icon: FileText },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp },
