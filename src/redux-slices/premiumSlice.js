@@ -12,6 +12,38 @@ export const fetchPremiumPlans = createAsyncThunk(
   }
 );
 
+// Async thunk for processing payment
+export const processPayment = createAsyncThunk(
+  'premium/processPayment',
+  async (paymentData, { getState }) => {
+    // Simulate API call
+    const response = await new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          success: true,
+          transactionId: 'TXN_' + Math.random().toString(36).substr(2, 9),
+          creditsAwarded: calculateCredits(paymentData.planId, getState().premium.billingCycle)
+        });
+      }, 2000);
+    });
+    return response;
+  }
+);
+
+// Helper function to calculate credits
+const calculateCredits = (planId, billingCycle) => {
+  const baseCredits = {
+    'basic': 0,
+    'standard': 200000,
+    'premium': 400000
+  };
+  
+  const credits = baseCredits[planId] || 0;
+  
+  // Yearly billing gives 12x credits
+  return billingCycle === 'yearly' ? credits * 12 : credits;
+};
+
 const premiumSlice = createSlice({
   name: 'premium',
   initialState: {
@@ -19,7 +51,10 @@ const premiumSlice = createSlice({
     loading: false,
     error: null,
     billingCycle: 'monthly',
-    selectedPlan: null
+    selectedPlan: null,
+    paymentProcessing: false,
+    paymentSuccess: false,
+    awardedCredits: 0
   },
   reducers: {
     setBillingCycle: (state, action) => {
@@ -31,9 +66,16 @@ const premiumSlice = createSlice({
     clearSelection: (state) => {
       state.selectedPlan = null;
     },
-    processPayment: (state, action) => {
-      // Handle payment processing logic
-      console.log('Processing payment:', action.payload);
+    clearPaymentStatus: (state) => {
+      state.paymentProcessing = false;
+      state.paymentSuccess = false;
+      state.awardedCredits = 0;
+    },
+    showToast: (state, action) => {
+      state.toast = action.payload;
+    },
+    hideToast: (state) => {
+      state.toast = null;
     }
   },
   extraReducers: (builder) => {
@@ -49,6 +91,22 @@ const premiumSlice = createSlice({
       .addCase(fetchPremiumPlans.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+      })
+      .addCase(processPayment.pending, (state) => {
+        state.paymentProcessing = true;
+        state.paymentSuccess = false;
+        state.error = null;
+      })
+      .addCase(processPayment.fulfilled, (state, action) => {
+        state.paymentProcessing = false;
+        state.paymentSuccess = true;
+        state.awardedCredits = action.payload.creditsAwarded;
+        state.selectedPlan = null;
+      })
+      .addCase(processPayment.rejected, (state, action) => {
+        state.paymentProcessing = false;
+        state.paymentSuccess = false;
+        state.error = action.error.message;
       });
   }
 });
@@ -57,7 +115,9 @@ export const {
   setBillingCycle,
   selectPlan,
   clearSelection,
-  processPayment
+  clearPaymentStatus,
+  showToast,
+  hideToast
 } = premiumSlice.actions;
 
 export default premiumSlice.reducer;

@@ -12,7 +12,8 @@ import {
   Building,
   Globe,
   Lock,
-  ArrowRight
+  ArrowRight,
+  Gift
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReTitle } from 're-title';
@@ -22,14 +23,18 @@ import {
   fetchPremiumPlans,
   setBillingCycle,
   selectPlan,
-  processPayment
+  processPayment,
+  clearPaymentStatus
 } from '../../redux-slices/premiumSlice';
 import {
   selectPlans,
   selectLoading,
   selectError,
   selectBillingCycle,
-  selectedPlan
+  selectedPlan,
+  selectPaymentProcessing,
+  selectPaymentSuccess,
+  selectAwardedCredits
 } from '../../redux-selectors/premiumSelectors';
 
 const cardVariants = {
@@ -62,6 +67,9 @@ const PremiumPage = () => {
   const error = useSelector(selectError);
   const billingCycle = useSelector(selectBillingCycle);
   const currentSelectedPlan = useSelector(selectedPlan);
+  const paymentProcessing = useSelector(selectPaymentProcessing);
+  const paymentSuccess = useSelector(selectPaymentSuccess);
+  const awardedCredits = useSelector(selectAwardedCredits);
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
@@ -71,7 +79,6 @@ const PremiumPage = () => {
     cvv: '',
     cardHolder: '',
     mobileNumber: '',
-    transactionId: '',
     bankName: '',
     accountNumber: ''
   });
@@ -79,6 +86,17 @@ const PremiumPage = () => {
   useEffect(() => {
     dispatch(fetchPremiumPlans());
   }, [dispatch]);
+
+  // Toast message effect
+  useEffect(() => {
+    if (paymentSuccess) {
+      const timer = setTimeout(() => {
+        dispatch(clearPaymentStatus());
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [paymentSuccess, dispatch]);
 
   const handleBillingCycleChange = (cycle) => {
     dispatch(setBillingCycle(cycle));
@@ -95,8 +113,18 @@ const PremiumPage = () => {
       planId: currentSelectedPlan?.id,
       paymentMethod,
       ...formData
-    }));
-    // Handle payment processing logic here
+    })).then(() => {
+      setShowPaymentModal(false);
+      setFormData({
+        cardNumber: '',
+        expiryDate: '',
+        cvv: '',
+        cardHolder: '',
+        mobileNumber: '',
+        bankName: '',
+        accountNumber: ''
+      });
+    });
   };
 
   const handleInputChange = (field, value) => {
@@ -104,6 +132,17 @@ const PremiumPage = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const calculateCredits = (planId) => {
+    const baseCredits = {
+      'basic': 0,
+      'standard': 200000,
+      'premium': 400000
+    };
+    
+    const credits = baseCredits[planId] || 0;
+    return billingCycle === 'yearly' ? credits * 12 : credits;
   };
 
   // Animation variants
@@ -181,6 +220,16 @@ const PremiumPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
       <ReTitle title="Go Premium - AI Job Platform" />
 
+      {/* Success Toast */}
+      <AnimatePresence>
+        {paymentSuccess && (
+          <SuccessToast 
+            credits={awardedCredits} 
+            onClose={() => dispatch(clearPaymentStatus())} 
+          />
+        )}
+      </AnimatePresence>
+
       {/* Payment Modal */}
       <AnimatePresence>
         {showPaymentModal && currentSelectedPlan && (
@@ -193,6 +242,8 @@ const PremiumPage = () => {
             onInputChange={handleInputChange}
             onSubmit={handlePaymentSubmit}
             onClose={() => setShowPaymentModal(false)}
+            processing={paymentProcessing}
+            credits={calculateCredits(currentSelectedPlan.id)}
           />
         )}
       </AnimatePresence>
@@ -265,6 +316,7 @@ const PremiumPage = () => {
               billingCycle={billingCycle}
               index={index}
               onSelect={handlePlanSelect}
+              calculateCredits={calculateCredits}
             />
           ))}
         </motion.div>
@@ -274,10 +326,11 @@ const PremiumPage = () => {
 };
 
 // Pricing Card Component
-const PricingCard = ({ plan, billingCycle, index, onSelect }) => {
+const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits }) => {
   const isPopular = plan.name === 'Standard';
   const price = billingCycle === 'yearly' ? plan.yearlyPrice : plan.monthlyPrice;
   const originalPrice = billingCycle === 'yearly' ? plan.originalYearlyPrice : null;
+  const credits = calculateCredits(plan.id);
 
   return (
     <motion.div
@@ -318,6 +371,21 @@ const PricingCard = ({ plan, billingCycle, index, onSelect }) => {
         </div>
 
         <p className="text-gray-600 text-sm">{plan.description}</p>
+
+        {/* Credits Display */}
+        {credits > 0 && (
+          <div className="mt-3 p-2 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
+            <div className="flex items-center justify-center space-x-1">
+              <Gift className="w-4 h-4 text-yellow-600" />
+              <span className="text-sm font-semibold text-yellow-700">
+                {credits.toLocaleString()} AI Credits
+              </span>
+              {billingCycle === 'yearly' && (
+                <span className="text-xs text-yellow-600">(12x)</span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Features List */}
@@ -361,7 +429,9 @@ const PaymentModal = ({
   formData, 
   onInputChange, 
   onSubmit, 
-  onClose 
+  onClose,
+  processing,
+  credits
 }) => {
   const paymentMethods = [
     { id: 'card', name: 'Credit/Debit Card', icon: CreditCard },
@@ -391,172 +461,261 @@ const PaymentModal = ({
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">Complete Payment</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
-            >
-              <X className="w-5 h-5 text-gray-600" />
-            </button>
+            <h2 className="text-xl font-bold text-gray-900">
+              {processing ? 'Processing Payment...' : 'Complete Payment'}
+            </h2>
+            {!processing && (
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            )}
           </div>
           <p className="text-gray-600 mt-2">
             You're subscribing to <span className="font-semibold">{plan.name}</span> plan 
             ({billingCycle === 'yearly' ? 'Yearly' : 'Monthly'})
           </p>
+          
+          {/* Credits Info */}
+          {credits > 0 && (
+            <div className="mt-3 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+              <div className="flex items-center space-x-2">
+                <Gift className="w-4 h-4 text-purple-600" />
+                <span className="text-sm font-semibold text-purple-700">
+                  Bonus: {credits.toLocaleString()} AI Credits
+                </span>
+              </div>
+              {billingCycle === 'yearly' && credits > 400000 && (
+                <p className="text-xs text-purple-600 mt-1">
+                  🎁 12x credits for yearly subscription!
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Payment Methods */}
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="font-semibold text-gray-900 mb-4">Select Payment Method</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {paymentMethods.map(method => (
-              <button
-                key={method.id}
-                onClick={() => setPaymentMethod(method.id)}
-                className={`p-3 border-2 rounded-xl text-left transition-all duration-200 ${paymentMethod === method.id
-                    ? 'border-purple-500 bg-purple-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                  }`}
+        {!processing ? (
+          <>
+            {/* Payment Methods */}
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="font-semibold text-gray-900 mb-4">Select Payment Method</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {paymentMethods.map(method => (
+                  <button
+                    key={method.id}
+                    onClick={() => setPaymentMethod(method.id)}
+                    className={`p-3 border-2 rounded-xl text-left transition-all duration-200 ${paymentMethod === method.id
+                        ? 'border-purple-500 bg-purple-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                  >
+                    <method.icon className={`w-5 h-5 mb-2 ${paymentMethod === method.id ? 'text-purple-600' : 'text-gray-600'
+                      }`} />
+                    <span className="text-sm font-medium text-gray-700">{method.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Payment Form */}
+            <form onSubmit={onSubmit} className="p-6">
+              {paymentMethod === 'card' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Card Number
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="1234 5678 9012 3456"
+                      value={formData.cardNumber}
+                      onChange={(e) => onInputChange('cardNumber', e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Expiry Date
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="MM/YY"
+                        value={formData.expiryDate}
+                        onChange={(e) => onInputChange('expiryDate', e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        CVV
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="123"
+                        value={formData.cvv}
+                        onChange={(e) => onInputChange('cvv', e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Card Holder Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="John Doe"
+                      value={formData.cardHolder}
+                      onChange={(e) => onInputChange('cardHolder', e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Mobile Payment Methods */}
+              {['bkash', 'nogod', 'rocket', 'upay'].includes(paymentMethod) && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Mobile Number
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="01XXXXXXXXX"
+                      value={formData.mobileNumber}
+                      onChange={(e) => onInputChange('mobileNumber', e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                </div>
+              )}
+
+              {paymentMethod === 'bank' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Bank Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter bank name"
+                      value={formData.bankName}
+                      onChange={(e) => onInputChange('bankName', e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Account Number
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter account number"
+                      value={formData.accountNumber}
+                      onChange={(e) => onInputChange('accountNumber', e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Security Note */}
+              <div className="flex items-center space-x-2 mt-6 p-3 bg-blue-50 rounded-lg">
+                <Lock className="w-4 h-4 text-blue-600" />
+                <span className="text-sm text-blue-700">
+                  Your payment information is secure and encrypted
+                </span>
+              </div>
+
+              {/* Submit Button */}
+              <motion.button
+                type="submit"
+                disabled={processing}
+                className="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: processing ? 1 : 1.02 }}
+                whileTap={{ scale: processing ? 1 : 0.98 }}
               >
-                <method.icon className={`w-5 h-5 mb-2 ${paymentMethod === method.id ? 'text-purple-600' : 'text-gray-600'
-                  }`} />
-                <span className="text-sm font-medium text-gray-700">{method.name}</span>
-              </button>
-            ))}
+                <span>Complete Payment - ${displayPrice}</span>
+                <ArrowRight className="w-4 h-4" />
+              </motion.button>
+            </form>
+          </>
+        ) : (
+          /* Processing State */
+          <div className="p-12 text-center">
+            <motion.div
+              animate={{
+                rotate: 360,
+                scale: [1, 1.1, 1]
+              }}
+              transition={{
+                rotate: { duration: 2, repeat: Infinity, ease: "linear" },
+                scale: { duration: 1, repeat: Infinity }
+              }}
+              className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full mx-auto mb-6 flex items-center justify-center"
+            >
+              <CreditCard className="w-8 h-8 text-white" />
+            </motion.div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Processing Your Payment
+            </h3>
+            <p className="text-gray-600">
+              Please wait while we complete your transaction...
+            </p>
           </div>
-        </div>
-
-        {/* Payment Form */}
-        <form onSubmit={onSubmit} className="p-6">
-          {paymentMethod === 'card' && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Card Number
-                </label>
-                <input
-                  type="text"
-                  placeholder="1234 5678 9012 3456"
-                  value={formData.cardNumber}
-                  onChange={(e) => onInputChange('cardNumber', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Expiry Date
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="MM/YY"
-                    value={formData.expiryDate}
-                    onChange={(e) => onInputChange('expiryDate', e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    CVV
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="123"
-                    value={formData.cvv}
-                    onChange={(e) => onInputChange('cvv', e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Card Holder Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="John Doe"
-                  value={formData.cardHolder}
-                  onChange={(e) => onInputChange('cardHolder', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Mobile Payment Methods */}
-          {['bkash', 'nogod', 'rocket', 'upay'].includes(paymentMethod) && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Mobile Number
-                </label>
-                <input
-                  type="text"
-                  placeholder="01XXXXXXXXX"
-                  value={formData.mobileNumber}
-                  onChange={(e) => onInputChange('mobileNumber', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
-          )}
-
-          {paymentMethod === 'bank' && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bank Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter bank name"
-                  value={formData.bankName}
-                  onChange={(e) => onInputChange('bankName', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Account Number
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter account number"
-                  value={formData.accountNumber}
-                  onChange={(e) => onInputChange('accountNumber', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Security Note */}
-          <div className="flex items-center space-x-2 mt-6 p-3 bg-blue-50 rounded-lg">
-            <Lock className="w-4 h-4 text-blue-600" />
-            <span className="text-sm text-blue-700">
-              Your payment information is secure and encrypted
-            </span>
-          </div>
-
-          {/* Submit Button */}
-          <motion.button
-            type="submit"
-            className="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <span>Complete Payment - ${displayPrice}</span>
-            <ArrowRight className="w-4 h-4" />
-          </motion.button>
-        </form>
+        )}
       </motion.div>
+    </motion.div>
+  );
+};
+
+// Success Toast Component
+const SuccessToast = ({ credits, onClose }) => {
+  return (
+    <motion.div
+      className="fixed top-4 right-4 z-50 max-w-sm w-full"
+      initial={{ opacity: 0, x: 300 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 300 }}
+    >
+      <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-xl shadow-lg">
+        <div className="flex items-start space-x-3">
+          <div className="flex-shrink-0">
+            <Gift className="w-6 h-6" />
+          </div>
+          <div className="flex-1">
+            <h4 className="font-bold text-lg mb-1">Payment Successful! 🎉</h4>
+            <p className="text-green-100">
+              Welcome to Premium! You've received{' '}
+              <span className="font-bold text-white">
+                {credits.toLocaleString()} AI Credits
+              </span>
+              {credits > 0 && (
+                <span className="block text-sm mt-1">
+                  🚀 Start using your credits to boost your job search!
+                </span>
+              )}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex-shrink-0 text-green-100 hover:text-white transition-colors duration-200"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
     </motion.div>
   );
 };
