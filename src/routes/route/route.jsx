@@ -21,6 +21,7 @@ import BusinessLayout from "../../layouts/BusinessLayout/BusinessLayout";
 import Hire from "../../pages/Business/Hire/Hire";
 import Learn from "../../pages/Business/Learn/Learn";
 import PostJob from "../../pages/Business/PostJob/PostJob";
+import JobDetails from "../../pages/jobs/JobDetails/JobDetails";
 
 export const route = createBrowserRouter([
   {
@@ -46,6 +47,10 @@ export const route = createBrowserRouter([
       {
         path: "/jobs",
         element: <JobsPage />,
+      },
+      {
+        path: "/job/:id",
+        element: <JobDetails></JobDetails>
       },
       {
         path: "/notifications",
