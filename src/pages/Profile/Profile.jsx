@@ -20,6 +20,8 @@ const Profile = () => {
         }
     }, [user?.email]);
 
+      console.log(user?.email);
+
     const fetchProfile = async () => {
         try {
             setProfileLoading(true);

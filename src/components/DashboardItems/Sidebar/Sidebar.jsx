@@ -11,7 +11,8 @@ import {
   ChevronDown,
   ChevronRight,
   Globe,
-  Users2
+  Users2,
+  AmpersandIcon
 } from 'lucide-react';
 import { Link } from 'react-router';
 
@@ -21,7 +22,8 @@ const Sidebar = ({ isOpen, toggleSidebar, activeRoute, setActiveRoute }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'users', label: 'Users', icon: Users, hasSubmenu: true, submenu: [
-      { id: "all-users", label: "All Users", icon: Users2}
+      { id: "all-users", label: "All Users", icon: Users2},
+      { id: "admins", label: "Admins", icon: AmpersandIcon},
     ] },
     { id: 'jobs', label: 'Jobs', icon: Briefcase },
     { id: 'applications', label: 'Applications', icon: FileText },

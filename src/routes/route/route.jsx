@@ -15,6 +15,7 @@ import NotificationPage from "../../pages/notifications/NotificationPage";
 import PremiumPage from "../../pages/premium/PremiumPage";
 import DashboardLayout from "../../layouts/DashboardLayout/DashboardLayout";
 import AdminDashboard from "../../components/DashboardItems/AdminDashboard/AdminDashboard";
+import ProtectedRoute from "../../components/ProtectedRoute/ProtectedRoute";
 
 export const route = createBrowserRouter([
     {
@@ -79,7 +80,7 @@ export const route = createBrowserRouter([
     },
     {
         path: "/dashboard",
-        element: <DashboardLayout></DashboardLayout>,
+        element: <ProtectedRoute><DashboardLayout></DashboardLayout></ProtectedRoute>,
         children: [
             {
                 path: "admin",
