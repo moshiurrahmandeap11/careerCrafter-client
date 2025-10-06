@@ -19,11 +19,32 @@ export const processPayment = createAsyncThunk(
     // Simulate API call
     const response = await new Promise((resolve) => {
       setTimeout(() => {
-        resolve({
+        const transactionData = {
           success: true,
           transactionId: 'TXN_' + Math.random().toString(36).substr(2, 9),
-          creditsAwarded: calculateCredits(paymentData.planId, getState().premium.billingCycle)
+          creditsAwarded: calculateCredits(paymentData.planId, getState().premium.billingCycle),
+          paymentData: paymentData,
+          timestamp: new Date().toISOString()
+        };
+        
+        // Log payment data to console with user email
+        console.log('💰 PAYMENT SUCCESSFUL - Transaction Data:', transactionData);
+        console.log('📋 Payment Details:', {
+          planId: paymentData.planId,
+          planName: paymentData.planName,
+          paymentMethod: paymentData.paymentMethod,
+          amount: paymentData.amount,
+          billingCycle: paymentData.billingCycle,
+          userEmail: paymentData.userEmail, // Log user email
+          creditsAwarded: transactionData.creditsAwarded,
+          timestamp: transactionData.timestamp
         });
+        
+        // Log user-specific success message
+        console.log(`🎯 Payment successful for user: ${paymentData.userEmail}`);
+        console.log(`📧 User email stored in payment data: ${paymentData.userEmail}`);
+        
+        resolve(transactionData);
       }, 2000);
     });
     return response;
@@ -102,11 +123,20 @@ const premiumSlice = createSlice({
         state.paymentSuccess = true;
         state.awardedCredits = action.payload.creditsAwarded;
         state.selectedPlan = null;
+        
+        // Additional console log in reducer for confirmation
+        console.log('✅ Payment state updated successfully in Redux store');
+        console.log('🎯 Credits awarded to user:', action.payload.creditsAwarded);
+        console.log('👤 User email from payment:', action.payload.paymentData.userEmail);
+        console.log('📝 Complete payment data stored:', action.payload.paymentData);
       })
       .addCase(processPayment.rejected, (state, action) => {
         state.paymentProcessing = false;
         state.paymentSuccess = false;
         state.error = action.error.message;
+        
+        // Log payment failure
+        console.error('❌ PAYMENT FAILED:', action.error.message);
       });
   }
 });

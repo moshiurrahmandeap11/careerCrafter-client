@@ -36,6 +36,7 @@ import {
   selectPaymentSuccess,
   selectAwardedCredits
 } from '../../redux-selectors/premiumSelectors';
+import useAuth from '../../hooks/UseAuth/useAuth';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -60,6 +61,7 @@ const cardVariants = {
 
 const PremiumPage = () => {
   const dispatch = useDispatch();
+  const { user } = useAuth()
 
   // Select data from Redux store
   const plans = useSelector(selectPlans);
@@ -90,13 +92,17 @@ const PremiumPage = () => {
   // Toast message effect
   useEffect(() => {
     if (paymentSuccess) {
+      console.log('🎉 Payment success detected in component, showing toast');
+      console.log('💎 Total credits awarded:', awardedCredits);
+
       const timer = setTimeout(() => {
         dispatch(clearPaymentStatus());
+        console.log('🔔 Toast auto-dismissed after 5 seconds');
       }, 5000);
-      
+
       return () => clearTimeout(timer);
     }
-  }, [paymentSuccess, dispatch]);
+  }, [paymentSuccess, awardedCredits, dispatch]);
 
   const handleBillingCycleChange = (cycle) => {
     dispatch(setBillingCycle(cycle));
@@ -105,26 +111,45 @@ const PremiumPage = () => {
   const handlePlanSelect = (planId) => {
     dispatch(selectPlan(planId));
     setShowPaymentModal(true);
+    console.log('🛒 Plan selected:', planId);
   };
 
   const handlePaymentSubmit = (e) => {
     e.preventDefault();
-    dispatch(processPayment({
+
+    const paymentPayload = {
       planId: currentSelectedPlan?.id,
       paymentMethod,
-      ...formData
-    })).then(() => {
-      setShowPaymentModal(false);
-      setFormData({
-        cardNumber: '',
-        expiryDate: '',
-        cvv: '',
-        cardHolder: '',
-        mobileNumber: '',
-        bankName: '',
-        accountNumber: ''
+      ...formData,
+      planName: currentSelectedPlan?.name,
+      billingCycle: billingCycle,
+      amount: billingCycle === 'yearly' ? currentSelectedPlan?.yearlyPrice : currentSelectedPlan?.monthlyPrice,
+      userEmail: user?.email // Add user email to payment payload
+    };
+
+    console.log('🚀 Initiating payment process...');
+    console.log('📦 Payment payload:', paymentPayload);
+    console.log('👤 User email for payment:', user?.email);
+
+    dispatch(processPayment(paymentPayload))
+      .unwrap()
+      .then((result) => {
+        console.log('✅ Payment process completed successfully');
+        console.log('📊 Final transaction result:', result);
+        setShowPaymentModal(false);
+        setFormData({
+          cardNumber: '',
+          expiryDate: '',
+          cvv: '',
+          cardHolder: '',
+          mobileNumber: '',
+          bankName: '',
+          accountNumber: ''
+        });
+      })
+      .catch((error) => {
+        console.error('❌ Payment process failed:', error);
       });
-    });
   };
 
   const handleInputChange = (field, value) => {
@@ -140,7 +165,7 @@ const PremiumPage = () => {
       'standard': 200000,
       'premium': 400000
     };
-    
+
     const credits = baseCredits[planId] || 0;
     return billingCycle === 'yearly' ? credits * 12 : credits;
   };
@@ -223,9 +248,12 @@ const PremiumPage = () => {
       {/* Success Toast */}
       <AnimatePresence>
         {paymentSuccess && (
-          <SuccessToast 
-            credits={awardedCredits} 
-            onClose={() => dispatch(clearPaymentStatus())} 
+          <SuccessToast
+            credits={awardedCredits}
+            onClose={() => {
+              console.log('👤 User manually closed success toast');
+              dispatch(clearPaymentStatus());
+            }}
           />
         )}
       </AnimatePresence>
@@ -241,9 +269,13 @@ const PremiumPage = () => {
             formData={formData}
             onInputChange={handleInputChange}
             onSubmit={handlePaymentSubmit}
-            onClose={() => setShowPaymentModal(false)}
+            onClose={() => {
+              console.log('❌ Payment modal closed by user');
+              setShowPaymentModal(false);
+            }}
             processing={paymentProcessing}
             credits={calculateCredits(currentSelectedPlan.id)}
+            userEmail={user?.email}
           />
         )}
       </AnimatePresence>
@@ -284,8 +316,8 @@ const PremiumPage = () => {
             <button
               onClick={() => handleBillingCycleChange('monthly')}
               className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${billingCycle === 'monthly'
-                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md'
+                : 'text-gray-600 hover:text-gray-900'
                 }`}
             >
               Monthly
@@ -293,8 +325,8 @@ const PremiumPage = () => {
             <button
               onClick={() => handleBillingCycleChange('yearly')}
               className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${billingCycle === 'yearly'
-                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md'
+                : 'text-gray-600 hover:text-gray-900'
                 }`}
             >
               Yearly <span className="text-green-500 text-sm ml-1">(Save 20%)</span>
@@ -337,8 +369,8 @@ const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits }) 
       variants={cardVariants}
       whileHover="hover"
       className={`relative rounded-2xl border-2 p-8 transition-all duration-300 ${isPopular
-          ? 'border-purple-500 bg-gradient-to-b from-white to-purple-50 shadow-xl scale-105'
-          : 'border-gray-200 bg-white shadow-sm'
+        ? 'border-purple-500 bg-gradient-to-b from-white to-purple-50 shadow-xl scale-105'
+        : 'border-gray-200 bg-white shadow-sm'
         }`}
     >
       {isPopular && (
@@ -408,8 +440,8 @@ const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits }) 
       <motion.button
         onClick={() => onSelect(plan.id)}
         className={`w-full py-4 rounded-xl font-semibold transition-all duration-200 ${isPopular
-            ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:shadow-lg'
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:shadow-lg'
+          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
@@ -421,17 +453,18 @@ const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits }) 
 };
 
 // Payment Modal Component
-const PaymentModal = ({ 
-  plan, 
-  billingCycle, 
-  paymentMethod, 
-  setPaymentMethod, 
-  formData, 
-  onInputChange, 
-  onSubmit, 
+const PaymentModal = ({
+  plan,
+  billingCycle,
+  paymentMethod,
+  setPaymentMethod,
+  formData,
+  onInputChange,
+  onSubmit,
   onClose,
   processing,
-  credits
+  credits,
+  userEmail
 }) => {
   const paymentMethods = [
     { id: 'card', name: 'Credit/Debit Card', icon: CreditCard },
@@ -474,10 +507,19 @@ const PaymentModal = ({
             )}
           </div>
           <p className="text-gray-600 mt-2">
-            You're subscribing to <span className="font-semibold">{plan.name}</span> plan 
+            You're subscribing to <span className="font-semibold">{plan.name}</span> plan
             ({billingCycle === 'yearly' ? 'Yearly' : 'Monthly'})
           </p>
-          
+
+          {/* User Email Display */}
+          {userEmail && (
+            <div className="mt-2 p-2 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-600">
+                <span className="font-medium">Account:</span> {userEmail}
+              </p>
+            </div>
+          )}
+
           {/* Credits Info */}
           {credits > 0 && (
             <div className="mt-3 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
@@ -505,10 +547,13 @@ const PaymentModal = ({
                 {paymentMethods.map(method => (
                   <button
                     key={method.id}
-                    onClick={() => setPaymentMethod(method.id)}
+                    onClick={() => {
+                      console.log(`💳 Payment method changed to: ${method.name}`);
+                      setPaymentMethod(method.id);
+                    }}
                     className={`p-3 border-2 rounded-xl text-left transition-all duration-200 ${paymentMethod === method.id
-                        ? 'border-purple-500 bg-purple-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-purple-500 bg-purple-50'
+                      : 'border-gray-200 hover:border-gray-300'
                       }`}
                   >
                     <method.icon className={`w-5 h-5 mb-2 ${paymentMethod === method.id ? 'text-purple-600' : 'text-gray-600'
@@ -645,6 +690,7 @@ const PaymentModal = ({
                 className="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 whileHover={{ scale: processing ? 1 : 1.02 }}
                 whileTap={{ scale: processing ? 1 : 0.98 }}
+                onClick={() => console.log('🔄 Payment submission initiated...')}
               >
                 <span>Complete Payment - ${displayPrice}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -673,6 +719,11 @@ const PaymentModal = ({
             <p className="text-gray-600">
               Please wait while we complete your transaction...
             </p>
+            {userEmail && (
+              <p className="text-sm text-gray-500 mt-2">
+                For account: {userEmail}
+              </p>
+            )}
           </div>
         )}
       </motion.div>
