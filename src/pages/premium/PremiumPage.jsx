@@ -92,12 +92,9 @@ const PremiumPage = () => {
   // Toast message effect
   useEffect(() => {
     if (paymentSuccess) {
-      console.log('🎉 Payment success detected in component, showing toast');
-      console.log('💎 Total credits awarded:', awardedCredits);
 
       const timer = setTimeout(() => {
         dispatch(clearPaymentStatus());
-        console.log('🔔 Toast auto-dismissed after 5 seconds');
       }, 5000);
 
       return () => clearTimeout(timer);
@@ -111,7 +108,6 @@ const PremiumPage = () => {
   const handlePlanSelect = (planId) => {
     dispatch(selectPlan(planId));
     setShowPaymentModal(true);
-    console.log('🛒 Plan selected:', planId);
   };
 
   const handlePaymentSubmit = (e) => {
@@ -127,20 +123,10 @@ const PremiumPage = () => {
       userEmail: user?.email // Add user email to payment payload
     };
 
-    console.log('🚀 Initiating payment process...');
-    console.log('📦 Payment payload:', {
-      ...paymentPayload,
-      userEmail: user?.email,
-      // Hide sensitive data in logs
-      cardNumber: paymentPayload.cardNumber ? '***' + paymentPayload.cardNumber.slice(-4) : undefined,
-      cvv: paymentPayload.cvv ? '***' : undefined
-    });
 
     dispatch(processPayment(paymentPayload))
       .unwrap()
       .then((result) => {
-        console.log('✅ Payment process completed successfully');
-        console.log('📊 Final transaction result:', result);
         setShowPaymentModal(false);
         setFormData({
           cardNumber: '',
@@ -257,7 +243,6 @@ const PremiumPage = () => {
           <SuccessToast
             credits={awardedCredits}
             onClose={() => {
-              console.log('👤 User manually closed success toast');
               dispatch(clearPaymentStatus());
             }}
           />
@@ -276,7 +261,6 @@ const PremiumPage = () => {
             onInputChange={handleInputChange}
             onSubmit={handlePaymentSubmit}
             onClose={() => {
-              console.log('❌ Payment modal closed by user');
               setShowPaymentModal(false);
             }}
             processing={paymentProcessing}
@@ -554,7 +538,6 @@ const PaymentModal = ({
                   <button
                     key={method.id}
                     onClick={() => {
-                      console.log(`💳 Payment method changed to: ${method.name}`);
                       setPaymentMethod(method.id);
                     }}
                     className={`p-3 border-2 rounded-xl text-left transition-all duration-200 ${paymentMethod === method.id
@@ -696,7 +679,6 @@ const PaymentModal = ({
                 className="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 whileHover={{ scale: processing ? 1 : 1.02 }}
                 whileTap={{ scale: processing ? 1 : 0.98 }}
-                onClick={() => console.log('🔄 Payment submission initiated...')}
               >
                 <span>Complete Payment - ${displayPrice}</span>
                 <ArrowRight className="w-4 h-4" />

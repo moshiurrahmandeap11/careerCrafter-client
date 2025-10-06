@@ -17,7 +17,7 @@ export const processPayment = createAsyncThunk(
   'premium/processPayment',
   async (paymentData, { getState, rejectWithValue }) => {
     try {
-      console.log('🚀 Starting payment process...');
+
       
       // Calculate credits
       const creditsAwarded = calculateCredits(paymentData.planId, getState().premium.billingCycle);
@@ -39,11 +39,6 @@ export const processPayment = createAsyncThunk(
         }
       };
 
-      console.log('📤 Sending payment data to backend:', {
-        userEmail: backendPaymentData.userEmail,
-        plan: backendPaymentData.planName,
-        amount: backendPaymentData.amount
-      });
 
       // Send payment data to backend
       const response = await fetch('http://localhost:3000/v1/payments/process-payment', {
@@ -60,10 +55,6 @@ export const processPayment = createAsyncThunk(
       }
 
       const result = await response.json();
-      
-      console.log('✅ Backend payment response:', result);
-      console.log('💰 Payment successful for user:', paymentData.userEmail);
-      console.log('🎯 Credits awarded:', creditsAwarded);
 
       return {
         success: true,
@@ -157,9 +148,6 @@ const premiumSlice = createSlice({
         state.transactionId = action.payload.transactionId;
         state.selectedPlan = null;
         
-        console.log('✅ Payment state updated successfully in Redux store');
-        console.log('🎯 Credits awarded to user:', action.payload.creditsAwarded);
-        console.log('📝 Transaction ID:', action.payload.transactionId);
       })
       .addCase(processPayment.rejected, (state, action) => {
         state.paymentProcessing = false;
