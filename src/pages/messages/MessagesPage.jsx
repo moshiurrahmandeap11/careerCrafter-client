@@ -61,6 +61,8 @@ const MessagesPage = () => {
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [allUser, setAllUser] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");  
+
   const fetchMessages = async (friendEmail) => {
     if (!user?.email) {
       console.warn("fetchMessages aborted: user.email not ready yet");
@@ -92,16 +94,33 @@ const MessagesPage = () => {
     }
   };
 
-  // --- SOCKET CONNECTION ---
+
   useEffect(() => {
     socket.current = connectWS();
     socket.current.on("connect", () => {
-      socket.current.emit("joinRoom", user?.email);
+      if (user?.email) {
+        socket.current.emit("joinRoom", user.email);
+      }
+
+      socket.current.on("privateMessage", (msg) => {
+
+        if ((msg.senderEmail === user.email && msg.receiverEmail === selectedConversation?.email) ||
+            (msg.senderEmail === selectedConversation?.email && msg.receiverEmail === user.email)) {
+          setMessages((prev) => [...prev, msg]);
+        }
+      });
       socket.current.on("chatMessage", (msg) => {
-        setMessages((prev) => [...prev, msg]);
+        setMessages((prev) => [...prev, msg]);  
       });
     });
 
+    return () => {
+      socket.current?.off("privateMessage");
+      socket.current?.off("chatMessage");
+    };
+  }, [dispatch, user, selectedConversation?.email]);
+
+  useEffect(() => {
     dispatch(fetchConversations());
 
     if (!user?.email) return;
@@ -133,26 +152,53 @@ const MessagesPage = () => {
     }
   };
 
-  const handleSendMessage = () => {
+
+  const handleSendMessage = async () => {
     const text = newMessage.trim();
     if (!text) return;
 
-    const msg = {
-      fromEmail: user?.email,
-      toEmail: selectedConversation?.email,
-      message: text,
-      timestamp: new Date(),
-    };
+    dispatch({ type: 'messages/setSendingMessage', payload: true }); 
 
-    setMessages((m) => [...m, msg]);
+    try {
+      const msg = {
+        fromEmail: user?.email,
+        toEmail: selectedConversation?.email,
+        message: text,
+        timestamp: new Date(), 
+      };
 
-    socket.current.emit("privateMessage", {
-      senderEmail: user?.email,
-      receiverEmail: selectedConversation?.email,
-      text: newMessage,
-    });
 
-    setNewMessage("");
+      await axiosIntense.post('/messageUsers/messages', {
+        fromEmail: msg.fromEmail,
+        toEmail: msg.toEmail,
+        message: text,  
+      });
+      
+
+      socket.current.emit("privateMessage", {
+        senderEmail: user?.email,
+        receiverEmail: selectedConversation?.email,
+        text: text,
+        timestamp: msg.timestamp,
+      });
+      
+      setNewMessage("");
+      setMessages((m) => [...m, msg]);
+      setErrorMessage("");  
+    } catch (err) {
+      if (err.response?.status === 403) {
+        const hateError = err.response.data.error || "Message blocked: Inappropriate content";
+        setErrorMessage(hateError); 
+
+        setTimeout(() => setErrorMessage(""), 5000);
+      } else {
+        console.error("Send error:", err);
+        setErrorMessage("Failed to send message. Try again.");
+        setTimeout(() => setErrorMessage(""), 5000);
+      }
+    } finally {
+      dispatch({ type: 'messages/setSendingMessage', payload: false }); 
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -180,7 +226,7 @@ const MessagesPage = () => {
     },
   };
 
-  // --- UI Loading States ---
+  // --- UI Loading States (existing—no change) ---
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
@@ -243,14 +289,14 @@ const MessagesPage = () => {
     );
   }
 
-  // --- MAIN LAYOUT ---
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <ReTitle
         title={`Messages${unreadCount > 0 ? ` (${unreadCount})` : ""}`}
       />
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+        {/* Header (existing—no change) */}
         <motion.div
           className="mb-8"
           initial={{ opacity: 0, y: -20 }}
@@ -279,7 +325,7 @@ const MessagesPage = () => {
         {/* Main Content */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="flex h-[600px]">
-            {/* Conversations List */}
+            {/* Conversations List (existing—no change) */}
             <motion.div
               className={`w-full lg:w-96 border-r border-gray-200 flex flex-col ${
                 mobileView === "chat" ? "hidden lg:flex" : "flex"
@@ -358,7 +404,7 @@ const MessagesPage = () => {
             >
               {selectedConversation ? (
                 <>
-                  {/* Chat Header */}
+                  {/* Chat Header (existing—no change) */}
                   <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <button
@@ -408,7 +454,7 @@ const MessagesPage = () => {
                     </div>
                   </div>
 
-                  {/* Messages */}
+                  {/* Messages (existing—no change) */}
                   <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
                     <motion.div
                       variants={containerVariants}
@@ -422,12 +468,13 @@ const MessagesPage = () => {
                     </motion.div>
                   </div>
 
-                  {/* Input */}
+
                   <div className="p-4 border-t border-gray-200">
                     <div className="flex items-center space-x-2">
                       <motion.button
                         className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
                         whileHover={{ scale: 1.1 }}
+                        disabled={sendingMessage}
                       >
                         <Paperclip className="w-5 h-5" />
                       </motion.button>
@@ -444,6 +491,7 @@ const MessagesPage = () => {
                         <motion.button
                           className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-blue-600 transition-colors duration-200"
                           whileHover={{ scale: 1.1 }}
+                          disabled={sendingMessage}
                         >
                           <Smile className="w-5 h-5" />
                         </motion.button>
@@ -482,6 +530,17 @@ const MessagesPage = () => {
                         )}
                       </motion.button>
                     </div>
+
+                    {errorMessage && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="mt-2 text-sm text-red-600 px-2 animate-pulse"
+                      >
+                        {errorMessage}
+                      </motion.p>
+                    )}
                   </div>
                 </>
               ) : (

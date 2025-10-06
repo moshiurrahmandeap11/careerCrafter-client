@@ -18,74 +18,78 @@ import AdminDashboard from "../../components/DashboardItems/AdminDashboard/Admin
 import ProtectedRoute from "../../components/ProtectedRoute/ProtectedRoute";
 
 export const route = createBrowserRouter([
-    {
-        path: "/", 
-        element: <RootLayout></RootLayout>,
-        children: [
-            {
-                index: true,
-                element: <Home></Home>
-            },
-            {
-                path: "/profile",
-                element: <Profile></Profile>
-            },
-            {
-                path: '/network',
-                element: <MyNetwork />
-            },
-            {
-                path:'/messages',
-                element: <MessagesPage />
-            },
-            {
-                path: '/jobs',
-                element: <JobsPage />
-            },
-            {
-                path: '/notifications',
-                element: <NotificationPage />
-            },
-            {
-                path: '/premium',
-                element: <PremiumPage />
-            }
-        ]
-    },
-    {
-        path: "/auth",
-        element: <AuthLayout></AuthLayout>,
-        children: [
-            {
-                path: "signup",
-                element: <SignUp></SignUp>
-            },
-            {
-                path: "signin",
-                element: <SignIn></SignIn>
-            },
-            {
-                path: "where-listen",
-                element: <WhereListen></WhereListen>
-            },
-            {
-                path: "tags",
-                element: <Tags></Tags>
-            },
-            {
-                path: "what-to-do",
-                element: <WhatToDo></WhatToDo>
-            }
-        ]
-    },
-    {
-        path: "/dashboard",
-        element: <ProtectedRoute><DashboardLayout></DashboardLayout></ProtectedRoute>,
-        children: [
-            {
-                path: "admin",
-                element: <AdminDashboard></AdminDashboard>
-            }
-        ]
-    }
-])
+  {
+    path: "/",
+    element: <RootLayout></RootLayout>,
+    children: [
+      {
+        index: true,
+        element: <Home></Home>,
+      },
+      {
+        path: "/profile",
+        element: <Profile></Profile>,
+      },
+      {
+        path: "/network",
+        element: <MyNetwork />,
+      },
+      {
+        path: "/messages",
+        element: <MessagesPage />,
+      },
+      {
+        path: "/jobs",
+        element: <JobsPage />,
+      },
+      {
+        path: "/notifications",
+        element: <NotificationPage />,
+      },
+      {
+        path: "/premium",
+        element: <PremiumPage />,
+      },
+    ],
+  },
+  {
+    path: "/auth",
+    element: <AuthLayout></AuthLayout>,
+    children: [
+      {
+        path: "signup",
+        element: <SignUp></SignUp>,
+      },
+      {
+        path: "signin",
+        element: <SignIn></SignIn>,
+      },
+      {
+        path: "where-listen",
+        element: <WhereListen></WhereListen>,
+      },
+      {
+        path: "tags",
+        element: <Tags></Tags>,
+      },
+      {
+        path: "what-to-do",
+        element: <WhatToDo></WhatToDo>,
+      },
+    ],
+  },
+  {
+    path: "/dashboard",
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout></DashboardLayout>
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        path: "admin",
+        element: <AdminDashboard></AdminDashboard>,
+      },
+    ],
+  },
+]);

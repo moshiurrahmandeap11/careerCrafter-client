@@ -4,6 +4,7 @@ import Settings from "../AdminDashboard/Settings/Settings";
 import SiteSettings from "../AdminDashboard/Settings/SiteSettings/SiteSettings";
 import AllUsers from "../AdminDashboard/AllUsers/AllUsers";
 import Admins from "../AdminDashboard/AllUsers/Admins/Admins";
+import Messages from "../AdminDashboard/Messages/Messages";
 
 const MainContent = ({ activeRoute }) => {
   const renderContent = () => {
@@ -215,14 +216,10 @@ const MainContent = ({ activeRoute }) => {
       case "messages":
         return (
           <div>
-            <h1 className="text-3xl font-bold text-slate-800 mb-6">Messages</h1>
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <p className="text-slate-600">
-                Communicate with users and manage support tickets.
-              </p>
-            </div>
+            <Messages></Messages>
           </div>
         );
+        
 
       case "settings":
         return (
