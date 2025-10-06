@@ -16,6 +16,11 @@ import PremiumPage from "../../pages/premium/PremiumPage";
 import DashboardLayout from "../../layouts/DashboardLayout/DashboardLayout";
 import AdminDashboard from "../../components/DashboardItems/AdminDashboard/AdminDashboard";
 import ProtectedRoute from "../../components/ProtectedRoute/ProtectedRoute";
+import Business from "../../pages/Business/Business";
+import BusinessLayout from "../../layouts/BusinessLayout/BusinessLayout";
+import Hire from "../../pages/Business/Hire/Hire";
+import Learn from "../../pages/Business/Learn/Learn";
+import PostJob from "../../pages/Business/PostJob/PostJob";
 
 export const route = createBrowserRouter([
   {
@@ -50,6 +55,10 @@ export const route = createBrowserRouter([
         path: "/premium",
         element: <PremiumPage />,
       },
+      {
+        path: "/business",
+        element: <Business></Business>
+      }
     ],
   },
   {
@@ -92,4 +101,22 @@ export const route = createBrowserRouter([
       },
     ],
   },
+  {
+    path: "/cc",
+    element: <BusinessLayout></BusinessLayout>,
+    children: [
+      {
+        path: "hire",
+        element: <Hire></Hire>
+      },
+      {
+        path: "learn",
+        element: <Learn></Learn>
+      },
+      {
+        path: "post",
+        element: <PostJob></PostJob>
+      }
+    ]
+  }
 ]);
