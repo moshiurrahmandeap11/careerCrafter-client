@@ -128,8 +128,13 @@ const PremiumPage = () => {
     };
 
     console.log('🚀 Initiating payment process...');
-    console.log('📦 Payment payload:', paymentPayload);
-    console.log('👤 User email for payment:', user?.email);
+    console.log('📦 Payment payload:', {
+      ...paymentPayload,
+      userEmail: user?.email,
+      // Hide sensitive data in logs
+      cardNumber: paymentPayload.cardNumber ? '***' + paymentPayload.cardNumber.slice(-4) : undefined,
+      cvv: paymentPayload.cvv ? '***' : undefined
+    });
 
     dispatch(processPayment(paymentPayload))
       .unwrap()
@@ -149,6 +154,7 @@ const PremiumPage = () => {
       })
       .catch((error) => {
         console.error('❌ Payment process failed:', error);
+        // Error is now handled in the Redux slice
       });
   };
 

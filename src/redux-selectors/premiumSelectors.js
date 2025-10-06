@@ -6,3 +6,4 @@ export const selectedPlan = (state) => state.premium.selectedPlan;
 export const selectPaymentProcessing = (state) => state.premium.paymentProcessing;
 export const selectPaymentSuccess = (state) => state.premium.paymentSuccess;
 export const selectAwardedCredits = (state) => state.premium.awardedCredits;
+export const selectTransactionId = (state) => state.premium.transactionId;

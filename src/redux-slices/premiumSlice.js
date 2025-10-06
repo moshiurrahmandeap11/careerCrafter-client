@@ -15,39 +15,68 @@ export const fetchPremiumPlans = createAsyncThunk(
 // Async thunk for processing payment
 export const processPayment = createAsyncThunk(
   'premium/processPayment',
-  async (paymentData, { getState }) => {
-    // Simulate API call
-    const response = await new Promise((resolve) => {
-      setTimeout(() => {
-        const transactionData = {
-          success: true,
-          transactionId: 'TXN_' + Math.random().toString(36).substr(2, 9),
-          creditsAwarded: calculateCredits(paymentData.planId, getState().premium.billingCycle),
-          paymentData: paymentData,
-          timestamp: new Date().toISOString()
-        };
-        
-        // Log payment data to console with user email
-        console.log('💰 PAYMENT SUCCESSFUL - Transaction Data:', transactionData);
-        console.log('📋 Payment Details:', {
-          planId: paymentData.planId,
-          planName: paymentData.planName,
-          paymentMethod: paymentData.paymentMethod,
-          amount: paymentData.amount,
-          billingCycle: paymentData.billingCycle,
-          userEmail: paymentData.userEmail, // Log user email
-          creditsAwarded: transactionData.creditsAwarded,
-          timestamp: transactionData.timestamp
-        });
-        
-        // Log user-specific success message
-        console.log(`🎯 Payment successful for user: ${paymentData.userEmail}`);
-        console.log(`📧 User email stored in payment data: ${paymentData.userEmail}`);
-        
-        resolve(transactionData);
-      }, 2000);
-    });
-    return response;
+  async (paymentData, { getState, rejectWithValue }) => {
+    try {
+      console.log('🚀 Starting payment process...');
+      
+      // Calculate credits
+      const creditsAwarded = calculateCredits(paymentData.planId, getState().premium.billingCycle);
+      
+      // Prepare data for backend
+      const backendPaymentData = {
+        planId: paymentData.planId,
+        planName: paymentData.planName,
+        paymentMethod: paymentData.paymentMethod,
+        amount: paymentData.amount,
+        billingCycle: paymentData.billingCycle,
+        userEmail: paymentData.userEmail,
+        creditsAwarded: creditsAwarded,
+        paymentData: {
+          ...paymentData,
+          // Remove sensitive data or include only what's needed
+          cardNumber: paymentData.cardNumber ? '***' + paymentData.cardNumber.slice(-4) : undefined,
+          cvv: paymentData.cvv ? '***' : undefined
+        }
+      };
+
+      console.log('📤 Sending payment data to backend:', {
+        userEmail: backendPaymentData.userEmail,
+        plan: backendPaymentData.planName,
+        amount: backendPaymentData.amount
+      });
+
+      // Send payment data to backend
+      const response = await fetch('http://localhost:3000/v1/payments/process-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(backendPaymentData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Payment failed');
+      }
+
+      const result = await response.json();
+      
+      console.log('✅ Backend payment response:', result);
+      console.log('💰 Payment successful for user:', paymentData.userEmail);
+      console.log('🎯 Credits awarded:', creditsAwarded);
+
+      return {
+        success: true,
+        transactionId: result.transactionId,
+        creditsAwarded: creditsAwarded,
+        paymentData: paymentData,
+        backendResponse: result
+      };
+
+    } catch (error) {
+      console.error('❌ Payment processing error:', error);
+      return rejectWithValue(error.message);
+    }
   }
 );
 
@@ -75,7 +104,8 @@ const premiumSlice = createSlice({
     selectedPlan: null,
     paymentProcessing: false,
     paymentSuccess: false,
-    awardedCredits: 0
+    awardedCredits: 0,
+    transactionId: null
   },
   reducers: {
     setBillingCycle: (state, action) => {
@@ -91,6 +121,8 @@ const premiumSlice = createSlice({
       state.paymentProcessing = false;
       state.paymentSuccess = false;
       state.awardedCredits = 0;
+      state.transactionId = null;
+      state.error = null;
     },
     showToast: (state, action) => {
       state.toast = action.payload;
@@ -122,21 +154,19 @@ const premiumSlice = createSlice({
         state.paymentProcessing = false;
         state.paymentSuccess = true;
         state.awardedCredits = action.payload.creditsAwarded;
+        state.transactionId = action.payload.transactionId;
         state.selectedPlan = null;
         
-        // Additional console log in reducer for confirmation
         console.log('✅ Payment state updated successfully in Redux store');
         console.log('🎯 Credits awarded to user:', action.payload.creditsAwarded);
-        console.log('👤 User email from payment:', action.payload.paymentData.userEmail);
-        console.log('📝 Complete payment data stored:', action.payload.paymentData);
+        console.log('📝 Transaction ID:', action.payload.transactionId);
       })
       .addCase(processPayment.rejected, (state, action) => {
         state.paymentProcessing = false;
         state.paymentSuccess = false;
-        state.error = action.error.message;
+        state.error = action.payload;
         
-        // Log payment failure
-        console.error('❌ PAYMENT FAILED:', action.error.message);
+        console.error('❌ PAYMENT FAILED:', action.payload);
       });
   }
 });
