@@ -1,57 +1,110 @@
 // redux-slices/networkSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axiosIntense from '../hooks/AxiosIntense/axiosIntense';
 
-// Async thunks for API calls
-export const fetchConnections = createAsyncThunk(
-  'network/fetchConnections',
-  async () => {
-    const response = await fetch('/data/connections.json');
-    if (!response.ok) {
-      throw new Error('Failed to fetch connections');
-    }
-    return response.json();
-  }
-);
-
-export const fetchPendingInvitations = createAsyncThunk(
-  'network/fetchPendingInvitations',
-  async () => {
-    const response = await fetch('/data/pending-invitations.json');
-    if (!response.ok) {
-      throw new Error('Failed to fetch pending invitations');
-    }
-    return response.json();
-  }
-);
-
-export const fetchSuggestions = createAsyncThunk(
-  'network/fetchSuggestions',
-  async () => {
-    const response = await fetch('/data/suggestions.json');
-    if (!response.ok) {
-      throw new Error('Failed to fetch suggestions');
-    }
-    return response.json();
-  }
-);
-
+// Async Thunks
+// redux-slices/networkSlice.js - fetchAllNetworkData থাঙ্কে
 export const fetchAllNetworkData = createAsyncThunk(
   'network/fetchAllNetworkData',
-  async (_, { dispatch }) => {
-    await Promise.all([
-      dispatch(fetchConnections()),
-      dispatch(fetchPendingInvitations()),
-      dispatch(fetchSuggestions())
-    ]);
+  async (userId, { rejectWithValue }) => {
+    try {
+      console.log('📡 Fetching network data for user:', userId);
+      
+      const [
+        connectionsResponse,
+        pendingResponse,
+        suggestionsResponse,
+        allUsersResponse
+      ] = await Promise.all([
+        axiosIntense.get(`/network/myConnections?userId=${userId}`),
+        axiosIntense.get(`/network/pendingReq?userId=${userId}`),
+        axiosIntense.get(`/network/getSuggestion?userId=${userId}`),
+        axiosIntense.get(`/users/allUsersForNetwork?userId=${userId}`),
+      ]);
+
+      console.log('✅ API Responses:', {
+        connections: connectionsResponse.data,
+        pending: pendingResponse.data,
+        suggestions: suggestionsResponse.data,
+        allUsers: allUsersResponse.data
+      });
+
+      return {
+        connections: connectionsResponse.data || [],
+        pendingInvitations: pendingResponse.data || [],
+        suggestions: suggestionsResponse.data || [],
+        allUsers: allUsersResponse.data || []
+      };
+    } catch (error) {
+      console.error('❌ API Error:', error);
+      return rejectWithValue(error.response?.data?.message || 'Network error occurred');
+    }
   }
 );
 
+export const acceptInvitation = createAsyncThunk(
+  'network/acceptInvitation',
+  async ({ invitationId, userId }, { rejectWithValue }) => {
+    try {
+      const response = await axiosIntense.patch(`/network/accept/${invitationId}`, {
+        userId
+      });
+      return { invitationId, data: response.data };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to accept invitation');
+    }
+  }
+);
+
+export const ignoreInvitation = createAsyncThunk(
+  'network/ignoreInvitation',
+  async ({ invitationId, userId }, { rejectWithValue }) => {
+    try {
+      const response = await axiosIntense.patch(`/network/ignore/${invitationId}`, {
+        userId
+      });
+      return { invitationId, data: response.data };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to ignore invitation');
+    }
+  }
+);
+
+export const connectWithSuggestion = createAsyncThunk(
+  'network/connectWithSuggestion',
+  async ({ suggestionId, currentUserId }, { rejectWithValue }) => {
+    try {
+      const response = await axiosIntense.post('/network/connectReq', { 
+        receiverId: suggestionId,
+        senderId: currentUserId
+      });
+      return { suggestionId, data: response.data };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to send connection request');
+    }
+  }
+);
+
+export const removeConnection = createAsyncThunk(
+  'network/removeConnection',
+  async (connectionId, { rejectWithValue }) => {
+    try {
+      await axiosIntense.delete(`/network/connect/${connectionId}`);
+      return { connectionId };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to remove connection');
+    }
+  }
+);
+
+// Slice
 const networkSlice = createSlice({
   name: 'network',
   initialState: {
     connections: [],
     pendingInvitations: [],
     suggestions: [],
+    allUsers: [],
     loading: false,
     error: null,
     searchTerm: '',
@@ -67,47 +120,6 @@ const networkSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    acceptInvitation: (state, action) => {
-      const invitationId = action.payload;
-      const invitation = state.pendingInvitations.find(inv => inv.id === invitationId);
-      
-      if (invitation) {
-        // Move from pending to connections
-        state.connections.push({
-          ...invitation,
-          connectedDate: 'Just now',
-          online: true
-        });
-        
-        // Remove from pending
-        state.pendingInvitations = state.pendingInvitations.filter(inv => inv.id !== invitationId);
-      }
-    },
-    ignoreInvitation: (state, action) => {
-      const invitationId = action.payload;
-      state.pendingInvitations = state.pendingInvitations.filter(inv => inv.id !== invitationId);
-    },
-    connectWithSuggestion: (state, action) => {
-      const suggestionId = action.payload;
-      const suggestion = state.suggestions.find(sug => sug.id === suggestionId);
-      
-      if (suggestion) {
-        // Move to pending (simulating sent invitation)
-        state.pendingInvitations.push({
-          ...suggestion,
-          daysAgo: 0,
-          message: "I'd like to connect with you",
-          mutualConnections: suggestion.mutual
-        });
-        
-        // Remove from suggestions
-        state.suggestions = state.suggestions.filter(sug => sug.id !== suggestionId);
-      }
-    },
-    removeConnection: (state, action) => {
-      const connectionId = action.payload;
-      state.connections = state.connections.filter(conn => conn.id !== connectionId);
-    }
   },
   extraReducers: (builder) => {
     builder
@@ -116,45 +128,74 @@ const networkSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchAllNetworkData.fulfilled, (state) => {
+      .addCase(fetchAllNetworkData.fulfilled, (state, action) => {
         state.loading = false;
+        state.connections = action.payload.connections;
+        state.pendingInvitations = action.payload.pendingInvitations;
+        state.suggestions = action.payload.suggestions;
+        state.allUsers = action.payload.allUsers;
       })
       .addCase(fetchAllNetworkData.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload;
       })
-      // Fetch Connections
-      .addCase(fetchConnections.fulfilled, (state, action) => {
-        state.connections = action.payload;
+      // Accept Invitation
+      .addCase(acceptInvitation.fulfilled, (state, action) => {
+        const { invitationId } = action.payload;
+        // Remove from pending and add to connections
+        const invitationIndex = state.pendingInvitations.findIndex(
+          inv => inv._id === invitationId
+        );
+        if (invitationIndex !== -1) {
+          const acceptedInvitation = state.pendingInvitations[invitationIndex];
+          state.pendingInvitations.splice(invitationIndex, 1);
+          // Add to connections with proper format
+          state.connections.push({
+            id: acceptedInvitation._id,
+            user: acceptedInvitation.sender, // Adjust based on your API response
+            connectedAt: new Date().toISOString()
+          });
+        }
       })
-      .addCase(fetchConnections.rejected, (state, action) => {
-        state.error = action.error.message;
+      .addCase(acceptInvitation.rejected, (state, action) => {
+        state.error = action.payload;
       })
-      // Fetch Pending Invitations
-      .addCase(fetchPendingInvitations.fulfilled, (state, action) => {
-        state.pendingInvitations = action.payload;
+      // Ignore Invitation
+      .addCase(ignoreInvitation.fulfilled, (state, action) => {
+        const { invitationId } = action.payload;
+        state.pendingInvitations = state.pendingInvitations.filter(
+          inv => inv._id !== invitationId
+        );
       })
-      .addCase(fetchPendingInvitations.rejected, (state, action) => {
-        state.error = action.error.message;
+      .addCase(ignoreInvitation.rejected, (state, action) => {
+        state.error = action.payload;
       })
-      // Fetch Suggestions
-      .addCase(fetchSuggestions.fulfilled, (state, action) => {
-        state.suggestions = action.payload;
+      // Connect With Suggestion
+      .addCase(connectWithSuggestion.fulfilled, (state, action) => {
+        const { suggestionId } = action.payload;
+        // Remove from suggestions and allUsers
+        state.suggestions = state.suggestions.filter(
+          sug => sug._id !== suggestionId
+        );
+        state.allUsers = state.allUsers.filter(
+          user => user._id !== suggestionId
+        );
       })
-      .addCase(fetchSuggestions.rejected, (state, action) => {
-        state.error = action.error.message;
+      .addCase(connectWithSuggestion.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      // Remove Connection
+      .addCase(removeConnection.fulfilled, (state, action) => {
+        const { connectionId } = action.payload;
+        state.connections = state.connections.filter(
+          conn => conn.id !== connectionId
+        );
+      })
+      .addCase(removeConnection.rejected, (state, action) => {
+        state.error = action.payload;
       });
   }
 });
 
-export const {
-  setSearchTerm,
-  setActiveTab,
-  clearError,
-  acceptInvitation,
-  ignoreInvitation,
-  connectWithSuggestion,
-  removeConnection
-} = networkSlice.actions;
-
+export const { setSearchTerm, setActiveTab, clearError } = networkSlice.actions;
 export default networkSlice.reducer;
