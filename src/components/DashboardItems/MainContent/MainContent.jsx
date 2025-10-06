@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Settings from '../AdminDashboard/Settings/Settings';
 import SiteSettings from '../AdminDashboard/Settings/SiteSettings/SiteSettings';
+import AllUsers from '../AdminDashboard/AllUsers/AllUsers';
 
 const MainContent = ({ activeRoute }) => {
   const renderContent = () => {
@@ -108,6 +109,13 @@ const MainContent = ({ activeRoute }) => {
             </div>
           </div>
         );
+
+        case "all-users":
+          return (
+            <div>
+              <AllUsers></AllUsers>
+            </div>
+          )
       
       case 'jobs':
         return (
