@@ -13,7 +13,8 @@ const Learn = () => {
     
     const userId = 'user123';
     const API_URL = 'http://localhost:3000/v1/learn';
-    const OPENROUTER_API_KEY = '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';
+    const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
+
 
     useEffect(() => {
         fetchLearningPaths();
