@@ -17,6 +17,13 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReTitle } from 're-title';
+import { loadStripe } from '@stripe/stripe-js';
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements
+} from '@stripe/react-stripe-js';
 
 // Redux actions and selectors
 import {
@@ -24,7 +31,8 @@ import {
   setBillingCycle,
   selectPlan,
   processPayment,
-  clearPaymentStatus
+  clearPaymentStatus,
+  createStripePaymentIntent
 } from '../../redux-slices/premiumSlice';
 import {
   selectPlans,
@@ -34,9 +42,13 @@ import {
   selectedPlan,
   selectPaymentProcessing,
   selectPaymentSuccess,
-  selectAwardedCredits
+  selectAwardedCredits,
+  selectClientSecret
 } from '../../redux-selectors/premiumSelectors';
 import useAuth from '../../hooks/UseAuth/useAuth';
+
+// Initialize Stripe
+const stripePromise = loadStripe(import.meta.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -60,6 +72,14 @@ const cardVariants = {
 };
 
 const PremiumPage = () => {
+  return (
+    <Elements stripe={stripePromise}>
+      <PremiumContent />
+    </Elements>
+  );
+};
+
+const PremiumContent = () => {
   const dispatch = useDispatch();
   const { user } = useAuth()
 
@@ -72,14 +92,11 @@ const PremiumPage = () => {
   const paymentProcessing = useSelector(selectPaymentProcessing);
   const paymentSuccess = useSelector(selectPaymentSuccess);
   const awardedCredits = useSelector(selectAwardedCredits);
+  const clientSecret = useSelector(selectClientSecret);
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [formData, setFormData] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardHolder: '',
     mobileNumber: '',
     bankName: '',
     accountNumber: ''
@@ -92,7 +109,6 @@ const PremiumPage = () => {
   // Toast message effect
   useEffect(() => {
     if (paymentSuccess) {
-
       const timer = setTimeout(() => {
         dispatch(clearPaymentStatus());
       }, 5000);
@@ -105,12 +121,27 @@ const PremiumPage = () => {
     dispatch(setBillingCycle(cycle));
   };
 
-  const handlePlanSelect = (planId) => {
+  const handlePlanSelect = async (planId) => {
     dispatch(selectPlan(planId));
+    
+    // For Stripe card payments, create payment intent
+    const selectedPlan = plans.find(p => p.id === planId);
+    if (selectedPlan) {
+      const amount = billingCycle === 'yearly' ? selectedPlan.yearlyPrice : selectedPlan.monthlyPrice;
+      
+      // Create Stripe payment intent for card payments
+      await dispatch(createStripePaymentIntent({
+        planId,
+        amount,
+        billingCycle,
+        userEmail: user?.email
+      }));
+    }
+    
     setShowPaymentModal(true);
   };
 
-  const handlePaymentSubmit = (e) => {
+  const handlePaymentSubmit = async (e) => {
     e.preventDefault();
 
     const paymentPayload = {
@@ -120,19 +151,14 @@ const PremiumPage = () => {
       planName: currentSelectedPlan?.name,
       billingCycle: billingCycle,
       amount: billingCycle === 'yearly' ? currentSelectedPlan?.yearlyPrice : currentSelectedPlan?.monthlyPrice,
-      userEmail: user?.email // Add user email to payment payload
+      userEmail: user?.email
     };
-
 
     dispatch(processPayment(paymentPayload))
       .unwrap()
       .then((result) => {
         setShowPaymentModal(false);
         setFormData({
-          cardNumber: '',
-          expiryDate: '',
-          cvv: '',
-          cardHolder: '',
           mobileNumber: '',
           bankName: '',
           accountNumber: ''
@@ -140,7 +166,6 @@ const PremiumPage = () => {
       })
       .catch((error) => {
         console.error('❌ Payment process failed:', error);
-        // Error is now handled in the Redux slice
       });
   };
 
@@ -266,6 +291,7 @@ const PremiumPage = () => {
             processing={paymentProcessing}
             credits={calculateCredits(currentSelectedPlan.id)}
             userEmail={user?.email}
+            clientSecret={clientSecret}
           />
         )}
       </AnimatePresence>
@@ -442,6 +468,86 @@ const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits }) 
   );
 };
 
+// Stripe Card Form Component
+const StripeCardForm = ({ onSubmit, processing, amount, clientSecret }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [cardError, setCardError] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setIsProcessing(true);
+    setCardError('');
+
+    const cardElement = elements.getElement(CardElement);
+
+    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card: cardElement,
+      }
+    });
+
+    if (error) {
+      setCardError(error.message);
+      setIsProcessing(false);
+    } else {
+      if (paymentIntent.status === 'succeeded') {
+        // Payment succeeded - call the parent onSubmit
+        onSubmit(e);
+      }
+    }
+  };
+
+  const cardElementOptions = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#424770',
+        '::placeholder': {
+          color: '#aab7c4',
+        },
+        padding: '10px 12px',
+      },
+    },
+    hidePostalCode: true,
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Card Details
+        </label>
+        <div className="p-3 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent">
+          <CardElement options={cardElementOptions} />
+        </div>
+        {cardError && (
+          <p className="text-red-600 text-sm mt-2">{cardError}</p>
+        )}
+      </div>
+
+      <motion.button
+        type="submit"
+        disabled={!stripe || isProcessing || processing}
+        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        whileHover={{ scale: processing || isProcessing ? 1 : 1.02 }}
+        whileTap={{ scale: processing || isProcessing ? 1 : 0.98 }}
+      >
+        <span>
+          {isProcessing ? 'Processing...' : `Pay $${amount}`}
+        </span>
+        {!isProcessing && <ArrowRight className="w-4 h-4" />}
+      </motion.button>
+    </form>
+  );
+};
+
 // Payment Modal Component
 const PaymentModal = ({
   plan,
@@ -454,7 +560,8 @@ const PaymentModal = ({
   onClose,
   processing,
   credits,
-  userEmail
+  userEmail,
+  clientSecret
 }) => {
   const paymentMethods = [
     { id: 'card', name: 'Credit/Debit Card', icon: CreditCard },
@@ -554,151 +661,88 @@ const PaymentModal = ({
             </div>
 
             {/* Payment Form */}
-            <form onSubmit={onSubmit} className="p-6">
-{paymentMethod === 'card' && (
-  <div className="space-y-4">
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Card Number
-      </label>
-      <input
-        type="text"
-        placeholder="1234 5678 9012 3456"
-        value={formData.cardNumber.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim()}
-        onChange={(e) => {
-          const value = e.target.value.replace(/\s/g, '');
-          if (value === '' || /^\d+$/.test(value)) {
-            onInputChange('cardNumber', value.slice(0, 16));
-          }
-        }}
-        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-        required
-      />
-    </div>
-    <div className="grid grid-cols-2 gap-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Expiry Date
-        </label>
-        <input
-          type="text"
-          placeholder="MM/YY"
-          value={formData.expiryDate.replace(/\D/g, '').replace(/(\d{2})(\d{0,2})/, '$1/$2')}
-          onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, '');
-            if (value === '' || /^\d+$/.test(value)) {
-              onInputChange('expiryDate', value.slice(0, 4));
-            }
-          }}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          CVV
-        </label>
-        <input
-          type="text"
-          placeholder="123"
-          value={formData.cvv}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (value === '' || /^\d+$/.test(value)) {
-              onInputChange('cvv', value.slice(0, 4));
-            }
-          }}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          required
-        />
-      </div>
-    </div>
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Card Holder Name
-      </label>
-      <input
-        type="text"
-        placeholder="John Doe"
-        value={formData.cardHolder}
-        onChange={(e) => onInputChange('cardHolder', e.target.value)}
-        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-        required
-      />
-    </div>
-  </div>
-)}
+            <div className="p-6">
+              {paymentMethod === 'card' ? (
+                <StripeCardForm
+                  onSubmit={onSubmit}
+                  processing={processing}
+                  amount={displayPrice}
+                  clientSecret={clientSecret}
+                />
+              ) : (
+                <form onSubmit={onSubmit}>
+                  {/* Mobile Payment Methods */}
+                  {['bkash', 'nogod', 'rocket', 'upay'].includes(paymentMethod) && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Mobile Number
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="01XXXXXXXXX"
+                          value={formData.mobileNumber}
+                          onChange={(e) => onInputChange('mobileNumber', e.target.value)}
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
 
-              {/* Mobile Payment Methods */}
-              {['bkash', 'nogod', 'rocket', 'upay'].includes(paymentMethod) && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Mobile Number
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="01XXXXXXXXX"
-                      value={formData.mobileNumber}
-                      onChange={(e) => onInputChange('mobileNumber', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      required
-                    />
+                  {paymentMethod === 'bank' && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Bank Name
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Enter bank name"
+                          value={formData.bankName}
+                          onChange={(e) => onInputChange('bankName', e.target.value)}
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Account Number
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Enter account number"
+                          value={formData.accountNumber}
+                          onChange={(e) => onInputChange('accountNumber', e.target.value)}
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Security Note */}
+                  <div className="flex items-center space-x-2 mt-6 p-3 bg-blue-50 rounded-lg">
+                    <Lock className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm text-blue-700">
+                      Your payment information is secure and encrypted
+                    </span>
                   </div>
-                </div>
+
+                  {/* Submit Button */}
+                  <motion.button
+                    type="submit"
+                    disabled={processing}
+                    className="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={{ scale: processing ? 1 : 1.02 }}
+                    whileTap={{ scale: processing ? 1 : 0.98 }}
+                  >
+                    <span>Complete Payment - ${displayPrice}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </motion.button>
+                </form>
               )}
-
-              {paymentMethod === 'bank' && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Bank Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter bank name"
-                      value={formData.bankName}
-                      onChange={(e) => onInputChange('bankName', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Account Number
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter account number"
-                      value={formData.accountNumber}
-                      onChange={(e) => onInputChange('accountNumber', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Security Note */}
-              <div className="flex items-center space-x-2 mt-6 p-3 bg-blue-50 rounded-lg">
-                <Lock className="w-4 h-4 text-blue-600" />
-                <span className="text-sm text-blue-700">
-                  Your payment information is secure and encrypted
-                </span>
-              </div>
-
-              {/* Submit Button */}
-              <motion.button
-                type="submit"
-                disabled={processing}
-                className="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                whileHover={{ scale: processing ? 1 : 1.02 }}
-                whileTap={{ scale: processing ? 1 : 0.98 }}
-              >
-                <span>Complete Payment - ${displayPrice}</span>
-                <ArrowRight className="w-4 h-4" />
-              </motion.button>
-            </form>
+            </div>
           </>
         ) : (
           /* Processing State */
