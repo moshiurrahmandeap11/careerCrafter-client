@@ -1,36 +1,131 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router';
-import { Search, Home, Users, Briefcase, MessageCircle, Bell, User, Building, Crown, Menu, X, FileText, Sparkles, Target, Bot } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Loader from '../Loader/Loader';
-import useAuth from '../../../hooks/UseAuth/useAuth';
-
-import Swal from 'sweetalert2';
-import axiosIntense from '../../../hooks/AxiosIntense/axiosIntense';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router";
+import {
+  Search,
+  Home,
+  Users,
+  Briefcase,
+  MessageCircle,
+  Bell,
+  User,
+  Building,
+  Crown,
+  Menu,
+  X,
+  FileText,
+  Sparkles,
+  Target,
+  Bot,
+  Zap,
+  ChevronDown,
+  Settings,
+  LogOut,
+  Star,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Loader from "../Loader/Loader";
+import useAuth from "../../../hooks/UseAuth/useAuth";
+import Swal from "sweetalert2";
+import axiosIntense from "../../../hooks/AxiosIntense/axiosIntense";
 
 const Navbar = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, userLogOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeNav, setActiveNav] = useState('Home');
+  const [activeNav, setActiveNav] = useState("Home");
   const [showSearch, setShowSearch] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
   const [logoData, setLogoData] = useState(null);
   const [logoLoading, setLogoLoading] = useState(true);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showAIToolsMenu, setShowAIToolsMenu] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
 
-  const avatar = "https://i.postimg.cc/0y6myZrg/businessman-character-avatar-isolated-24877-60111.avif";
+  // Fallback avatar images
+  const fallbackAvatars = [
+    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
+    "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face",
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
+  ];
+
+  // Get a consistent fallback avatar based on user ID or random
+  const getFallbackAvatar = useCallback(() => {
+    if (user?.id) {
+      const index = user.id.charCodeAt(0) % fallbackAvatars.length;
+      return fallbackAvatars[index];
+    }
+    return fallbackAvatars[0];
+  }, [user]);
+
+  // Fetch user profile from API
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user?.email) {
+        setProfileLoading(false);
+        return;
+      }
+
+      try {
+        setProfileLoading(true);
+        const response = await axiosIntense.get(`/users/email/${user.email}`);
+        setUserProfile(response.data);
+      } catch {
+        setUserProfile(null);
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user?.email]);
+
+  // Get user avatar - priority: userProfile -> auth user -> fallback
+  const userAvatar = useMemo(() => {
+    if (userProfile?.profileImage) {
+      return userProfile.profileImage;
+    }
+    if (user?.profileImage) {
+      return user.profileImage;
+    }
+    return getFallbackAvatar();
+  }, [userProfile, user, getFallbackAvatar]);
+
+  // Get user display name - priority: userProfile -> auth user -> default
+  const userDisplayName = useMemo(() => {
+    if (userProfile?.fullName) {
+      return userProfile.fullName;
+    }
+    if (user?.displayName) {
+      return user.displayName;
+    }
+    if (user?.name) {
+      return user.name;
+    }
+    return "Guest User";
+  }, [userProfile, user]);
+
+  // Get user email
+  const userEmail = useMemo(() => {
+    return user?.email || "Sign in to your account";
+  }, [user]);
+
+  // Check if user is premium
+  const isPremiumUser = useMemo(() => {
+    return userProfile?.isPremium || userProfile?.role === "premium user";
+  }, [userProfile]);
 
   // Fetch logo from API
   useEffect(() => {
     const fetchLogo = async () => {
       try {
-        const response = await axiosIntense.get('/logo');
+        const response = await axiosIntense.get("/logo");
         setLogoData(response.data);
       } catch (error) {
-        console.error('Failed to fetch logo:', error);
-        // Use default if logo fetch fails
-        setLogoData({ type: 'text', text: 'CC' });
+        console.error("Failed to fetch logo:", error);
+        setLogoData({ type: "text", text: "CC" });
       } finally {
         setLogoLoading(false);
       }
@@ -39,438 +134,723 @@ const Navbar = () => {
     fetchLogo();
   }, []);
 
-  // Logo Component based on type
+  // Minimal Logo Component
   const LogoComponent = useCallback(() => {
     if (logoLoading) {
       return (
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg animate-pulse" />
+        <div className="w-8 h-8 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg animate-pulse" />
       );
     }
 
-    if (!logoData) {
-      return (
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-lg">CC</span>
+    return (
+      <div className="flex items-center space-x-2">
+        <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+          <Zap className="w-4 h-4 text-white" />
         </div>
-      );
-    }
-
-    switch (logoData.type) {
-      case 'text':
-        return (
-          <div className="px-3 py-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-            <span className="text-white font-bold text-lg">{logoData.text}</span>
-          </div>
-        );
-      
-      case 'image':
-        return (
-          <img 
-            src={logoData.imageUrl} 
-            alt="Logo" 
-            className="w-10 h-10 object-contain rounded-lg"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect fill="%234F46E5" width="40" height="40" rx="8"/><text x="20" y="26" font-size="16" fill="white" text-anchor="middle" font-weight="bold">CC</text></svg>';
-            }}
-          />
-        );
-      
-      case 'image-text':
-        return (
-          <div className="flex items-center gap-2">
-            <img 
-              src={logoData.imageUrl} 
-              alt="Logo" 
-              className="w-10 h-10 object-contain rounded-lg"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.style.display = 'none';
-              }}
-            />
-            <span className="text-xl font-bold text-gray-900">{logoData.text}</span>
-          </div>
-        );
-      
-      default:
-        return (
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">CC</span>
-          </div>
-        );
-    }
-  }, [logoData, logoLoading]);
-
-  // Animation variants - memoized
-  const containerVariants = useMemo(() => ({
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  }), []);
-
-  const itemVariants = useMemo(() => ({
-    hidden: { y: -20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: "spring", stiffness: 300, damping: 24 }
-    }
-  }), []);
+        <span className="font-bold text-xl text-gray-900 hidden sm:block">
+          CareerCrafter
+        </span>
+      </div>
+    );
+  }, [logoLoading]);
 
   // Set active nav based on current route
   useEffect(() => {
     const path = location.pathname;
     const navMap = {
-      '/': 'Home',
-      '/network': 'My Network',
-      '/jobs': 'Jobs',
-      '/messages': 'Messages',
-      '/notifications': 'Notifications',
-      '/profile': 'Profile',
-      '/ai-resume': 'AI Resume',
-      '/ai-job-match': 'AI Job Match',
-      '/ai-coach': 'AI Coach',
-      '/business': 'Business',
-      '/premium': 'Premium'
+      "/": "Home",
+      "/network": "Network",
+      "/jobs": "Jobs",
+      "/messages": "Messages",
+      "/notifications": "Notifications",
+      "/profile": "Profile",
+      "/ai-resume": "AI Resume",
+      "/ai-job-match": "AI Job Match",
+      "/ai-coach": "AI Coach",
+      "/business": "Business",
+      "/premium": "Premium",
+      "/settings": "Settings",
     };
 
-    const matchedNav = Object.entries(navMap).find(([route]) => path.includes(route));
+    const matchedNav = Object.entries(navMap).find(([route]) => path === route);
     if (matchedNav) {
       setActiveNav(matchedNav[1]);
+    } else {
+      // Handle nested routes
+      if (path.includes("/ai-resume")) setActiveNav("AI Resume");
+      else if (path.includes("/ai-job-match")) setActiveNav("AI Job Match");
+      else if (path.includes("/ai-coach")) setActiveNav("AI Coach");
+      else if (path.includes("/profile")) setActiveNav("Profile");
+      else if (path.includes("/settings")) setActiveNav("Settings");
     }
   }, [location.pathname]);
 
-  // Close mobile menu when route changes
+  // Close menus when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setShowSearch(false);
+    setShowProfileMenu(false);
+    setShowAIToolsMenu(false);
   }, [location.pathname]);
 
   const handleProfileClick = useCallback(() => {
     if (user) {
-      navigate('/profile');
-      setActiveNav('Profile');
+      navigate("/profile");
     } else {
       Swal.fire({
-        title: 'Login Required',
-        text: 'You need to login first',
-        icon: 'warning',
-        showCancelButton: false,
-        confirmButtonText: 'Login',
-        confirmButtonColor: '#dc2626',
+        title: "Login Required",
+        text: "You need to login first",
+        icon: "warning",
+        confirmButtonText: "Login",
+        confirmButtonColor: "#2563eb",
       }).then((result) => {
         if (result.isConfirmed) {
-          navigate('/auth/signin');
+          navigate("/auth/signin");
         }
       });
     }
   }, [user, navigate]);
 
-  const handleNavClick = useCallback((navItem) => {
-    setActiveNav(navItem);
-    setIsMobileMenuOpen(false);
+  const handleNavClick = useCallback(
+    (navItem) => {
+      setActiveNav(navItem);
+      setIsMobileMenuOpen(false);
+      setShowProfileMenu(false);
+      setShowAIToolsMenu(false);
 
-    const routeMap = {
-      'Home': '/',
-      'My Network': '/network',
-      'Network': '/network',
-      'Jobs': '/jobs',
-      'Messages': '/messages',
-      'Notifications': '/notifications',
-      'Business': '/business',
-      'Premium': '/premium',
-      'AI Resume': '/ai-resume',
-      'AI Job Match': '/ai-job-match',
-      'AI Coach': '/ai-coach'
-    };
+      const routeMap = {
+        Home: "/",
+        Network: "/network",
+        Jobs: "/jobs",
+        Messages: "/messages",
+        Notifications: "/notifications",
+        Business: "/business",
+        Premium: "/premium",
+        "AI Resume": "/ai-resume",
+        "AI Job Match": "/ai-job-match",
+        "AI Coach": "/ai-coach",
+        Profile: "/profile",
+        Settings: "/settings",
+      };
 
-    const route = routeMap[navItem];
-    if (route) {
-      navigate(route);
-    }
-  }, [navigate]);
+      const route = routeMap[navItem];
+      if (route) {
+        navigate(route);
+      }
+    },
+    [navigate]
+  );
 
-  const handleSearch = useCallback((e) => {
-    if (e.key === 'Enter' && searchValue.trim()) {
-      console.log('Searching for:', searchValue);
-      navigate(`/search?q=${encodeURIComponent(searchValue)}`);
-      setShowSearch(false);
-    }
-  }, [searchValue, navigate]);
+  const handleAIToolClick = useCallback(
+    (tool) => {
+      handleNavClick(tool);
+      setShowAIToolsMenu(false);
+    },
+    [handleNavClick]
+  );
 
-  // Main navigation items - memoized
-  const mainNavItems = useMemo(() => [
-    { label: 'Home', icon: Home, path: '/' },
-    { label: 'My Network', icon: Users, path: '/network' },
-    { label: 'Jobs', icon: Briefcase, path: '/jobs' },
-    { label: 'Messages', icon: MessageCircle, path: '/messages', notification: true },
-    { label: 'Notifications', icon: Bell, path: '/notifications', notification: true },
-  ], []);
+  const handleSearch = useCallback(
+    (e) => {
+      if (e.key === "Enter" && searchValue.trim()) {
+        navigate(`/search?q=${encodeURIComponent(searchValue)}`);
+        setShowSearch(false);
+        setSearchValue("");
+      }
+    },
+    [searchValue, navigate]
+  );
 
-  const aiNavItems = useMemo(() => [
-    { label: 'AI Resume', icon: FileText, path: '/ai-resume', premium: true },
-    { label: 'AI Job Match', icon: Target, path: '/ai-job-match', premium: true },
-    { label: 'AI Coach', icon: Bot, path: '/ai-coach', premium: true },
-  ], []);
+  const handleLogout = useCallback(() => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out of your account",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, logout!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        userLogOut();
+        navigate("/");
+      }
+    });
+  }, [userLogOut, navigate]);
 
-  const additionalMenuItems = useMemo(() => [
-    { label: 'Business', icon: Building, path: '/business' },
-    { label: 'Premium', icon: Crown, path: '/premium', premium: true },
-  ], []);
+  // Navigation items
+  const mainNavItems = useMemo(
+    () => [
+      { label: "Home", icon: Home, path: "/" },
+      { label: "Network", icon: Users, path: "/network" },
+      { label: "Jobs", icon: Briefcase, path: "/jobs" },
+      {
+        label: "Messages",
+        icon: MessageCircle,
+        path: "/messages",
+        notification: 3,
+      },
+    ],
+    []
+  );
 
-  const mobileBottomNavItems = useMemo(() => [
-    { label: 'Home', icon: Home, path: '/' },
-    { label: 'Network', icon: Users, path: '/network' },
-    { label: 'Jobs', icon: Briefcase, path: '/jobs' },
-    { label: 'Messages', icon: MessageCircle, path: '/messages', notification: true },
-  ], []);
+  const aiToolsItems = useMemo(
+    () => [
+      { label: "AI Resume", icon: FileText, path: "/ai-resume" },
+      { label: "AI Job Match", icon: Target, path: "/ai-job-match" },
+      { label: "AI Coach", icon: Bot, path: "/ai-coach" },
+    ],
+    []
+  );
 
-  if (loading) {
+  // Business and Premium items for desktop
+  const businessPremiumItems = useMemo(
+    () => [
+      { label: "Business", icon: Building, path: "/business" },
+      { label: "Premium", icon: Crown, path: "/premium" },
+    ],
+    []
+  );
+
+  const mobileNavItems = useMemo(
+    () => [
+      { label: "Home", icon: Home, path: "/" },
+      { label: "Network", icon: Users, path: "/network" },
+      { label: "Jobs", icon: Briefcase, path: "/jobs" },
+      {
+        label: "Messages",
+        icon: MessageCircle,
+        path: "/messages",
+        notification: 3,
+      },
+      {
+        label: "Notifications",
+        icon: Bell,
+        path: "/notifications",
+        notification: 5,
+      },
+    ],
+    []
+  );
+
+  if (loading || profileLoading) {
     return <Loader />;
   }
 
   return (
     <>
-      {/* Desktop & Tablet Navbar */}
-      <motion.nav 
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-        className="hidden lg:block w-full transition-all duration-300 bg-white shadow-lg border-b border-gray-200/50 sticky top-0 z-50"
-      >
-        {/* First Row */}
-        <motion.div variants={itemVariants} className="border-b border-gray-100">
-          <div className="mx-auto w-11/12 px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              {/* Logo */}
-              <motion.div 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center space-x-3 cursor-pointer group"
-                onClick={() => handleNavClick('Home')}
-              >
-                <LogoComponent />
+      {/* Desktop Navigation */}
+      <nav className="hidden lg:block w-full bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center cursor-pointer"
+              onClick={() => handleNavClick("Home")}
+            >
+              <LogoComponent />
+            </motion.div>
 
-              </motion.div>
+            {/* Search Bar */}
+            <div className="flex-1 max-w-xl mx-8">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search jobs, people, companies..."
+                  className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200 text-sm"
+                  onKeyPress={handleSearch}
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                />
+              </div>
+            </div>
 
-              {/* Search Bar */}
-              <motion.div variants={itemVariants} className="flex-1 max-w-2xl mx-8">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <motion.input
-                    whileFocus={{ scale: 1.02 }}
-                    type="text"
-                    placeholder="Search for jobs, people, or companies..."
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm hover:bg-gray-100"
-                    onKeyPress={handleSearch}
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
-                  />
-                </div>
-              </motion.div>
+            {/* Navigation Items */}
+            <div className="flex items-center space-x-1">
+              {mainNavItems.map((item) => (
+                <DesktopNavItem
+                  key={item.label}
+                  label={item.label}
+                  icon={item.icon}
+                  active={activeNav === item.label}
+                  onClick={() => handleNavClick(item.label)}
+                  notification={item.notification}
+                />
+              ))}
 
-              {/* Actions */}
-              <motion.div variants={itemVariants} className="flex items-center space-x-4">
-                <div className="flex items-center space-x-3">
-                  <NavItem
-                    label="Business"
-                    icon={Building}
-                    active={activeNav === 'Business'}
-                    onClick={() => handleNavClick('Business')}
-                  />
-
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center space-x-2 cursor-pointer group p-2 rounded-lg hover:bg-amber-50 transition-colors duration-200"
-                    onClick={() => handleNavClick('Premium')}
-                  >
-                    <Crown className="w-5 h-5 text-amber-500 group-hover:text-amber-600" />
-                    <span className={`text-sm font-semibold ${activeNav === 'Premium' ? 'text-amber-700' : 'text-amber-600'}`}>
-                      Premium
-                    </span>
-                  </motion.div>
-                </div>
-
-                {/* Profile */}
-                <motion.div
+              {/* AI Tools Dropdown */}
+              <div className="relative">
+                <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center space-x-3 cursor-pointer group p-2 rounded-lg hover:bg-blue-50"
-                  onClick={handleProfileClick}
+                  className={`relative flex flex-col items-center p-2 rounded-xl min-w-16 transition-colors ${
+                    aiToolsItems.some((item) => activeNav === item.label)
+                      ? "text-purple-600 bg-purple-50"
+                      : "text-gray-600 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setShowAIToolsMenu(!showAIToolsMenu)}
                 >
-                  {user ? (
-                    <img
-                      src={user.profilePicture || avatar}
-                      alt={user.name || 'User'}
-                      className="w-8 h-8 rounded-full object-cover border-2 border-transparent group-hover:border-blue-500"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                      <User className="w-5 h-5 text-gray-600" />
-                    </div>
+                  <div className="relative">
+                    <Sparkles className="w-5 h-5" />
+                    {aiToolsItems.some((item) => activeNav === item.label) && (
+                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full" />
+                    )}
+                  </div>
+                  <span className="text-xs mt-1 font-medium">AI Tools</span>
+                </motion.button>
+
+                <AnimatePresence>
+                  {showAIToolsMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50"
+                    >
+                      {aiToolsItems.map((item) => (
+                        <button
+                          key={item.label}
+                          onClick={() => handleAIToolClick(item.label)}
+                          className={`w-full px-4 py-2 text-left text-sm flex items-center space-x-3 transition-colors ${
+                            activeNav === item.label
+                              ? "bg-purple-50 text-purple-600"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span>{item.label}</span>
+                        </button>
+                      ))}
+                    </motion.div>
                   )}
-                  <span className={`text-sm font-medium ${activeNav === 'Profile' ? 'text-blue-600' : 'text-gray-700'}`}>
-                    Profile
-                  </span>
-                </motion.div>
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Second Row - Navigation */}
-        <motion.div variants={itemVariants} className="bg-white">
-          <div className="w-11/12 mx-auto pb-5 px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-12">
-              <div className="flex items-center space-x-1">
-                {mainNavItems.map((item) => (
-                  <NavItem
-                    key={item.label}
-                    label={item.label}
-                    icon={item.icon}
-                    active={activeNav === item.label}
-                    onClick={() => handleNavClick(item.label)}
-                    hasNotification={item.notification}
-                  />
-                ))}
+                </AnimatePresence>
               </div>
 
-              <div className="flex items-center space-x-1">
-                <div className="flex items-center space-x-2 mr-4 px-3 py-1 bg-gradient-to-r from-purple-50 to-blue-50 rounded-full border border-purple-200">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
-                  <span className="text-sm font-semibold text-purple-700">AI Tools</span>
-                </div>
-                {aiNavItems.map((item) => (
-                  <NavItem
-                    key={item.label}
-                    label={item.label}
-                    icon={item.icon}
-                    active={activeNav === item.label}
-                    onClick={() => handleNavClick(item.label)}
-                    premium={item.premium}
-                  />
-                ))}
+              {/* Business and Premium Items */}
+              {businessPremiumItems.map((item) => (
+                <DesktopNavItem
+                  key={item.label}
+                  label={item.label}
+                  icon={item.icon}
+                  active={activeNav === item.label}
+                  onClick={() => handleNavClick(item.label)}
+                />
+              ))}
+
+              {/* Notifications */}
+              <DesktopNavItem
+                label="Notifications"
+                icon={Bell}
+                active={activeNav === "Notifications"}
+                onClick={() => handleNavClick("Notifications")}
+                notification={5}
+              />
+
+              {/* Profile Menu */}
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`flex items-center space-x-2 p-2 rounded-xl transition-colors ${
+                    activeNav === "Profile"
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-gray-600 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                >
+                  <div className="relative">
+                    <img
+                      src={userProfile?.profileImage || userAvatar}
+                      alt={userDisplayName}
+                      className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = getFallbackAvatar();
+                      }}
+                    />
+                    {isPremiumUser && (
+                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border-2 border-white flex items-center justify-center">
+                        <Star className="w-2 h-2 text-white fill-current" />
+                      </div>
+                    )}
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </motion.button>
+
+                <AnimatePresence>
+                  {showProfileMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50"
+                    >
+                      {/* User Info */}
+                      {user ? (
+                        <>
+                          <div className="px-4 py-3 border-b border-gray-100">
+                            <div className="flex items-center space-x-3">
+                              <div className="relative">
+                                <img
+                                  src={userProfile?.profileImage || userAvatar}
+                                  alt={userDisplayName}
+                                  className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = getFallbackAvatar();
+                                  }}
+                                />
+                                {isPremiumUser && (
+                                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 rounded-full border-2 border-white flex items-center justify-center">
+                                    <Crown className="w-2 h-2 text-white fill-current" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center space-x-2">
+                                  <p className="font-semibold text-gray-900 truncate">
+                                    {userDisplayName}
+                                  </p>
+                                  {isPremiumUser && (
+                                    <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full font-medium flex items-center space-x-1">
+                                      <Crown className="w-3 h-3" />
+                                      <span>Premium</span>
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-600 truncate">
+                                  {userEmail}
+                                </p>
+                                {userProfile?.aiCredits && (
+                                  <p className="text-xs text-green-600 font-medium mt-1">
+                                    {userProfile.aiCredits.toLocaleString()} AI
+                                    Credits
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Menu Items for logged in users */}
+                          <div className="py-1">
+                            <button
+                              onClick={() => handleNavClick("Profile")}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+                            >
+                              <User className="w-4 h-4" />
+                              <span>Your Profile</span>
+                            </button>
+                            <button
+                              onClick={() => handleNavClick("Settings")}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+                            >
+                              <Settings className="w-4 h-4" />
+                              <span>Settings & Privacy</span>
+                            </button>
+                          </div>
+
+                          {/* Logout */}
+                          <div className="border-t border-gray-100 my-1" />
+                          <button
+                            onClick={handleLogout}
+                            className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-3 transition-colors"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            <span>Sign Out</span>
+                          </button>
+                        </>
+                      ) : (
+                        /* Show only Sign In button for non-logged in users */
+                        <div className="p-4">
+                          <h1 className="text-sm mb-2 text-center font-medium">
+                            You need to sign to access
+                          </h1>
+                          <button
+                            onClick={() => navigate("/auth/signin")}
+                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                          >
+                            <User className="w-4 h-4" />
+                            <span>Sign In</span>
+                          </button>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>
-        </motion.div>
-      </motion.nav>
+        </div>
+      </nav>
 
       {/* Mobile Top Bar */}
-      <nav className="lg:hidden w-full bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
+      <nav className="lg:hidden w-full bg-white/80 border-b border-gray-100 sticky top-0 z-50">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3 flex-1">
+            {/* Left: Menu Button & Logo */}
+            <div className="flex items-center space-x-3">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 rounded-lg hover:bg-gray-100"
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {isMobileMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
               </button>
 
-              <div className="flex items-center space-x-2 cursor-pointer" onClick={() => handleNavClick('Home')}>
+              <div
+                className="flex items-center cursor-pointer"
+                onClick={() => handleNavClick("Home")}
+              >
                 <LogoComponent />
-                <h1 className="font-bold text-lg text-gray-900">Career Crafter</h1>
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <button onClick={() => setShowSearch(!showSearch)} className="p-2 rounded-lg hover:bg-gray-100">
+            {/* Right: Search & Notifications */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
                 <Search className="w-5 h-5" />
               </button>
 
-              <button className="relative p-2 rounded-lg hover:bg-gray-100" onClick={() => handleNavClick('Notifications')}>
+              <button
+                className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                onClick={() => handleNavClick("Notifications")}
+              >
                 <Bell className="w-5 h-5" />
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
             </div>
           </div>
 
-          {showSearch && (
-            <div className="mt-3">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                autoFocus
-                onKeyPress={handleSearch}
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-              />
-            </div>
-          )}
+          {/* Mobile Search Bar */}
+          <AnimatePresence>
+            {showSearch && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-3 overflow-hidden"
+              >
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search jobs, people, companies..."
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    autoFocus
+                    onKeyPress={handleSearch}
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Mobile Sidebar */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <>
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50" onClick={() => setIsMobileMenuOpen(false)} />
-              <div className="fixed left-0 top-0 bottom-0 w-80 bg-white shadow-xl z-50">
-                <div className="p-6 border-b">
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/40 bg-opacity-50 z-40"
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
+
+              {/* Sidebar */}
+              <motion.div
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                className="fixed left-0 top-0 bottom-0 w-80 bg-white shadow-xl z-50"
+              >
+                {/* Header */}
+                <div className="p-6 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <LogoComponent />
-                    <h1 className="font-bold text-xl">Career Crafter</h1>
                   </div>
                 </div>
 
-                <div className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-100px)]">
-                  {/* Profile Section */}
-                  <div className="flex items-center space-x-3 p-4 rounded-lg cursor-pointer hover:bg-blue-50 border" onClick={handleProfileClick}>
-                    {user ? (
-                      <img src={user.profilePicture || avatar} alt={user.name} className="w-12 h-12 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                        <User className="w-6 h-6" />
-                      </div>
-                    )}
+                {/* Profile Section */}
+                <div
+                  className="p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+                  onClick={handleProfileClick}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <img
+                        src={userAvatar}
+                        alt={userDisplayName}
+                        className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = getFallbackAvatar();
+                        }}
+                      />
+                      {isPremiumUser && (
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 rounded-full border-2 border-white flex items-center justify-center">
+                          <Crown className="w-2 h-2 text-white fill-current" />
+                        </div>
+                      )}
+                    </div>
                     <div>
-                      <h3 className="font-semibold">{user ? user.name : 'Guest User'}</h3>
-                      <p className="text-sm text-gray-600">{user ? 'View profile' : 'Login'}</p>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-semibold text-gray-900">
+                          {userDisplayName}
+                        </h3>
+                        {isPremiumUser && (
+                          <span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 text-xs rounded-full font-medium">
+                            Premium
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {user ? "View your profile" : "Sign in to your account"}
+                      </p>
+                      {userProfile?.aiCredits && (
+                        <p className="text-xs text-green-600 font-medium mt-1">
+                          {userProfile.aiCredits.toLocaleString()} AI Credits
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Settings & Logout - Only show for logged in users */}
+                {user && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+                      Account
+                    </h4>
+                    <div className="space-y-1">
+                      <MobileNavItem
+                        label="Settings"
+                        icon={Settings}
+                        active={activeNav === "Settings"}
+                        onClick={() => handleNavClick("Settings")}
+                      />
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center space-x-3 p-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut className="w-5 h-5" />
+                        <span className="font-medium">Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Navigation Sections */}
+                <div className="p-4 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]">
+                  {/* Main Navigation */}
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+                      Menu
+                    </h4>
+                    <div className="space-y-1">
+                      {mainNavItems.map((item) => (
+                        <MobileNavItem
+                          key={item.label}
+                          {...item}
+                          active={activeNav === item.label}
+                          onClick={() => handleNavClick(item.label)}
+                        />
+                      ))}
                     </div>
                   </div>
 
                   {/* AI Tools */}
-                  <div className="pt-4">
-                    <div className="flex items-center space-x-2 px-4 mb-3">
-                      <Sparkles className="w-5 h-5 text-purple-600" />
-                      <span className="font-semibold text-purple-700">AI Tools</span>
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+                      AI Tools
+                    </h4>
+                    <div className="space-y-1">
+                      {aiToolsItems.map((item) => (
+                        <MobileNavItem
+                          key={item.label}
+                          {...item}
+                          active={activeNav === item.label}
+                          onClick={() => handleNavClick(item.label)}
+                        />
+                      ))}
                     </div>
-                    {aiNavItems.map((item) => (
-                      <MobileNavItem key={item.label} {...item} active={activeNav === item.label} onClick={() => handleNavClick(item.label)} />
-                    ))}
                   </div>
 
                   {/* More */}
-                  <div className="pt-4">
-                    <div className="px-4 mb-3">
-                      <span className="font-semibold text-gray-700">More</span>
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+                      More
+                    </h4>
+                    <div className="space-y-1">
+                      <MobileNavItem
+                        label="Business"
+                        icon={Building}
+                        active={activeNav === "Business"}
+                        onClick={() => handleNavClick("Business")}
+                      />
+                      <MobileNavItem
+                        label="Premium"
+                        icon={Crown}
+                        active={activeNav === "Premium"}
+                        onClick={() => handleNavClick("Premium")}
+                        premium
+                      />
                     </div>
-                    {additionalMenuItems.map((item) => (
-                      <MobileNavItem key={item.label} {...item} active={activeNav === item.label} onClick={() => handleNavClick(item.label)} />
-                    ))}
                   </div>
+
+                  {/* Settings & Logout */}
+                  {user && (
+                    <div>
+                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+                        Account
+                      </h4>
+                      <div className="space-y-1">
+                        <MobileNavItem
+                          label="Settings"
+                          icon={Settings}
+                          active={activeNav === "Settings"}
+                          onClick={() => handleNavClick("Settings")}
+                        />
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center space-x-3 p-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut className="w-5 h-5" />
+                          <span className="font-medium">Sign Out</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
+              </motion.div>
             </>
           )}
         </AnimatePresence>
       </nav>
 
-      {/* Mobile Bottom Nav */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t z-40 shadow-2xl">
+      {/* Mobile Bottom Navigation */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 z-40">
         <div className="flex items-center justify-around px-2 py-2">
-          {mobileBottomNavItems.map((item) => (
+          {mobileNavItems.map((item) => (
             <MobileBottomNavItem
               key={item.label}
               icon={item.icon}
               label={item.label}
               active={activeNav === item.label}
               onClick={() => handleNavClick(item.label)}
-              hasNotification={item.notification}
+              notification={item.notification}
             />
           ))}
         </div>
@@ -479,48 +859,73 @@ const Navbar = () => {
   );
 };
 
-// NavItem Component
-const NavItem = ({ label, icon: Icon, active, onClick, hasNotification, premium }) => (
-  <div
-    className={`flex flex-col items-center cursor-pointer p-3 rounded-xl min-w-20 ${
-      active ? (premium ? 'text-amber-600 bg-amber-50' : 'text-blue-600 bg-blue-50') : 
-      (premium ? 'text-amber-600 hover:bg-amber-50' : 'text-gray-600 hover:bg-gray-50')
+// Desktop Nav Item Component
+const DesktopNavItem = ({
+  label,
+  icon: Icon,
+  active,
+  onClick,
+  notification,
+}) => (
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    className={`relative flex flex-col items-center p-2 rounded-xl min-w-16 transition-colors ${
+      active ? "text-blue-600 bg-blue-50" : "text-gray-600 hover:bg-gray-50"
     }`}
     onClick={onClick}
   >
     <div className="relative">
       <Icon className="w-5 h-5" />
-      {hasNotification && <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />}
+      {notification && (
+        <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
+      )}
     </div>
     <span className="text-xs mt-1 font-medium">{label}</span>
-  </div>
+  </motion.button>
 );
 
-// Mobile Nav Items
+// Mobile Nav Item Component
 const MobileNavItem = ({ label, icon: Icon, active, onClick, premium }) => (
-  <div
-    className={`flex items-center space-x-4 p-4 rounded-xl cursor-pointer ${
-      active ? (premium ? 'text-amber-600 bg-amber-50' : 'text-blue-600 bg-blue-50') :
-      (premium ? 'text-amber-600 hover:bg-amber-50' : 'hover:bg-gray-50')
+  <button
+    className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-colors ${
+      active
+        ? premium
+          ? "bg-amber-50 text-amber-600"
+          : "bg-blue-50 text-blue-600"
+        : "text-gray-700 hover:bg-gray-50"
     }`}
     onClick={onClick}
   >
-    <Icon className="w-6 h-6" />
+    <Icon className="w-5 h-5" />
     <span className="font-medium">{label}</span>
-  </div>
+    {premium && <Crown className="w-4 h-4 text-amber-500 ml-auto" />}
+  </button>
 );
 
-const MobileBottomNavItem = ({ icon: Icon, label, active, onClick, hasNotification }) => (
-  <button
-    className={`flex flex-col items-center p-2 rounded-xl flex-1 ${active ? 'text-blue-600 bg-blue-50' : 'text-gray-600'}`}
+// Mobile Bottom Nav Item Component
+const MobileBottomNavItem = ({
+  icon: Icon,
+  label,
+  active,
+  onClick,
+  notification,
+}) => (
+  <motion.button
+    whileTap={{ scale: 0.95 }}
+    className={`relative flex flex-col items-center p-2 rounded-xl flex-1 transition-colors ${
+      active ? "text-blue-600" : "text-gray-600"
+    }`}
     onClick={onClick}
   >
     <div className="relative">
       <Icon className="w-5 h-5" />
-      {hasNotification && <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />}
+      {notification && (
+        <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
+      )}
     </div>
     <span className="text-xs mt-1">{label}</span>
-  </button>
+  </motion.button>
 );
 
 export default Navbar;
