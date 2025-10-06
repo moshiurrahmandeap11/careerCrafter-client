@@ -555,64 +555,79 @@ const PaymentModal = ({
 
             {/* Payment Form */}
             <form onSubmit={onSubmit} className="p-6">
-              {paymentMethod === 'card' && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Card Number
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="1234 5678 9012 3456"
-                      value={formData.cardNumber}
-                      onChange={(e) => onInputChange('cardNumber', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Expiry Date
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="MM/YY"
-                        value={formData.expiryDate}
-                        onChange={(e) => onInputChange('expiryDate', e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        CVV
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="123"
-                        value={formData.cvv}
-                        onChange={(e) => onInputChange('cvv', e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Card Holder Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="John Doe"
-                      value={formData.cardHolder}
-                      onChange={(e) => onInputChange('cardHolder', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                </div>
-              )}
+{paymentMethod === 'card' && (
+  <div className="space-y-4">
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Card Number
+      </label>
+      <input
+        type="text"
+        placeholder="1234 5678 9012 3456"
+        value={formData.cardNumber.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim()}
+        onChange={(e) => {
+          const value = e.target.value.replace(/\s/g, '');
+          if (value === '' || /^\d+$/.test(value)) {
+            onInputChange('cardNumber', value.slice(0, 16));
+          }
+        }}
+        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        required
+      />
+    </div>
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Expiry Date
+        </label>
+        <input
+          type="text"
+          placeholder="MM/YY"
+          value={formData.expiryDate.replace(/\D/g, '').replace(/(\d{2})(\d{0,2})/, '$1/$2')}
+          onChange={(e) => {
+            const value = e.target.value.replace(/\D/g, '');
+            if (value === '' || /^\d+$/.test(value)) {
+              onInputChange('expiryDate', value.slice(0, 4));
+            }
+          }}
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          CVV
+        </label>
+        <input
+          type="text"
+          placeholder="123"
+          value={formData.cvv}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === '' || /^\d+$/.test(value)) {
+              onInputChange('cvv', value.slice(0, 4));
+            }
+          }}
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          required
+        />
+      </div>
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Card Holder Name
+      </label>
+      <input
+        type="text"
+        placeholder="John Doe"
+        value={formData.cardHolder}
+        onChange={(e) => onInputChange('cardHolder', e.target.value)}
+        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        required
+      />
+    </div>
+  </div>
+)}
 
               {/* Mobile Payment Methods */}
               {['bkash', 'nogod', 'rocket', 'upay'].includes(paymentMethod) && (
