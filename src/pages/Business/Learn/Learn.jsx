@@ -1,6 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, MessageSquare, Target, TrendingUp, Award, Users, Send, Sparkles, Code, Briefcase, Brain, Loader2, Clock, CheckCircle } from 'lucide-react';
 
+// ইউজার আইডি ম্যানেজমেন্ট ফাংশন
+const getOrCreateUserId = () => {
+  let userId = localStorage.getItem('career_crafter_user_id');
+  if (!userId) {
+    userId = 'user_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('career_crafter_user_id', userId);
+  }
+  return userId;
+};
+
 const Learn = () => {
     const [activeTab, setActiveTab] = useState('explore');
     const [messages, setMessages] = useState([]);
@@ -11,16 +21,24 @@ const Learn = () => {
     const [learningPaths, setLearningPaths] = useState([]);
     const chatEndRef = useRef(null);
     
-    const userId = 'user123';
+    // ইউজার আইডি স্টেট
+    const [userId, setUserId] = useState(null);
+    
     const API_URL = 'http://localhost:3000/v1/learn';
     const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 
+    useEffect(() => {
+        const user = getOrCreateUserId();
+        setUserId(user);
+    }, []);
 
     useEffect(() => {
-        fetchLearningPaths();
-        fetchUserStats();
-        loadChatHistory();
-    }, []);
+        if (userId) {
+            fetchLearningPaths();
+            fetchUserStats();
+            loadChatHistory();
+        }
+    }, [userId]);
 
     useEffect(() => {
         scrollToBottom();
@@ -86,6 +104,8 @@ const Learn = () => {
     ];
 
     const fetchUserStats = async () => {
+        if (!userId) return;
+        
         try {
             const response = await fetch(`${API_URL}/stats/${userId}`);
             const data = await response.json();
@@ -99,6 +119,8 @@ const Learn = () => {
     };
 
     const loadChatHistory = async () => {
+        if (!userId) return;
+        
         try {
             const response = await fetch(`${API_URL}/chat/${userId}?limit=20`);
             const data = await response.json();
@@ -116,6 +138,8 @@ const Learn = () => {
     };
 
     const saveChatMessage = async (role, content, topic = null) => {
+        if (!userId) return;
+        
         try {
             await fetch(`${API_URL}/chat`, {
                 method: 'POST',
@@ -128,6 +152,8 @@ const Learn = () => {
     };
 
     const enrollInPath = async (pathId) => {
+        if (!userId) return;
+        
         try {
             const response = await fetch(`${API_URL}/enroll`, {
                 method: 'POST',
@@ -159,6 +185,8 @@ const Learn = () => {
     const [currentModelIndex, setCurrentModelIndex] = useState(0);
 
     const sendMessageToAI = async (message) => {
+        if (!userId) return;
+        
         setIsLoading(true);
         
         const userMessage = { role: 'user', content: message };
@@ -427,6 +455,7 @@ const Learn = () => {
                                     {messages.length > 0 && (
                                         <button
                                             onClick={async () => {
+                                                if (!userId) return;
                                                 try {
                                                     await fetch(`${API_URL}/chat/${userId}`, {
                                                         method: 'DELETE'
