@@ -111,7 +111,7 @@ const PremiumContent = () => {
     if (paymentSuccess) {
       const timer = setTimeout(() => {
         dispatch(clearPaymentStatus());
-      }, 5000);
+      }, 3000);
 
       return () => clearTimeout(timer);
     }
@@ -793,7 +793,7 @@ const SuccessToast = ({ credits, onClose }) => {
             <Gift className="w-6 h-6" />
           </div>
           <div className="flex-1">
-            <h4 className="font-bold text-lg mb-1">Payment Successful! 🎉</h4>
+            <h4 className="font-bold text-lg mb-1">Payment Successful! </h4>
             <p className="text-green-100">
               Welcome to Premium! You've received{' '}
               <span className="font-bold text-white">
@@ -801,7 +801,7 @@ const SuccessToast = ({ credits, onClose }) => {
               </span>
               {credits > 0 && (
                 <span className="block text-sm mt-1">
-                  🚀 Start using your credits to boost your job search!
+                   Start using your credits to boost your job search!
                 </span>
               )}
             </p>
