@@ -5,6 +5,8 @@ import SiteSettings from "../AdminDashboard/Settings/SiteSettings/SiteSettings";
 import AllUsers from "../AdminDashboard/AllUsers/AllUsers";
 import Admins from "../AdminDashboard/AllUsers/Admins/Admins";
 import Messages from "../AdminDashboard/Messages/Messages";
+import JobsAdmin from "../AdminDashboard/JobsAdmin/JobsAdmin";
+import ApplicationsAdmin from "../AdminDashboard/ApplicationsAdmin/ApplicationsAdmin";
 
 const MainContent = ({ activeRoute }) => {
   const renderContent = () => {
@@ -174,28 +176,14 @@ const MainContent = ({ activeRoute }) => {
       case "jobs":
         return (
           <div>
-            <h1 className="text-3xl font-bold text-slate-800 mb-6">
-              Job Listings
-            </h1>
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <p className="text-slate-600">
-                Create, edit, and manage job postings across the platform.
-              </p>
-            </div>
+            <JobsAdmin></JobsAdmin>
           </div>
         );
 
       case "applications":
         return (
           <div>
-            <h1 className="text-3xl font-bold text-slate-800 mb-6">
-              Applications
-            </h1>
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <p className="text-slate-600">
-                Track and manage all job applications submitted by users.
-              </p>
-            </div>
+            <ApplicationsAdmin></ApplicationsAdmin>
           </div>
         );
 

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Eye, Edit, Trash2, DollarSign, Briefcase, FileText, Image as ImageIcon } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, DollarSign, Briefcase, FileText, Image as ImageIcon, Building } from 'lucide-react';
 import useAuth from '../../../hooks/UseAuth/useAuth';
 import axiosIntense from '../../../hooks/AxiosIntense/axiosIntense';
-
-
 
 const PostJob = () => {
     const { user } = useAuth();
@@ -16,6 +14,7 @@ const PostJob = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
+        company: '',
         salaryMin: '',
         salaryMax: '',
         image: ''
@@ -31,7 +30,7 @@ const PostJob = () => {
 
     const fetchJobs = async () => {
         try {
-            const response = await axiosIntense.get(`/jobs/user/${user.id}`);
+            const response = await axiosIntense.get(`/jobs/user/${user.uid}`);
             if (response.data.success) {
                 setJobs(response.data.data);
             }
@@ -72,14 +71,26 @@ const PostJob = () => {
             return;
         }
 
+        // Validation
+        if (!formData.company.trim()) {
+            alert('Company name is required');
+            return;
+        }
+
+        if (parseInt(formData.salaryMin) > parseInt(formData.salaryMax)) {
+            alert('Minimum salary cannot be greater than maximum salary');
+            return;
+        }
+
         setLoading(true);
         try {
             const jobData = {
                 ...formData,
                 userId: user.uid,
-                userName: user.name || user.email,
+                userName: user.displayName || user.email,
                 salaryMin: parseInt(formData.salaryMin),
-                salaryMax: parseInt(formData.salaryMax)
+                salaryMax: parseInt(formData.salaryMax),
+                company: formData.company.trim()
             };
 
             if (editingJob) {
@@ -99,6 +110,7 @@ const PostJob = () => {
             }
         } catch (error) {
             console.error('Error posting job:', error);
+            alert(error.response?.data?.message || 'Error posting job');
         } finally {
             setLoading(false);
         }
@@ -109,6 +121,7 @@ const PostJob = () => {
         setFormData({
             title: job.title,
             description: job.description,
+            company: job.company || '',
             salaryMin: job.salaryMin.toString(),
             salaryMax: job.salaryMax.toString(),
             image: job.image
@@ -133,6 +146,7 @@ const PostJob = () => {
         setFormData({
             title: '',
             description: '',
+            company: '',
             salaryMin: '',
             salaryMax: '',
             image: ''
@@ -211,13 +225,13 @@ const PostJob = () => {
                     <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                         <div className="flex items-center">
                             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
-                                <DollarSign className="w-6 h-6 text-purple-600" />
+                                <Building className="w-6 h-6 text-purple-600" />
                             </div>
                             <div>
                                 <div className="text-2xl font-bold text-gray-900">
-                                    ${jobs.reduce((sum, job) => sum + job.salaryMin, 0).toLocaleString()}
+                                    {[...new Set(jobs.map(job => job.company))].length}
                                 </div>
-                                <div className="text-sm text-gray-600">Total Min Salary</div>
+                                <div className="text-sm text-gray-600">Companies</div>
                             </div>
                         </div>
                     </div>
@@ -256,6 +270,22 @@ const PostJob = () => {
                         {activeTab === 'post' ? (
                             <div className="max-w-2xl mx-auto">
                                 <form onSubmit={handleSubmit} className="space-y-6">
+                                    {/* Company Name */}
+                                    <div>
+                                        <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
+                                            Company Name *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="company"
+                                            required
+                                            value={formData.company}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="e.g., Google, Microsoft, Apple"
+                                        />
+                                    </div>
+
                                     {/* Title */}
                                     <div>
                                         <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
@@ -298,6 +328,7 @@ const PostJob = () => {
                                                 type="number"
                                                 id="salaryMin"
                                                 required
+                                                min="0"
                                                 value={formData.salaryMin}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, salaryMin: e.target.value }))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -312,6 +343,7 @@ const PostJob = () => {
                                                 type="number"
                                                 id="salaryMax"
                                                 required
+                                                min="0"
                                                 value={formData.salaryMax}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, salaryMax: e.target.value }))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -397,9 +429,22 @@ const PostJob = () => {
                                                     />
                                                 )}
                                                 <div className="p-6">
-                                                    <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                                                        {job.title}
-                                                    </h3>
+                                                    <div className="flex items-start justify-between mb-2">
+                                                        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 flex-1">
+                                                            {job.title}
+                                                        </h3>
+                                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ml-2 ${
+                                                            job.status === 'active' 
+                                                                ? 'bg-green-100 text-green-800'
+                                                                : 'bg-gray-100 text-gray-800'
+                                                        }`}>
+                                                            {job.status}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center text-sm text-gray-600 mb-3">
+                                                        <Building className="w-4 h-4 mr-1" />
+                                                        <span className="font-medium">{job.company}</span>
+                                                    </div>
                                                     <p className="text-gray-600 text-sm mb-4 line-clamp-3">
                                                         {job.description}
                                                     </p>
@@ -407,13 +452,9 @@ const PostJob = () => {
                                                         <span className="text-lg font-bold text-green-600">
                                                             {formatSalary(job.salaryMin, job.salaryMax)}
                                                         </span>
-                                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                            job.status === 'active' 
-                                                                ? 'bg-green-100 text-green-800'
-                                                                : 'bg-gray-100 text-gray-800'
-                                                        }`}>
-                                                            {job.status}
-                                                        </span>
+                                                        <div className="text-xs text-gray-500">
+                                                            {job.applications || 0} applications
+                                                        </div>
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <button
