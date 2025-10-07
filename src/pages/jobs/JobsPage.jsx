@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axiosIntense from '../../hooks/AxiosIntense/axiosIntense';
+import { useNavigate } from 'react-router';
 
 
 const JobsPage = () => {
@@ -27,6 +28,7 @@ const JobsPage = () => {
   const [dateFilter, setDateFilter] = useState('');
   const [savedJobs, setSavedJobs] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchJobs();
@@ -463,6 +465,7 @@ const JobsPage = () => {
                   {/* Actions */}
                   <div className="flex flex-wrap gap-3">
                     <motion.button
+                    onClick={() => navigate(`/job/${job._id}`)}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200"
