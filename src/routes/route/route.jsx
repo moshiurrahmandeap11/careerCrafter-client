@@ -22,7 +22,11 @@ import Hire from "../../pages/Business/Hire/Hire";
 import Learn from "../../pages/Business/Learn/Learn";
 import PostJob from "../../pages/Business/PostJob/PostJob";
 import JobDetails from "../../pages/jobs/JobDetails/JobDetails";
+<<<<<<< HEAD
 import ResumePage from "../../pages/ai-resume/ResumePage";
+=======
+import ProfileHired from "../../pages/Profile/ProfileHired/ProfileHired";
+>>>>>>> 40c0402dc76b1bc7ca6cd19faa299bb478ae68f9
 
 export const route = createBrowserRouter([
   {
@@ -36,6 +40,10 @@ export const route = createBrowserRouter([
       {
         path: "/profile",
         element: <Profile></Profile>,
+      },
+      {
+        path: "/profile/hired",
+        element: <ProfileHired></ProfileHired>
       },
       {
         path: "/network",
