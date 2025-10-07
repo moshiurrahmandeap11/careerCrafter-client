@@ -17,6 +17,7 @@
     "axios": "^1.12.2",
     "firebase": "^12.3.0",
     "framer-motion": "^12.23.22",
+    "html2pdf.js": "^0.10.3",
     "lucide-react": "^0.544.0",
     "re-title": "^1.0.1",
     "react": "^19.1.1",
