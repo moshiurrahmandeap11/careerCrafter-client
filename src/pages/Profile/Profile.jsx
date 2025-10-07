@@ -17,8 +17,17 @@ import {
   Target,
   LogOut,
   Edit3,
-  Sparkles
+  Sparkles,
+  Award,
+  Briefcase,
+  Eye,
+  Trash2,
+  FileText,
+  MapPin,
+  DollarSign,
+  Building
 } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 const Profile = () => {
     const {user, loading, userLogOut} = useAuth();
@@ -26,6 +35,9 @@ const Profile = () => {
     const [profileLoading, setProfileLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showPostModal, setShowPostModal] = useState(false);
+    const [selectedPost, setSelectedPost] = useState(null);
+    const [editPostData, setEditPostData] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -38,18 +50,11 @@ const Profile = () => {
         try {
             setProfileLoading(true);
             setError(null);
-
-            
             const response = await axiosIntense.get(`/users/email/${user?.email}`);
-
             
-            // ✅ FIX: Check if response.data exists directly (without success property)
             if (response.data && response.data._id) {
-                setProfile(response.data); // ✅ Use response.data directly
-                console.log(response.data);
-
+                setProfile(response.data);
             } else {
-                console.warn('No valid profile data found in response');
                 setError('Profile data not found or invalid');
             }
         } catch (err) {
@@ -65,12 +70,18 @@ const Profile = () => {
         navigate("/");
     };
 
+    const handleGetHired = () => {
+        navigate('/profile/hired');
+    };
+
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
-            day: 'numeric'
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
         });
     };
 
@@ -84,7 +95,100 @@ const Profile = () => {
         }
     };
 
+    // Post Management Functions
+    const handleViewPost = (post) => {
+        setSelectedPost(post);
+        setShowPostModal(true);
+    };
 
+    const handleEditPost = (post) => {
+        setEditPostData(post);
+        setShowPostModal(true);
+    };
+
+    const handleDeletePost = async (postIndex) => {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const updatedPosts = profile.hiredPosts.filter((_, index) => index !== postIndex);
+                await axiosIntense.patch(`/users/email/${user.email}`, {
+                    hiredPosts: updatedPosts
+                });
+                
+                Swal.fire({
+                    title: 'Deleted!',
+                    text: 'Your post has been deleted.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+                
+                fetchProfile(); // Refresh profile data
+            } catch (error) {
+                console.error('Error deleting post:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to delete post. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+    };
+
+    const handleUpdatePost = async (e) => {
+        e.preventDefault();
+        if (!editPostData.content.trim()) {
+            Swal.fire({
+                title: 'Empty Post!',
+                text: 'Please write something to post',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        try {
+            const updatedPosts = profile.hiredPosts.map((post, index) => 
+                index === editPostData.index ? {
+                    ...editPostData,
+                    index: undefined // Remove index before saving
+                } : post
+            );
+
+            await axiosIntense.patch(`/users/email/${user.email}`, {
+                hiredPosts: updatedPosts
+            });
+
+            Swal.fire({
+                title: 'Success!',
+                text: 'Your post has been updated successfully!',
+                icon: 'success',
+                confirmButtonText: 'Great!'
+            });
+
+            setShowPostModal(false);
+            setEditPostData(null);
+            fetchProfile(); // Refresh profile data
+        } catch (error) {
+            console.error('Error updating post:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to update post. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    };
 
     if (loading || profileLoading) {
         return (
@@ -151,6 +255,13 @@ const Profile = () => {
                                 </div>
                             </div>
                             <div className="flex items-center space-x-3">
+                                <button 
+                                    onClick={handleGetHired}
+                                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium py-2.5 px-6 rounded-xl transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl"
+                                >
+                                    <Award className="w-4 h-4" />
+                                    <span>Get Hired</span>
+                                </button>
                                 <button 
                                     onClick={() => setShowEditModal(true)}
                                     className="bg-white border border-gray-200 hover:border-gray-300 text-gray-700 font-medium py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center space-x-2 shadow-sm hover:shadow-md"
@@ -236,6 +347,86 @@ const Profile = () => {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Posts Table Section */}
+                                {profile.hiredPosts && profile.hiredPosts.length > 0 && (
+                                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                                        <div className="flex items-center justify-between mb-6">
+                                            <h3 className="text-lg font-semibold text-gray-900">Your Hired Posts</h3>
+                                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                                                {profile.hiredPosts.length} posts
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full">
+                                                <thead>
+                                                    <tr className="border-b border-gray-200">
+                                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Content</th>
+                                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Date</th>
+                                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Profile Data</th>
+                                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-100">
+                                                    {profile.hiredPosts.slice().reverse().map((post, index) => {
+                                                        const originalIndex = profile.hiredPosts.length - 1 - index;
+                                                        return (
+                                                            <tr key={originalIndex} className="hover:bg-gray-50 transition-colors duration-150">
+                                                                <td className="py-4 px-4">
+                                                                    <div className="max-w-xs">
+                                                                        <p className="text-sm text-gray-800 line-clamp-2">
+                                                                            {post.content}
+                                                                        </p>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="py-4 px-4">
+                                                                    <p className="text-sm text-gray-600">
+                                                                        {formatDate(post.timestamp)}
+                                                                    </p>
+                                                                </td>
+                                                                <td className="py-4 px-4">
+                                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                                        post.includeProfile 
+                                                                            ? 'bg-green-100 text-green-800' 
+                                                                            : 'bg-gray-100 text-gray-800'
+                                                                    }`}>
+                                                                        {post.includeProfile ? 'Included' : 'Not Included'}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="py-4 px-4">
+                                                                    <div className="flex items-center space-x-2">
+                                                                        <button
+                                                                            onClick={() => handleViewPost({...post, index: originalIndex})}
+                                                                            className="w-8 h-8 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center transition-colors duration-200"
+                                                                            title="View Post"
+                                                                        >
+                                                                            <Eye className="w-4 h-4" />
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => handleEditPost({...post, index: originalIndex})}
+                                                                            className="w-8 h-8 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg flex items-center justify-center transition-colors duration-200"
+                                                                            title="Edit Post"
+                                                                        >
+                                                                            <Edit3 className="w-4 h-4" />
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => handleDeletePost(originalIndex)}
+                                                                            className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg flex items-center justify-center transition-colors duration-200"
+                                                                            title="Delete Post"
+                                                                        >
+                                                                            <Trash2 className="w-4 h-4" />
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Stats Grid */}
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -334,6 +525,17 @@ const Profile = () => {
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                                     <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
                                     <div className="space-y-3">
+                                        <button 
+                                            onClick={handleGetHired}
+                                            className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all duration-200 text-left"
+                                        >
+                                            <Award className="w-5 h-5 text-green-600" />
+                                            <div>
+                                                <p className="font-medium text-gray-900 text-sm">Get Hired</p>
+                                                <p className="text-gray-500 text-xs">Find your dream job</p>
+                                            </div>
+                                        </button>
+
                                         <button className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-left">
                                             <Settings className="w-5 h-5 text-gray-600" />
                                             <div>
@@ -342,7 +544,7 @@ const Profile = () => {
                                             </div>
                                         </button>
                                         
-                                        <button className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all duration-200 text-left">
+                                        <button className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 text-left">
                                             <BarChart3 className="w-5 h-5 text-gray-600" />
                                             <div>
                                                 <p className="font-medium text-gray-900 text-sm">Analytics</p>
@@ -350,7 +552,7 @@ const Profile = () => {
                                             </div>
                                         </button>
                                         
-                                        <button className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 text-left">
+                                        <button className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-200 text-left">
                                             <Target className="w-5 h-5 text-gray-600" />
                                             <div>
                                                 <p className="font-medium text-gray-900 text-sm">Goals</p>
@@ -446,6 +648,162 @@ const Profile = () => {
                                 onClose={() => setShowEditModal(false)}
                                 onUpdate={fetchProfile}
                             />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Post View/Edit Modal */}
+            {showPostModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+                            <h2 className="text-lg font-semibold text-gray-800">
+                                {editPostData ? 'Edit Post' : 'View Post'}
+                            </h2>
+                            <button 
+                                onClick={() => {
+                                    setShowPostModal(false);
+                                    setEditPostData(null);
+                                    setSelectedPost(null);
+                                }}
+                                className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-all duration-200"
+                            >
+                                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            {editPostData ? (
+                                // Edit Form
+                                <form onSubmit={handleUpdatePost}>
+                                    <div className="mb-6">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Post Content
+                                        </label>
+                                        <textarea
+                                            value={editPostData.content}
+                                            onChange={(e) => setEditPostData({...editPostData, content: e.target.value})}
+                                            rows={6}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                                            placeholder="Share your job search journey..."
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowPostModal(false);
+                                                setEditPostData(null);
+                                            }}
+                                            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-xl transition-all duration-200"
+                                        >
+                                            Update Post
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : (
+                                // View Mode
+                                <div className="space-y-6">
+                                    <div>
+                                        <h3 className="text-sm font-medium text-gray-700 mb-2">Content</h3>
+                                        <p className="text-gray-800 bg-gray-50 rounded-xl p-4 whitespace-pre-line">
+                                            {selectedPost?.content}
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                                        <Calendar className="w-4 h-4" />
+                                        <span>Posted on {formatDate(selectedPost?.timestamp)}</span>
+                                    </div>
+
+                                    {selectedPost?.includeProfile && selectedPost.profileData && (
+                                        <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                                            <h4 className="font-semibold text-blue-900 mb-3 flex items-center space-x-2">
+                                                <Briefcase className="w-4 h-4" />
+                                                <span>Included Profile Information</span>
+                                            </h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                {selectedPost.profileData.desiredJobTitle && (
+                                                    <div className="flex items-center space-x-2">
+                                                        <Award className="w-4 h-4 text-green-600" />
+                                                        <span className="text-gray-700">
+                                                            <strong>Desired Role:</strong> {selectedPost.profileData.desiredJobTitle}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {selectedPost.profileData.currentJobTitle && (
+                                                    <div className="flex items-center space-x-2">
+                                                        <Building className="w-4 h-4 text-blue-600" />
+                                                        <span className="text-gray-700">
+                                                            <strong>Current Role:</strong> {selectedPost.profileData.currentJobTitle}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {selectedPost.profileData.location && (
+                                                    <div className="flex items-center space-x-2">
+                                                        <MapPin className="w-4 h-4 text-red-600" />
+                                                        <span className="text-gray-700">
+                                                            <strong>Location:</strong> {selectedPost.profileData.location}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {selectedPost.profileData.expectedSalary && (
+                                                    <div className="flex items-center space-x-2">
+                                                        <DollarSign className="w-4 h-4 text-green-600" />
+                                                        <span className="text-gray-700">
+                                                            <strong>Expected Salary:</strong> ${selectedPost.profileData.expectedSalary}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {selectedPost.profileData.yearsOfExperience && (
+                                                    <div className="flex items-center space-x-2">
+                                                        <FileText className="w-4 h-4 text-purple-600" />
+                                                        <span className="text-gray-700">
+                                                            <strong>Experience:</strong> {selectedPost.profileData.yearsOfExperience}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {selectedPost.profileData.resumeLink && (
+                                                    <div className="flex items-center space-x-2">
+                                                        <FileText className="w-4 h-4 text-blue-600" />
+                                                        <span className="text-gray-700">
+                                                            <strong>Resume:</strong> Available
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {selectedPost.profileData.portfolio && (
+                                                    <div className="flex items-center space-x-2">
+                                                        <Briefcase className="w-4 h-4 text-orange-600" />
+                                                        <span className="text-gray-700">
+                                                            <strong>Portfolio:</strong> Available
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="flex justify-end">
+                                        <button
+                                            onClick={() => {
+                                                setShowPostModal(false);
+                                                setSelectedPost(null);
+                                            }}
+                                            className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-xl font-medium transition-all duration-200"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

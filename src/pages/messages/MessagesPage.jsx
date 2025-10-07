@@ -94,6 +94,39 @@ const MessagesPage = () => {
     }
   };
 
+  // Auto-select conversation from Feed
+  useEffect(() => {
+    const storedConversation = sessionStorage.getItem('selectedConversation');
+    if (storedConversation && allUser) {
+      const conversationData = JSON.parse(storedConversation);
+      
+      // Find if this user already exists in the conversations list
+      const existingConversation = allUser?.find(user => 
+        user.email === conversationData.email
+      );
+
+      if (existingConversation) {
+        // If user exists in conversations, select it
+        handleConversationSelect(existingConversation);
+      } else {
+        // If user doesn't exist, create a new conversation object
+        const newConversation = {
+          _id: conversationData._id,
+          fullName: conversationData.fullName,
+          email: conversationData.email,
+          profileImage: conversationData.profileImage,
+          tags: conversationData.tags || []
+        };
+        
+        // Add to conversations list and select it
+        setAllUser(prev => [...(prev || []), newConversation]);
+        handleConversationSelect(newConversation);
+      }
+      
+      // Clear the stored conversation
+      sessionStorage.removeItem('selectedConversation');
+    }
+  }, [allUser, dispatch]);
 
   useEffect(() => {
     socket.current = connectWS();
@@ -103,7 +136,6 @@ const MessagesPage = () => {
       }
 
       socket.current.on("privateMessage", (msg) => {
-
         if ((msg.senderEmail === user.email && msg.receiverEmail === selectedConversation?.email) ||
             (msg.senderEmail === selectedConversation?.email && msg.receiverEmail === user.email)) {
           setMessages((prev) => [...prev, msg]);
@@ -152,7 +184,6 @@ const MessagesPage = () => {
     }
   };
 
-
   const handleSendMessage = async () => {
     const text = newMessage.trim();
     if (!text) return;
@@ -167,14 +198,12 @@ const MessagesPage = () => {
         timestamp: new Date(), 
       };
 
-
       await axiosIntense.post('/messageUsers/messages', {
         fromEmail: msg.fromEmail,
         toEmail: msg.toEmail,
         message: text,  
       });
       
-
       socket.current.emit("privateMessage", {
         senderEmail: user?.email,
         receiverEmail: selectedConversation?.email,
@@ -226,7 +255,7 @@ const MessagesPage = () => {
     },
   };
 
-  // --- UI Loading States (existing—no change) ---
+  // --- UI Loading States ---
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
@@ -289,14 +318,13 @@ const MessagesPage = () => {
     );
   }
 
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <ReTitle
         title={`Messages${unreadCount > 0 ? ` (${unreadCount})` : ""}`}
       />
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header (existing—no change) */}
+        {/* Header */}
         <motion.div
           className="mb-8"
           initial={{ opacity: 0, y: -20 }}
@@ -325,7 +353,7 @@ const MessagesPage = () => {
         {/* Main Content */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="flex h-[600px]">
-            {/* Conversations List (existing—no change) */}
+            {/* Conversations List */}
             <motion.div
               className={`w-full lg:w-96 border-r border-gray-200 flex flex-col ${
                 mobileView === "chat" ? "hidden lg:flex" : "flex"
@@ -404,7 +432,7 @@ const MessagesPage = () => {
             >
               {selectedConversation ? (
                 <>
-                  {/* Chat Header (existing—no change) */}
+                  {/* Chat Header */}
                   <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <button
@@ -426,7 +454,7 @@ const MessagesPage = () => {
                             {selectedConversation.fullName}
                           </h3>
                           <p className="text-sm text-gray-600 line-clamp-2">
-                            {selectedConversation.tags.join(" | ")}
+                            {selectedConversation.tags?.join(" | ") || "Active now"}
                           </p>
                         </div>
                       </div>
@@ -454,7 +482,7 @@ const MessagesPage = () => {
                     </div>
                   </div>
 
-                  {/* Messages (existing—no change) */}
+                  {/* Messages */}
                   <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
                     <motion.div
                       variants={containerVariants}
@@ -466,9 +494,17 @@ const MessagesPage = () => {
                         <MessageBubble key={index} message={message} />
                       ))}
                     </motion.div>
+                    
+                    {messages.length === 0 && (
+                      <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                        <MessageCircle className="w-16 h-16 mb-4 text-gray-300" />
+                        <p className="text-lg font-medium mb-2">No messages yet</p>
+                        <p className="text-sm">Start a conversation with {selectedConversation.fullName}</p>
+                      </div>
+                    )}
                   </div>
 
-
+                  {/* Message Input */}
                   <div className="p-4 border-t border-gray-200">
                     <div className="flex items-center space-x-2">
                       <motion.button

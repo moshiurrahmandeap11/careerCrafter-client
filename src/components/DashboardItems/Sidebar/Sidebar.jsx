@@ -16,9 +16,11 @@ import {
   MessagesSquareIcon
 } from 'lucide-react';
 import { Link } from 'react-router';
+import useAuth from '../../../hooks/UseAuth/useAuth';
 
 const Sidebar = ({ isOpen, toggleSidebar, activeRoute, setActiveRoute }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const {user} = useAuth();
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -28,7 +30,6 @@ const Sidebar = ({ isOpen, toggleSidebar, activeRoute, setActiveRoute }) => {
     ] },
     { id: 'jobs', label: 'Jobs', icon: Briefcase },
     { id: 'applications', label: 'Applications', icon: FileText },
-    { id: 'analytics', label: 'Analytics', icon: TrendingUp },
     { id: 'messages', label: 'Messages', icon: MessageSquare, hasSubmenu: true, submenu: [
       { id: "messages", label: "All Messages", icon: MessagesSquareIcon,}
     ] },
@@ -163,8 +164,8 @@ const Sidebar = ({ isOpen, toggleSidebar, activeRoute, setActiveRoute }) => {
               A
             </div>
             <div>
-              <p className="font-medium text-sm">Admin User</p>
-              <p className="text-xs text-slate-400">admin@careercrafter.com</p>
+              <p className="font-medium text-sm">{user?.displayName || 'Career Crafter'}</p>
+              <p className="text-xs text-slate-400">{user?.email || 'admin@careercrafter.com'}</p>
             </div>
           </div>
         </div>

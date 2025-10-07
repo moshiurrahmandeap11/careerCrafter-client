@@ -24,6 +24,9 @@ import PostJob from "../../pages/Business/PostJob/PostJob";
 import JobDetails from "../../pages/jobs/JobDetails/JobDetails";
 import ResumePage from "../../pages/ai-resume/ResumePage";
 
+import ProfileHired from "../../pages/Profile/ProfileHired/ProfileHired";
+
+
 export const route = createBrowserRouter([
   {
     path: "/",
@@ -36,6 +39,10 @@ export const route = createBrowserRouter([
       {
         path: "/profile",
         element: <Profile></Profile>,
+      },
+      {
+        path: "/profile/hired",
+        element: <ProfileHired></ProfileHired>
       },
       {
         path: "/network",
