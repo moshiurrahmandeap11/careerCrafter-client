@@ -26,6 +26,7 @@ import ResumePage from "../../pages/ai-resume/ResumePage";
 
 import ProfileHired from "../../pages/Profile/ProfileHired/ProfileHired";
 
+
 export const route = createBrowserRouter([
   {
     path: "/",
