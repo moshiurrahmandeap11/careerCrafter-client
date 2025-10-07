@@ -43,6 +43,7 @@ export const processPayment = createAsyncThunk(
   'premium/processPayment',
   async (paymentData, { getState, rejectWithValue }) => {
     try {
+      await new Promise(resolve => setTimeout(resolve, 5000));
       // Calculate credits
       const creditsAwarded = calculateCredits(paymentData.planId, getState().premium.billingCycle);
       
