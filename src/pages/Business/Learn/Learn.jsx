@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, MessageSquare, Target, TrendingUp, Award, Users, Send, Sparkles, Code, Briefcase, Brain, Loader2, Clock, CheckCircle } from 'lucide-react';
 import axiosIntense from '../../../hooks/AxiosIntense/axiosIntense';
+import { Link } from 'react-router';
 
 
 const getOrCreateUserId = () => {
@@ -325,7 +326,7 @@ const Learn = () => {
                                 <BookOpen className="w-4 h-4 md:w-6 md:h-6 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-lg md:text-2xl font-bold text-gray-900">Career Crafter</h1>
+                                <Link to={"/"} className="text-lg md:text-2xl font-bold text-gray-900">Career Crafter</Link>
                                 <p className="text-xs md:text-sm text-gray-500">Learn with AI</p>
                             </div>
                         </div>
