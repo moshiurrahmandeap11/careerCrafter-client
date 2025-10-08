@@ -25,6 +25,7 @@ import JobDetails from "../../pages/jobs/JobDetails/JobDetails";
 import ResumePage from "../../pages/ai-resume/ResumePage";
 import ProfileHired from "../../pages/Profile/ProfileHired/ProfileHired";
 import AiJobMatch from "../../pages/AIJobMatch/AiJobMatch";
+import UserDashboard from "../../components/DashboardItems/UserDashboard/UserDashboard";
 
 
 export const route = createBrowserRouter([
@@ -120,6 +121,10 @@ export const route = createBrowserRouter([
         path: "admin",
         element: <AdminDashboard></AdminDashboard>,
       },
+      {
+        path: "user",
+        element: <UserDashboard></UserDashboard>
+      }
     ],
   },
   {

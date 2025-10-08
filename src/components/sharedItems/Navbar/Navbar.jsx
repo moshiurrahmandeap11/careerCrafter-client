@@ -210,6 +210,23 @@ const Navbar = () => {
       });
     }
   }, [user, navigate]);
+  const handleDashboard = useCallback(() => {
+    if (user) {
+      navigate("/dashboard/user");
+    } else {
+      Swal.fire({
+        title: "Login Required",
+        text: "You need to login first",
+        icon: "warning",
+        confirmButtonText: "Login",
+        confirmButtonColor: "#2563eb",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/auth/signin");
+        }
+      });
+    }
+  }, [user, navigate]);
 
   const handleNavClick = useCallback(
     (navItem) => {
@@ -541,6 +558,13 @@ const Navbar = () => {
                             >
                               <User className="w-4 h-4" />
                               <span>Your Profile</span>
+                            </button>
+                            <button
+                              onClick={() => handleDashboard("dashboard")}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+                            >
+                              <User className="w-4 h-4" />
+                              <span>Dashboard</span>
                             </button>
                             <button
                               onClick={() => handleNavClick("Settings")}
