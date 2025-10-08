@@ -473,6 +473,7 @@ const JobsPage = () => {
                       Apply Now
                     </motion.button>
                     <motion.button
+                    onClick={() => navigate(`/job/${job._id}`)}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:bg-gray-200 transition-colors duration-200"
