@@ -23,7 +23,6 @@ import Learn from "../../pages/Business/Learn/Learn";
 import PostJob from "../../pages/Business/PostJob/PostJob";
 import JobDetails from "../../pages/jobs/JobDetails/JobDetails";
 import ResumePage from "../../pages/ai-resume/ResumePage";
-
 import ProfileHired from "../../pages/Profile/ProfileHired/ProfileHired";
 
 
