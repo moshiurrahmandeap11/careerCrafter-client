@@ -8,8 +8,8 @@ const Home = () => {
     return (
         <div>
             <ReTitle title='Career Crafter'/>
-            <HiredPost></HiredPost>
             <Hero></Hero>
+            <HiredPost></HiredPost>
             <Feed></Feed>
         </div>
     );
