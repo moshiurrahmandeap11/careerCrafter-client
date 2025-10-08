@@ -24,6 +24,7 @@ import PostJob from "../../pages/Business/PostJob/PostJob";
 import JobDetails from "../../pages/jobs/JobDetails/JobDetails";
 import ResumePage from "../../pages/ai-resume/ResumePage";
 import ProfileHired from "../../pages/Profile/ProfileHired/ProfileHired";
+import AiJobMatch from "../../pages/AIJobMatch/AiJobMatch";
 
 
 export const route = createBrowserRouter([
@@ -74,6 +75,10 @@ export const route = createBrowserRouter([
       {
         path: 'ai-resume',
         element: <ResumePage />
+      },
+      {
+        path: "ai-job-match",
+        element: <AiJobMatch></AiJobMatch>
       }
     ],
   },
