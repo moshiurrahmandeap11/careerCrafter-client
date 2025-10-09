@@ -3,7 +3,6 @@ import { BookOpen, MessageSquare, Target, TrendingUp, Award, Users, Send, Sparkl
 import axiosIntense from '../../../hooks/AxiosIntense/axiosIntense';
 import { Link } from 'react-router';
 
-
 const getOrCreateUserId = () => {
   let userId = localStorage.getItem('career_crafter_user_id');
   if (!userId) {
@@ -26,7 +25,15 @@ const Learn = () => {
     
     const [userId, setUserId] = useState(null);
     
-    const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+
+    // Groq models - fast and reliable
+    const GROQ_MODELS = [
+        'llama-3.1-8b-instant',  // Very fast, good for quick responses
+        'llama-3.3-70b-versatile', // High quality, slightly slower
+        'mixtral-8x7b-32768', // Excellent for complex queries
+        'gemma2-9b-it' // Good balanced model
+    ];
 
     useEffect(() => {
         const user = getOrCreateUserId();
@@ -78,38 +85,62 @@ const Learn = () => {
         {
             _id: '1',
             title: 'Web Development',
-            description: 'Master modern web technologies',
+            description: 'Master modern web technologies including React, Node.js, and full-stack development',
             category: 'development',
             courses: 156,
             enrolled: 2300,
-            difficulty: 'intermediate'
+            difficulty: 'intermediate',
+            duration: '3-6 months'
         },
         {
             _id: '2',
             title: 'Data Science & AI',
-            description: 'Learn machine learning and analytics',
+            description: 'Learn machine learning, data analysis, and artificial intelligence fundamentals',
             category: 'data-science',
             courses: 89,
             enrolled: 1800,
-            difficulty: 'advanced'
+            difficulty: 'advanced',
+            duration: '4-8 months'
         },
         {
             _id: '3',
             title: 'Business & Management',
-            description: 'Develop leadership skills',
+            description: 'Develop leadership, project management, and business strategy skills',
             category: 'business',
             courses: 124,
             enrolled: 3100,
-            difficulty: 'beginner'
+            difficulty: 'beginner',
+            duration: '2-4 months'
         },
         {
             _id: '4',
             title: 'Career Development',
-            description: 'Advance your professional journey',
+            description: 'Master resume writing, interview skills, and professional networking',
             category: 'career',
             courses: 67,
             enrolled: 2700,
-            difficulty: 'beginner'
+            difficulty: 'beginner',
+            duration: '1-2 months'
+        },
+        {
+            _id: '5',
+            title: 'Mobile Development',
+            description: 'Build iOS and Android apps with React Native and Flutter',
+            category: 'development',
+            courses: 92,
+            enrolled: 1500,
+            difficulty: 'intermediate',
+            duration: '3-5 months'
+        },
+        {
+            _id: '6',
+            title: 'Digital Marketing',
+            description: 'Learn SEO, social media marketing, and digital advertising strategies',
+            category: 'business',
+            courses: 78,
+            enrolled: 2200,
+            difficulty: 'beginner',
+            duration: '2-3 months'
         }
     ];
 
@@ -121,9 +152,25 @@ const Learn = () => {
             
             if (response.data.success) {
                 setUserStats(response.data.data);
+            } else {
+                // Default stats if none found
+                setUserStats({
+                    totalEnrolled: 0,
+                    totalCompleted: 0,
+                    totalTimeSpent: 0,
+                    averageScore: 0,
+                    learningStreak: 0
+                });
             }
         } catch (error) {
             console.error('Error fetching stats:', error);
+            setUserStats({
+                totalEnrolled: 0,
+                totalCompleted: 0,
+                totalTimeSpent: 0,
+                averageScore: 0,
+                learningStreak: 0
+            });
         }
     };
 
@@ -136,7 +183,8 @@ const Learn = () => {
             if (response.data.success && response.data.data.length > 0) {
                 const formattedMessages = response.data.data.map(msg => ({
                     role: msg.role,
-                    content: msg.content
+                    content: msg.content,
+                    timestamp: msg.timestamp
                 }));
                 setMessages(formattedMessages);
             }
@@ -149,7 +197,13 @@ const Learn = () => {
         if (!userId) return;
         
         try {
-            await axiosIntense.post('/learn/chat', { userId, role, content, topic });
+            await axiosIntense.post('/learn/chat', { 
+                userId, 
+                role, 
+                content, 
+                topic,
+                timestamp: new Date().toISOString()
+            });
         } catch (error) {
             console.error('Error saving chat:', error);
         }
@@ -173,15 +227,6 @@ const Learn = () => {
         }
     };
 
-    const AVAILABLE_MODELS = [
-        'qwen/qwen-2-7b-instruct:free',
-        'meta-llama/llama-3.2-3b-instruct:free',
-        'microsoft/phi-3-mini-128k-instruct:free',
-        'nousresearch/hermes-3-llama-3.1-405b:free'
-    ];
-
-    const [currentModelIndex, setCurrentModelIndex] = useState(0);
-
     const sendMessageToAI = async (message) => {
         if (!userId) return;
         
@@ -192,65 +237,119 @@ const Learn = () => {
         
         await saveChatMessage('user', message, selectedTopic);
 
-        const tryModel = async (modelIndex = 0) => {
-            if (modelIndex >= AVAILABLE_MODELS.length) {
-                throw new Error('All models failed. Please try again later.');
+        const tryGroqModel = async (modelIndex = 0) => {
+            if (modelIndex >= GROQ_MODELS.length) {
+                throw new Error('All Groq models are currently unavailable. Please try again later.');
             }
 
-            const model = AVAILABLE_MODELS[modelIndex];
-            console.log(`Trying model: ${model}`);
+            const model = GROQ_MODELS[modelIndex];
+            console.log(`Trying Groq model: ${model}`);
 
             try {
-                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                // Prepare conversation history (last 10 messages for context)
+                const conversationHistory = [
+                    {
+                        role: "system",
+                        content: `You are CareerCrafter AI Mentor, an expert career advisor and learning companion. You help users with:
+                        - Career guidance and planning
+                        - Learning path recommendations
+                        - Skill development strategies
+                        - Interview preparation
+                        - Resume and portfolio advice
+                        - Professional networking tips
+                        - Industry insights and trends
+                        
+                        Be supportive, practical, and actionable in your advice. Provide specific steps and resources when possible.
+                        Keep responses clear and structured. If suggesting learning paths, break them into manageable steps.
+                        Always maintain a positive and encouraging tone.`
+                    },
+                    ...messages.slice(-10).map(msg => ({
+                        role: msg.role,
+                        content: msg.content
+                    })),
+                    {
+                        role: "user",
+                        content: message
+                    }
+                ];
+
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`
+                        'Authorization': `Bearer ${GROQ_API_KEY}`
                     },
                     body: JSON.stringify({
                         model: model,
-                        messages: [
-                            {
-                                role: 'user',
-                                content: `You are a helpful career and learning mentor on Career Crafter platform. Help with this query: ${message}`
-                            }
-                        ]
+                        messages: conversationHistory,
+                        temperature: 0.7,
+                        max_tokens: 1024,
+                        top_p: 0.9,
+                        stream: false
                     })
                 });
 
-                const data = await response.json();
-
                 if (!response.ok) {
-                    console.error(`Model ${model} failed:`, data);
-                    return await tryModel(modelIndex + 1);
+                    const errorData = await response.json();
+                    console.error(`Groq model ${model} failed:`, errorData);
+                    
+                    // If rate limited or model unavailable, try next model
+                    if (response.status === 429 || response.status === 503) {
+                        return await tryGroqModel(modelIndex + 1);
+                    }
+                    throw new Error(`Groq API error: ${errorData.error?.message || response.statusText}`);
                 }
+
+                const data = await response.json();
                 
                 if (data.choices && data.choices[0] && data.choices[0].message) {
                     const aiResponse = data.choices[0].message.content;
-                    setCurrentModelIndex(modelIndex);
+                    console.log(`Success with Groq model: ${model}`);
                     return aiResponse;
                 } else {
-                    return await tryModel(modelIndex + 1);
+                    throw new Error('Invalid response format from Groq API');
                 }
             } catch (error) {
-                console.error(`Model ${model} error:`, error);
-                return await tryModel(modelIndex + 1);
+                console.error(`Groq model ${model} error:`, error);
+                
+                // If it's a network error or temporary issue, try next model
+                if (modelIndex < GROQ_MODELS.length - 1) {
+                    console.log(`Trying next Groq model...`);
+                    return await tryGroqModel(modelIndex + 1);
+                }
+                throw error;
             }
         };
 
         try {
-            const aiResponse = await tryModel(currentModelIndex);
+            const aiResponse = await tryGroqModel(0);
             const assistantMessage = { role: 'assistant', content: aiResponse };
             
             setMessages(prev => [...prev, assistantMessage]);
             await saveChatMessage('assistant', aiResponse, selectedTopic);
+            
         } catch (error) {
-            console.error('All AI models failed:', error);
-            const errorMsg = 'Sorry, I am unable to respond right now. Please try again in a moment.';
-            const errorMessage = { role: 'assistant', content: errorMsg };
+            console.error('All Groq models failed:', error);
+            
+            const errorMessage = { 
+                role: 'assistant', 
+                content: `I apologize, but I'm having trouble connecting right now. This could be due to high demand or temporary technical issues.
+
+Here are some things you can try:
+• Refresh the page and try again in a moment
+• Check out our learning paths in the Explore tab
+• Browse our curated resources for career development
+
+In the meantime, you might find these resources helpful:
+- FreeCodeCamp for web development
+- Coursera for professional courses
+- LinkedIn Learning for career skills
+
+Please try again shortly!` 
+            };
             
             setMessages(prev => [...prev, errorMessage]);
-            await saveChatMessage('assistant', errorMsg, selectedTopic);
+            await saveChatMessage('assistant', errorMessage.content, selectedTopic);
         } finally {
             setIsLoading(false);
             setInputMessage('');
@@ -282,10 +381,14 @@ const Learn = () => {
     };
 
     const quickPrompts = [
-        "How do I start learning web development?",
-        "What skills are in demand for 2025?",
-        "Create a 30-day learning plan for me",
-        "How to improve my LinkedIn profile?"
+        "How do I start learning web development in 2025?",
+        "What are the most in-demand tech skills right now?",
+        "Create a 30-day learning plan for data science",
+        "How to transition from beginner to intermediate developer?",
+        "Best ways to build a programming portfolio",
+        "How to prepare for technical interviews?",
+        "Career paths in artificial intelligence",
+        "Tips for negotiating salary in tech jobs"
     ];
 
     const getCategoryIcon = (category) => {
@@ -293,7 +396,8 @@ const Learn = () => {
             development: <Code className="w-4 h-4 md:w-6 md:h-6" />,
             'data-science': <Brain className="w-4 h-4 md:w-6 md:h-6" />,
             business: <Briefcase className="w-4 h-4 md:w-6 md:h-6" />,
-            career: <TrendingUp className="w-4 h-4 md:w-6 md:h-6" />
+            career: <TrendingUp className="w-4 h-4 md:w-6 md:h-6" />,
+            marketing: <Target className="w-4 h-4 md:w-6 md:h-6" />
         };
         return icons[category] || <BookOpen className="w-4 h-4 md:w-6 md:h-6" />;
     };
@@ -303,7 +407,8 @@ const Learn = () => {
             development: 'from-blue-500 to-cyan-500',
             'data-science': 'from-purple-500 to-pink-500',
             business: 'from-orange-500 to-red-500',
-            career: 'from-green-500 to-teal-500'
+            career: 'from-green-500 to-teal-500',
+            marketing: 'from-indigo-500 to-purple-500'
         };
         return colors[category] || 'from-gray-500 to-gray-700';
     };
@@ -379,15 +484,21 @@ const Learn = () => {
                             <div className="max-w-3xl">
                                 <h2 className="text-2xl md:text-4xl font-bold mb-3 md:mb-4">Start Your Learning Journey</h2>
                                 <p className="text-base md:text-xl opacity-90 mb-4 md:mb-6">
-                                    Unlock your potential with AI-powered personalized learning paths
+                                    Unlock your potential with AI-powered personalized learning paths and instant career guidance
                                 </p>
-                                <button
-                                    onClick={() => setActiveTab('mentor')}
-                                    className="bg-white text-blue-600 px-4 py-2 md:px-6 md:py-3 rounded-lg font-semibold hover:shadow-lg transition-all inline-flex items-center gap-2 text-sm md:text-base"
-                                >
-                                    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
-                                    Talk to AI Mentor
-                                </button>
+                                <div className="flex flex-wrap gap-3">
+                                    <button
+                                        onClick={() => setActiveTab('mentor')}
+                                        className="bg-white text-blue-600 px-4 py-2 md:px-6 md:py-3 rounded-lg font-semibold hover:shadow-lg transition-all inline-flex items-center gap-2 text-sm md:text-base"
+                                    >
+                                        <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
+                                        Talk to AI Mentor
+                                    </button>
+                                    <button className="bg-white/20 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg font-semibold hover:bg-white/30 transition-all inline-flex items-center gap-2 text-sm md:text-base">
+                                        <TrendingUp className="w-4 h-4 md:w-5 md:h-5" />
+                                        View Progress
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -397,12 +508,12 @@ const Learn = () => {
                                 { 
                                     icon: <Users className="w-4 h-4 md:w-5 md:h-5" />, 
                                     label: 'Enrollments', 
-                                    value: userStats ? userStats.totalEnrolled : '0' 
+                                    value: userStats ? formatNumber(userStats.totalEnrolled) : '0' 
                                 },
                                 { 
                                     icon: <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />, 
                                     label: 'Completed', 
-                                    value: userStats ? userStats.totalCompleted : '0' 
+                                    value: userStats ? formatNumber(userStats.totalCompleted) : '0' 
                                 },
                                 { 
                                     icon: <Clock className="w-4 h-4 md:w-5 md:h-5" />, 
@@ -425,8 +536,11 @@ const Learn = () => {
 
                         {/* Learning Paths */}
                         <div>
-                            <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Popular Learning Paths</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                            <div className="flex items-center justify-between mb-4 md:mb-6">
+                                <h3 className="text-xl md:text-2xl font-bold text-gray-900">Popular Learning Paths</h3>
+                                <span className="text-sm text-gray-500">{learningPaths.length} paths available</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                                 {learningPaths.map((path) => (
                                     <div
                                         key={path._id}
@@ -434,28 +548,44 @@ const Learn = () => {
                                         onClick={() => {
                                             setSelectedTopic(path.title);
                                             setActiveTab('mentor');
-                                            setInputMessage(`I want to learn ${path.title}. Can you help me get started?`);
-                                            enrollInPath(path._id);
+                                            setInputMessage(`I'm interested in learning ${path.title}. Can you create a personalized learning plan for me and suggest the best resources to get started?`);
                                         }}
                                     >
                                         <div className={`h-1 md:h-2 bg-gradient-to-r ${getCategoryColor(path.category)}`}></div>
                                         <div className="p-4 md:p-6">
                                             <div className="flex items-start gap-3 md:gap-4">
-                                                <div className={`w-8 h-8 md:w-12 md:h-12 rounded-lg bg-gradient-to-br ${getCategoryColor(path.category)} flex items-center justify-center text-white`}>
+                                                <div className={`w-8 h-8 md:w-12 md:h-12 rounded-lg bg-gradient-to-br ${getCategoryColor(path.category)} flex items-center justify-center text-white flex-shrink-0`}>
                                                     {getCategoryIcon(path.category)}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <h4 className="text-base md:text-xl font-bold text-gray-900 mb-1 md:mb-2 group-hover:text-blue-600 transition-colors truncate">
+                                                    <h4 className="text-base md:text-xl font-bold text-gray-900 mb-1 md:mb-2 group-hover:text-blue-600 transition-colors line-clamp-1">
                                                         {path.title}
                                                     </h4>
                                                     <p className="text-sm md:text-base text-gray-600 mb-2 md:mb-4 line-clamp-2">{path.description}</p>
-                                                    <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm text-gray-500">
-                                                        <span>{path.courses} courses</span>
+                                                    <div className="flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm text-gray-500">
+                                                        <span className="flex items-center gap-1">
+                                                            <BookOpen className="w-3 h-3" />
+                                                            {path.courses} courses
+                                                        </span>
                                                         <span>•</span>
-                                                        <span>{formatNumber(path.enrolled)} enrolled</span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Users className="w-3 h-3" />
+                                                            {formatNumber(path.enrolled)}
+                                                        </span>
                                                         <span>•</span>
-                                                        <span className="capitalize">{path.difficulty}</span>
+                                                        <span className={`px-2 py-1 rounded-full text-xs capitalize ${
+                                                            path.difficulty === 'beginner' ? 'bg-green-100 text-green-800' :
+                                                            path.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                                                            'bg-red-100 text-red-800'
+                                                        }`}>
+                                                            {path.difficulty}
+                                                        </span>
                                                     </div>
+                                                    {path.duration && (
+                                                        <div className="mt-2 text-xs text-blue-600 font-medium">
+                                                            {path.duration}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -476,7 +606,7 @@ const Learn = () => {
                                         </div>
                                         <div>
                                             <h3 className="text-lg md:text-xl font-bold">AI Career Mentor</h3>
-                                            <p className="text-xs md:text-sm opacity-90">Your personal learning guide</p>
+                                            <p className="text-xs md:text-sm opacity-90">Powered by Groq • Fast & Intelligent Responses</p>
                                         </div>
                                     </div>
                                     {messages.length > 0 && (
@@ -498,10 +628,10 @@ const Learn = () => {
                                             <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
                                         </div>
                                         <h4 className="text-base md:text-lg font-semibold text-gray-900 mb-2">
-                                            Start a conversation
+                                            Start a conversation with your AI Mentor
                                         </h4>
-                                        <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">
-                                            Ask me anything about learning, career development, or skill building
+                                        <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6 max-w-md mx-auto">
+                                            Get instant career advice, learning recommendations, and personalized guidance
                                         </p>
                                         <div className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-3 max-w-2xl mx-auto">
                                             {quickPrompts.map((prompt, idx) => (
@@ -511,7 +641,7 @@ const Learn = () => {
                                                         setInputMessage(prompt);
                                                         setTimeout(() => handleSendMessage(), 100);
                                                     }}
-                                                    className="text-left p-2 md:p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all text-xs md:text-sm"
+                                                    className="text-left p-2 md:p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all text-xs md:text-sm hover:bg-blue-50"
                                                 >
                                                     {prompt}
                                                 </button>
@@ -533,13 +663,21 @@ const Learn = () => {
                                                     }`}
                                                 >
                                                     <p className="whitespace-pre-wrap text-xs md:text-sm leading-relaxed">{msg.content}</p>
+                                                {msg.timestamp && (
+                                                    <div className={`text-xs mt-2 ${
+                                                        msg.role === 'user' ? 'text-blue-200' : 'text-gray-400'
+                                                    }`}>
+                                                        {new Date(msg.timestamp).toLocaleTimeString()}
+                                                    </div>
+                                                )}
                                                 </div>
                                             </div>
                                         ))}
                                         {isLoading && (
                                             <div className="flex justify-start">
-                                                <div className="bg-white text-gray-900 border border-gray-200 rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 shadow-sm">
+                                                <div className="bg-white text-gray-900 border border-gray-200 rounded-xl md:rounded-2xl px-4 py-3 shadow-sm flex items-center gap-2">
                                                     <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin text-blue-600" />
+                                                    <span className="text-sm text-gray-600">AI Mentor is thinking...</span>
                                                 </div>
                                             </div>
                                         )}
@@ -556,14 +694,14 @@ const Learn = () => {
                                         value={inputMessage}
                                         onChange={(e) => setInputMessage(e.target.value)}
                                         onKeyPress={handleKeyPress}
-                                        placeholder="Ask me anything about learning..."
+                                        placeholder="Ask about career advice, learning paths, skills development..."
                                         className="flex-1 px-3 py-2 md:px-4 md:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
                                         disabled={isLoading}
                                     />
                                     <button
                                         onClick={handleSendMessage}
                                         disabled={isLoading || !inputMessage.trim()}
-                                        className="px-3 py-2 md:px-6 md:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+                                        className="px-3 py-2 md:px-6 md:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center min-w-[60px]"
                                     >
                                         {isLoading ? (
                                             <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
@@ -571,6 +709,9 @@ const Learn = () => {
                                             <Send className="w-4 h-4 md:w-5 md:h-5" />
                                         )}
                                     </button>
+                                </div>
+                                <div className="mt-2 text-xs text-gray-500 text-center">
+                                    Powered by Groq AI • Fast responses • Expert career guidance
                                 </div>
                             </div>
                         </div>
