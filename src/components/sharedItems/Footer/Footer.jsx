@@ -90,6 +90,10 @@ const Footer = () => {
                 <span className="text-slate-300 text-sm">
                   123 Career Street<br />
                   San Francisco, CA 94102
+                <div className='flex items-center gap-2'>
+                  <Link className='text-red-600 hover:underline' to={"/about"}>About</Link>
+                  <Link className='text-red-600 hover:underline' to={"/contact"}>Contact</Link>
+                </div>
                 </span>
               </div>
             </div>
