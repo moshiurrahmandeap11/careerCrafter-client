@@ -711,7 +711,7 @@ Please try again shortly!`
                                     </button>
                                 </div>
                                 <div className="mt-2 text-xs text-gray-500 text-center">
-                                    Powered by Groq AI • Fast responses • Expert career guidance
+                                    Powered by Career Crafter • Fast responses • Expert career guidance
                                 </div>
                             </div>
                         </div>
