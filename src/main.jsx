@@ -8,7 +8,7 @@ import { ReTitleProvider } from "re-title";
 import store from "./store/index.js";
 import { Provider } from "react-redux";
 import axiosIntense from "./hooks/AxiosIntense/axiosIntense.jsx";
-
+import { HelmetProvider } from "react-helmet-async";
 
 // --- fetch favicon before rendering app ---
 const fetchFavicon = async () => {
@@ -31,7 +31,7 @@ const fetchFavicon = async () => {
 await fetchFavicon(); // Vite allows top-level await
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  <HelmetProvider>
     <Provider store={store}>
       <AuthProvider>
         <ReTitleProvider defaultTitle="Career Crafter">
@@ -39,5 +39,5 @@ createRoot(document.getElementById("root")).render(
         </ReTitleProvider>
       </AuthProvider>
     </Provider>
-  </StrictMode>
+  </HelmetProvider>
 );

@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://careercrafter.moshiurrahman.online/sitemap.xml
+
+# Block admin and user-specific pages
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /profile/edit
+Disallow: /settings/
