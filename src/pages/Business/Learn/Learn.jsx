@@ -606,7 +606,7 @@ Please try again shortly!`
                                         </div>
                                         <div>
                                             <h3 className="text-lg md:text-xl font-bold">AI Career Mentor</h3>
-                                            <p className="text-xs md:text-sm opacity-90">Powered by Groq • Fast & Intelligent Responses</p>
+                                            <p className="text-xs md:text-sm opacity-90">Powered by Career Crafter • Fast & Intelligent Responses</p>
                                         </div>
                                     </div>
                                     {messages.length > 0 && (
