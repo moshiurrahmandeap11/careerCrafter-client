@@ -164,7 +164,7 @@ const Navbar = () => {
       "/messages": "Messages",
       "/notifications": "Notifications",
       "/profile": "Profile",
-      "/ai-resume": "AI Resume",
+      "/create-resume": "Create Resume",
       "/ai-job-match": "AI Job Match",
       "/ai-coach": "AI Coach",
       "/business": "Business",
@@ -177,7 +177,7 @@ const Navbar = () => {
       setActiveNav(matchedNav[1]);
     } else {
       // Handle nested routes
-      if (path.includes("/ai-resume")) setActiveNav("AI Resume");
+      if (path.includes("/create-resume")) setActiveNav("Create Resume");
       else if (path.includes("/ai-job-match")) setActiveNav("AI Job Match");
       else if (path.includes("/ai-coach")) setActiveNav("AI Coach");
       else if (path.includes("/profile")) setActiveNav("Profile");
@@ -243,7 +243,7 @@ const Navbar = () => {
         Notifications: "/notifications",
         Business: "/business",
         Premium: "/premium",
-        "AI Resume": "/ai-resume",
+        "Create Resume": "/create-resume",
         "AI Job Match": "/ai-job-match",
         "AI Coach": "/ai-coach",
         Profile: "/profile",
@@ -312,7 +312,7 @@ const Navbar = () => {
 
   const aiToolsItems = useMemo(
     () => [
-      { label: "AI Resume", icon: FileText, path: "/ai-resume" },
+      { label: "Create Resume", icon: FileText, path: "/create-resume" },
       { label: "AI Job Match", icon: Target, path: "/ai-job-match" },
       { label: "AI Coach", icon: Bot, path: "/ai-coach" },
     ],
