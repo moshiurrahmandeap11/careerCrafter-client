@@ -28,7 +28,8 @@ import UserDashboard from "../../components/DashboardItems/UserDashboard/UserDas
 import About from "../../components/About/About";
 import Contact from "../../components/Contact/Contact";
 import CreateResume from "../../pages/create-resume/CreateResume";
-import ResumeCheck from "../../components/check-resume/ResumeCheck";
+import ResumeCheck from "../../pages/check-resume/ResumeCheck";
+
 
 
 export const route = createBrowserRouter([
