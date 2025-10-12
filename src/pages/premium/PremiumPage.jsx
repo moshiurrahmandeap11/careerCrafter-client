@@ -48,7 +48,7 @@ import {
 import useAuth from '../../hooks/UseAuth/useAuth';
 
 // Initialize Stripe
-const stripePromise = loadStripe(VITE_REACT_APP_STRIPE_PUBLISHABLE_KEY);
+const stripePromise = loadStripe(import.meta.env.VITE_REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
