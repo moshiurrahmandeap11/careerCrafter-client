@@ -7,6 +7,7 @@ import notificationsReducer from '../redux-slices/notificationsSlice';
 import premiumReducer from '../redux-slices/premiumSlice';
 import resumeReducer from '../redux-slices/resumeSlice';
 import resumeCheckReducer from '../redux-slices/resumeCheckSlice';
+import mockInterviewReducer from '../redux-slices/mockInterviewSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,7 +17,8 @@ export const store = configureStore({
     notifications: notificationsReducer,
     premium: premiumReducer,
     resume: resumeReducer,
-    resumeCheck: resumeCheckReducer
+    resumeCheck: resumeCheckReducer,
+    mockInterview: mockInterviewReducer
   },
 });
 
