@@ -1,47 +1,76 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Eye, FileText, Plus, Trash2, Sparkles, Award, Briefcase, GraduationCap, User, Mail, Phone, MapPin, Globe, Github, ExternalLink, Menu, X } from 'lucide-react';
+import { Download, Eye, FileText, Plus, Trash2, Sparkles, Award, Briefcase, GraduationCap, User, Mail, Phone, MapPin, Globe, Github, ExternalLink, Menu, X, Languages } from 'lucide-react';
+
+// Redux actions and selectors
+import {
+  setActiveTab,
+  setShowPreview,
+  setMobileMenuOpen,
+  updatePersonalInfo,
+  addEducation,
+  updateEducation,
+  removeEducation,
+  addExperience,
+  updateExperience,
+  removeExperience,
+  addSkill,
+  updateSkill,
+  removeSkill,
+  addProject,
+  updateProject,
+  removeProject,
+  addLanguage,
+  updateLanguage,
+  removeLanguage,
+  hideToast,
+  saveResume,
+  generatePDF
+} from '../../redux-slices/resumeSlice';
+
+import {
+  selectResumeData,
+  selectActiveTab,
+  selectShowPreview,
+  selectIsCreating,
+  selectIsDownloading,
+  selectResumeId,
+  selectMobileMenuOpen,
+  selectToast,
+  selectIsFormValid
+} from '../../redux-selectors/resumeSelectors';
 
 const CreateResume = () => {
-  const [activeTab, setActiveTab] = useState('personal');
-  const [resumeData, setResumeData] = useState({
-    personal: {
-      name: '',
-      title: '',
-      email: '',
-      phone: '',
-      location: '',
-      website: '',
-      github: '',
-      summary: ''
-    },
-    education: [],
-    experience: [],
-    skills: [],
-    projects: []
-  });
+  const dispatch = useDispatch();
   
-  const [showPreview, setShowPreview] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [resumeId, setResumeId] = useState(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: '', type: '' });
-
-  // Show toast message
-  const showToast = (message, type = 'success') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => {
-      setToast({ show: false, message: '', type: '' });
-    }, 3000);
-  };
+  // Select data from Redux store
+  const resumeData = useSelector(selectResumeData);
+  const activeTab = useSelector(selectActiveTab);
+  const showPreview = useSelector(selectShowPreview);
+  const isCreating = useSelector(selectIsCreating);
+  const isDownloading = useSelector(selectIsDownloading);
+  const resumeId = useSelector(selectResumeId);
+  const mobileMenuOpen = useSelector(selectMobileMenuOpen);
+  const toast = useSelector(selectToast);
+  const isFormValid = useSelector(selectIsFormValid);
 
   // Close mobile menu when tab is selected
   useEffect(() => {
     if (mobileMenuOpen) {
-      setMobileMenuOpen(false);
+      dispatch(setMobileMenuOpen(false));
     }
-  }, [activeTab]);
+  }, [activeTab, dispatch, mobileMenuOpen]);
+
+  // Auto-hide toast
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => {
+        dispatch(hideToast());
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast.show, dispatch]);
 
   // Animation variants
   const containerVariants = {
@@ -102,134 +131,54 @@ const CreateResume = () => {
     }
   };
 
-  // Handle input changes
-  const handleInputChange = (section, field, value) => {
-    setResumeData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
-    }));
+  // Event handlers
+  const handleInputChange = (field, value) => {
+    dispatch(updatePersonalInfo({ field, value }));
   };
 
-  // Handle array field changes
   const handleArrayFieldChange = (section, index, field, value) => {
-    setResumeData(prev => ({
-      ...prev,
-      [section]: prev[section].map((item, i) => 
-        i === index ? { ...item, [field]: value } : item
-      )
-    }));
+    const updateActions = {
+      education: updateEducation,
+      experience: updateExperience,
+      skills: updateSkill,
+      projects: updateProject,
+      languages: updateLanguage
+    };
+    
+    dispatch(updateActions[section]({ index, field, value }));
   };
 
-  // Add new item to array
-  const addArrayItem = (section, template) => {
-    setResumeData(prev => ({
-      ...prev,
-      [section]: [...prev[section], template]
-    }));
+  const addArrayItem = (section) => {
+    const addActions = {
+      education: addEducation,
+      experience: addExperience,
+      skills: addSkill,
+      projects: addProject,
+      languages: addLanguage
+    };
+    
+    dispatch(addActions[section]());
   };
 
-  // Remove item from array
   const removeArrayItem = (section, index) => {
-    setResumeData(prev => ({
-      ...prev,
-      [section]: prev[section].filter((_, i) => i !== index)
-    }));
+    const removeActions = {
+      education: removeEducation,
+      experience: removeExperience,
+      skills: removeSkill,
+      projects: removeProject,
+      languages: removeLanguage
+    };
+    
+    dispatch(removeActions[section](index));
   };
 
-  // Validate form data
-  const validateForm = () => {
-    const { personal, education, skills } = resumeData;
-    
-    if (!personal.name || !personal.title || !personal.email || !personal.phone || !personal.location || !personal.summary) {
-      showToast('Please fill all required personal information fields', 'error');
-      return false;
-    }
-    
-    if (education.length === 0) {
-      showToast('Please add at least one education entry', 'error');
-      return false;
-    }
-    
-    if (skills.length === 0) {
-      showToast('Please add at least one skill', 'error');
-      return false;
-    }
-    
-    return true;
+  const handleSaveResume = () => {
+    if (!isFormValid) return;
+    dispatch(saveResume(resumeData));
   };
 
-  // Save resume to backend
-  const saveResume = async () => {
-    if (!validateForm()) return;
-    
-    setIsCreating(true);
-    try {
-      // Simulate 3 second delay before API call
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      const response = await fetch('http://localhost:3000/v1/resumes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(resumeData)
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        setResumeId(result.id);
-        setShowPreview(true);
-        showToast('Resume created successfully!');
-      } else {
-        console.error('Failed to save resume');
-        showToast('Failed to create resume. Please try again.', 'error');
-      }
-    } catch (error) {
-      console.error('Error saving resume:', error);
-      showToast('Error creating resume. Please check your connection.', 'error');
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  // Download PDF
-  const downloadPDF = async () => {
-    setIsDownloading(true);
-    try {
-      // Simulate 3 second delay before API call
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      const response = await fetch('http://localhost:3000/v1/resumes/generate-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(resumeData)
-      });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `${resumeData.personal.name.replace(/\s+/g, '_')}_resume.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        showToast('PDF downloaded successfully!');
-      } else {
-        throw new Error('Failed to generate PDF');
-      }
-    } catch (error) {
-      console.error('Error downloading PDF:', error);
-      showToast('Error downloading PDF. Please try again.', 'error');
-    } finally {
-      setIsDownloading(false);
-    }
+  const handleDownloadPDF = () => {
+    dispatch(generatePDF(resumeData));
   };
 
   // Tab navigation
@@ -238,7 +187,8 @@ const CreateResume = () => {
     { id: 'education', label: 'Education', icon: GraduationCap },
     { id: 'experience', label: 'Experience', icon: Briefcase },
     { id: 'skills', label: 'Skills', icon: Award },
-    { id: 'projects', label: 'Projects', icon: FileText }
+    { id: 'projects', label: 'Projects', icon: FileText },
+    { id: 'languages', label: 'Languages', icon: Languages }
   ];
 
   return (
@@ -307,7 +257,7 @@ const CreateResume = () => {
               {/* Mobile Menu Button */}
               <div className="lg:hidden border-b border-gray-200 p-4">
                 <button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  onClick={() => dispatch(setMobileMenuOpen(!mobileMenuOpen))}
                   className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors duration-200"
                 >
                   {mobileMenuOpen ? (
@@ -328,7 +278,7 @@ const CreateResume = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={() => dispatch(setMobileMenuOpen(false))}
                     />
                     <motion.div
                       className="fixed top-0 right-0 h-full w-64 bg-white shadow-xl z-50 lg:hidden"
@@ -341,7 +291,7 @@ const CreateResume = () => {
                         <div className="flex items-center justify-between">
                           <h3 className="font-semibold text-gray-900">Navigation</h3>
                           <button
-                            onClick={() => setMobileMenuOpen(false)}
+                            onClick={() => dispatch(setMobileMenuOpen(false))}
                             className="text-gray-500 hover:text-gray-700"
                           >
                             <X className="w-5 h-5" />
@@ -355,7 +305,7 @@ const CreateResume = () => {
                           return (
                             <button
                               key={tab.id}
-                              onClick={() => setActiveTab(tab.id)}
+                              onClick={() => dispatch(setActiveTab(tab.id))}
                               className={`flex items-center space-x-3 w-full px-4 py-3 text-left rounded-xl transition-all duration-200 mb-2 ${
                                 isActive
                                   ? 'bg-blue-50 text-blue-600 border border-blue-200'
@@ -381,7 +331,7 @@ const CreateResume = () => {
                     return (
                       <button
                         key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
+                        onClick={() => dispatch(setActiveTab(tab.id))}
                         className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap ${
                           activeTab === tab.id
                             ? 'border-blue-500 text-blue-600 bg-blue-50'
@@ -413,9 +363,9 @@ const CreateResume = () => {
                         <input
                           type="text"
                           value={resumeData.personal.name}
-                          onChange={(e) => handleInputChange('personal', 'name', e.target.value)}
+                          onChange={(e) => handleInputChange('name', e.target.value)}
                           className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                          placeholder="John Doe"
+                          placeholder="Shariful Islam Udoy"
                           required
                         />
                       </div>
@@ -426,9 +376,9 @@ const CreateResume = () => {
                         <input
                           type="text"
                           value={resumeData.personal.title}
-                          onChange={(e) => handleInputChange('personal', 'title', e.target.value)}
+                          onChange={(e) => handleInputChange('title', e.target.value)}
                           className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                          placeholder="Software Engineer"
+                          placeholder="Frontend Developer (MERN Stack)"
                           required
                         />
                       </div>
@@ -444,9 +394,9 @@ const CreateResume = () => {
                           <input
                             type="email"
                             value={resumeData.personal.email}
-                            onChange={(e) => handleInputChange('personal', 'email', e.target.value)}
+                            onChange={(e) => handleInputChange('email', e.target.value)}
                             className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                            placeholder="john@example.com"
+                            placeholder="sharifulislamudoy56@gmail.com"
                             required
                           />
                         </div>
@@ -460,9 +410,9 @@ const CreateResume = () => {
                           <input
                             type="tel"
                             value={resumeData.personal.phone}
-                            onChange={(e) => handleInputChange('personal', 'phone', e.target.value)}
+                            onChange={(e) => handleInputChange('phone', e.target.value)}
                             className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                            placeholder="+1 (555) 123-4567"
+                            placeholder="+8801609-359736"
                             required
                           />
                         </div>
@@ -479,9 +429,9 @@ const CreateResume = () => {
                           <input
                             type="text"
                             value={resumeData.personal.location}
-                            onChange={(e) => handleInputChange('personal', 'location', e.target.value)}
+                            onChange={(e) => handleInputChange('location', e.target.value)}
                             className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                            placeholder="New York, NY"
+                            placeholder="Dhaka, Bangladesh"
                             required
                           />
                         </div>
@@ -493,7 +443,7 @@ const CreateResume = () => {
                           <input
                             type="url"
                             value={resumeData.personal.website}
-                            onChange={(e) => handleInputChange('personal', 'website', e.target.value)}
+                            onChange={(e) => handleInputChange('website', e.target.value)}
                             className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                             placeholder="https://portfolio.com"
                           />
@@ -509,7 +459,7 @@ const CreateResume = () => {
                           <input
                             type="url"
                             value={resumeData.personal.github}
-                            onChange={(e) => handleInputChange('personal', 'github', e.target.value)}
+                            onChange={(e) => handleInputChange('github', e.target.value)}
                             className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                             placeholder="https://github.com/username"
                           />
@@ -519,14 +469,14 @@ const CreateResume = () => {
 
                     <motion.div variants={itemVariants}>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Professional Summary <span className="text-red-500">*</span>
+                        Career Objective <span className="text-red-500">*</span>
                       </label>
                       <textarea
                         value={resumeData.personal.summary}
-                        onChange={(e) => handleInputChange('personal', 'summary', e.target.value)}
+                        onChange={(e) => handleInputChange('summary', e.target.value)}
                         rows={4}
                         className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                        placeholder="Brief overview of your professional background and key achievements..."
+                        placeholder="Frontend-focused MERN stack developer skilled in React, Next.js, Node.js, and MongoDB. Experienced in building scalable, user-centered web applications with modern ui and collaborating in dynamic teams"
                         required
                       />
                     </motion.div>
@@ -562,7 +512,7 @@ const CreateResume = () => {
                               type="text"
                               value={edu.institution}
                               onChange={(e) => handleArrayFieldChange('education', index, 'institution', e.target.value)}
-                              placeholder="University Name"
+                              placeholder="Dhaka College"
                               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                           </div>
@@ -572,7 +522,7 @@ const CreateResume = () => {
                               type="text"
                               value={edu.degree}
                               onChange={(e) => handleArrayFieldChange('education', index, 'degree', e.target.value)}
-                              placeholder="Degree"
+                              placeholder="B. Sc Honours in Mathematics"
                               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                           </div>
@@ -582,7 +532,7 @@ const CreateResume = () => {
                               type="text"
                               value={edu.field}
                               onChange={(e) => handleArrayFieldChange('education', index, 'field', e.target.value)}
-                              placeholder="Field of Study"
+                              placeholder="Mathematics"
                               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                           </div>
@@ -592,7 +542,7 @@ const CreateResume = () => {
                               type="text"
                               value={edu.duration}
                               onChange={(e) => handleArrayFieldChange('education', index, 'duration', e.target.value)}
-                              placeholder="Duration (e.g., 2020-2024)"
+                              placeholder="2022 – Present (Expected Graduation: 2026)"
                               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                           </div>
@@ -602,7 +552,7 @@ const CreateResume = () => {
                     
                     <motion.button
                       variants={itemVariants}
-                      onClick={() => addArrayItem('education', { institution: '', degree: '', field: '', duration: '' })}
+                      onClick={() => addArrayItem('education')}
                       className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
                     >
                       <Plus className="w-4 h-4" />
@@ -694,7 +644,7 @@ const CreateResume = () => {
                     
                     <motion.button
                       variants={itemVariants}
-                      onClick={() => addArrayItem('experience', { company: '', position: '', duration: '', location: '', description: '' })}
+                      onClick={() => addArrayItem('experience')}
                       className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
                     >
                       <Plus className="w-4 h-4" />
@@ -722,7 +672,7 @@ const CreateResume = () => {
                             type="text"
                             value={skill.name}
                             onChange={(e) => handleArrayFieldChange('skills', index, 'name', e.target.value)}
-                            placeholder="Skill name"
+                            placeholder="React.js"
                             className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
@@ -751,7 +701,7 @@ const CreateResume = () => {
                     
                     <motion.button
                       variants={itemVariants}
-                      onClick={() => addArrayItem('skills', { name: '', level: '' })}
+                      onClick={() => addArrayItem('skills')}
                       className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
                     >
                       <Plus className="w-4 h-4" />
@@ -789,7 +739,7 @@ const CreateResume = () => {
                               type="text"
                               value={project.name}
                               onChange={(e) => handleArrayFieldChange('projects', index, 'name', e.target.value)}
-                              placeholder="Project Name"
+                              placeholder="MediHurt"
                               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                           </div>
@@ -799,7 +749,7 @@ const CreateResume = () => {
                               type="text"
                               value={project.technologies}
                               onChange={(e) => handleArrayFieldChange('projects', index, 'technologies', e.target.value)}
-                              placeholder="Technologies Used"
+                              placeholder="Tailwind CSS, MongoDB, React.js, Express.js, Cloudinary"
                               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                           </div>
@@ -808,7 +758,7 @@ const CreateResume = () => {
                             <textarea
                               value={project.keyFeatures}
                               onChange={(e) => handleArrayFieldChange('projects', index, 'keyFeatures', e.target.value)}
-                              placeholder="List key features and functionalities..."
+                              placeholder="Integrate multiple payment gateways including Strip and a custom Cash on Delivery, Developed role-based dashboard supporting Admin, Seller and User roles, Admin dashboard for managing users, categories, sales reports and advertisement"
                               rows={2}
                               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
@@ -822,7 +772,7 @@ const CreateResume = () => {
                                   type="url"
                                   value={project.liveLink}
                                   onChange={(e) => handleArrayFieldChange('projects', index, 'liveLink', e.target.value)}
-                                  placeholder="https://demo.com"
+                                  placeholder="https://medihurt-demo.com"
                                   className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                               </div>
@@ -835,7 +785,7 @@ const CreateResume = () => {
                                   type="url"
                                   value={project.githubLink}
                                   onChange={(e) => handleArrayFieldChange('projects', index, 'githubLink', e.target.value)}
-                                  placeholder="https://github.com/user/repo"
+                                  placeholder="https://github.com/username/medihurt"
                                   className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                               </div>
@@ -846,7 +796,7 @@ const CreateResume = () => {
                             <textarea
                               value={project.description}
                               onChange={(e) => handleArrayFieldChange('projects', index, 'description', e.target.value)}
-                              placeholder="Project description and your contributions..."
+                              placeholder="A Medicine E-commerce Web App where medicines are bought and sold based on the categories..."
                               rows={3}
                               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
@@ -857,18 +807,68 @@ const CreateResume = () => {
                     
                     <motion.button
                       variants={itemVariants}
-                      onClick={() => addArrayItem('projects', { 
-                        name: '', 
-                        technologies: '', 
-                        keyFeatures: '', 
-                        liveLink: '', 
-                        githubLink: '', 
-                        description: '' 
-                      })}
+                      onClick={() => addArrayItem('projects')}
                       className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Add Project</span>
+                    </motion.button>
+                  </motion.div>
+                )}
+
+                {activeTab === 'languages' && (
+                  <motion.div
+                    className="space-y-6"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    {resumeData.languages.map((language, index) => (
+                      <motion.div
+                        key={index}
+                        variants={itemVariants}
+                        className="flex items-center space-x-4"
+                      >
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                          <input
+                            type="text"
+                            value={language.name}
+                            onChange={(e) => handleArrayFieldChange('languages', index, 'name', e.target.value)}
+                            placeholder="Bangla"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Proficiency</label>
+                          <select
+                            value={language.proficiency}
+                            onChange={(e) => handleArrayFieldChange('languages', index, 'proficiency', e.target.value)}
+                            className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">Select Level</option>
+                            <option value="Native">Native</option>
+                            <option value="Fluent">Fluent</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Basic">Basic</option>
+                          </select>
+                        </div>
+                        <button
+                          onClick={() => removeArrayItem('languages', index)}
+                          className="text-red-500 hover:text-red-700 transition-colors duration-200 p-2 mt-5"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </motion.div>
+                    ))}
+                    
+                    <motion.button
+                      variants={itemVariants}
+                      onClick={() => addArrayItem('languages')}
+                      className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add Language</span>
                     </motion.button>
                   </motion.div>
                 )}
@@ -888,13 +888,13 @@ const CreateResume = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Resume Actions</h3>
               <div className="space-y-4">
                 <motion.button
-                  onClick={saveResume}
-                  disabled={isCreating}
+                  onClick={handleSaveResume}
+                  disabled={isCreating || !isFormValid}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   variants={buttonHoverVariants}
                   initial="initial"
-                  whileHover="hover"
-                  whileTap="tap"
+                  whileHover={!isCreating && isFormValid ? "hover" : {}}
+                  whileTap={!isCreating && isFormValid ? "tap" : {}}
                 >
                   {isCreating ? (
                     <>
@@ -908,13 +908,13 @@ const CreateResume = () => {
                   ) : (
                     <>
                       <FileText className="w-5 h-5" />
-                      <span>Create Resume</span>
+                      <span>{isFormValid ? 'Create Resume' : 'Fill Required Fields'}</span>
                     </>
                   )}
                 </motion.button>
 
                 <motion.button
-                  onClick={() => setShowPreview(!showPreview)}
+                  onClick={() => dispatch(setShowPreview(!showPreview))}
                   className="w-full border border-gray-200 text-gray-700 py-3 px-4 rounded-xl font-semibold flex items-center justify-center space-x-2 hover:border-blue-500 hover:text-blue-600 transition-all duration-200"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -925,13 +925,13 @@ const CreateResume = () => {
 
                 {showPreview && (
                   <motion.button
-                    onClick={downloadPDF}
+                    onClick={handleDownloadPDF}
                     disabled={isDownloading}
                     className="w-full bg-green-600 text-white py-3 px-4 rounded-xl font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     variants={buttonHoverVariants}
                     initial="initial"
-                    whileHover="hover"
-                    whileTap="tap"
+                    whileHover={!isDownloading ? "hover" : {}}
+                    whileTap={!isDownloading ? "tap" : {}}
                   >
                     {isDownloading ? (
                       <>
@@ -964,20 +964,22 @@ const CreateResume = () => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Resume Preview</h3>
                 <div className="bg-gray-50 rounded-xl p-4 border-2 border-dashed border-gray-200 min-h-[400px]">
                   <div className="space-y-4">
+                    {/* Personal Information */}
                     <div className="text-center border-b pb-4">
-                      <h2 className="text-2xl font-bold text-gray-900">{resumeData.personal.name}</h2>
-                      <p className="text-gray-600">{resumeData.personal.title}</p>
+                      <h2 className="text-2xl font-bold text-gray-900">{resumeData.personal.name || "Shariful Islam Udoy"}</h2>
+                      <p className="text-gray-600">{resumeData.personal.title || "Frontend Developer (MERN Stack)"}</p>
                     </div>
                     
+                    {/* Contact Information */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                       <div>
-                        <strong>Email:</strong> {resumeData.personal.email}
+                        <strong>Email:</strong> {resumeData.personal.email || "sharifulislamudoy56@gmail.com"}
                       </div>
                       <div>
-                        <strong>Phone:</strong> {resumeData.personal.phone}
+                        <strong>Phone:</strong> {resumeData.personal.phone || "+8801609-359736"}
                       </div>
                       <div>
-                        <strong>Location:</strong> {resumeData.personal.location}
+                        <strong>Location:</strong> {resumeData.personal.location || "Dhaka, Bangladesh"}
                       </div>
                       {resumeData.personal.website && (
                         <div>
@@ -991,14 +993,16 @@ const CreateResume = () => {
                       )}
                     </div>
 
+                    {/* Career Objective */}
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Summary</h3>
-                      <p className="text-sm text-gray-600">{resumeData.personal.summary}</p>
+                      <h3 className="font-semibold text-gray-900 mb-2">Career Objective</h3>
+                      <p className="text-sm text-gray-600">{resumeData.personal.summary || "Frontend-focused MERN stack developer skilled in React, Next.js, Node.js, and MongoDB. Experienced in building scalable, user-centered web applications with modern ui and collaborating in dynamic teams"}</p>
                     </div>
 
+                    {/* Skills */}
                     {resumeData.skills.length > 0 && (
                       <div>
-                        <h3 className="font-semibold text-gray-900 mb-2">Skills</h3>
+                        <h3 className="font-semibold text-gray-900 mb-2">Technical Skills</h3>
                         <div className="flex flex-wrap gap-2">
                           {resumeData.skills.map((skill, index) => (
                             <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
@@ -1009,26 +1013,14 @@ const CreateResume = () => {
                       </div>
                     )}
 
-                    {resumeData.education.length > 0 && (
-                      <div>
-                        <h3 className="font-semibold text-gray-900 mb-2">Education</h3>
-                        {resumeData.education.map((edu, index) => (
-                          <div key={index} className="mb-2">
-                            <p className="font-medium text-sm">{edu.institution}</p>
-                            <p className="text-sm text-gray-600">{edu.degree} {edu.field && `in ${edu.field}`}</p>
-                            <p className="text-xs text-gray-500">{edu.duration}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
+                    {/* Projects */}
                     {resumeData.projects.length > 0 && (
                       <div>
                         <h3 className="font-semibold text-gray-900 mb-2">Projects</h3>
                         {resumeData.projects.map((project, index) => (
                           <div key={index} className="mb-4">
-                            <p className="font-medium text-sm">{project.name}</p>
-                            <p className="text-xs text-gray-600 mb-1">Technologies: {project.technologies}</p>
+                            <p className="font-medium text-sm">{project.name || "MediHurt"}</p>
+                            <p className="text-xs text-gray-600 mb-1">Technologies: {project.technologies || "Tailwind CSS, MongoDB, React.js, Express.js, Cloudinary"}</p>
                             {project.keyFeatures && (
                               <p className="text-xs text-gray-600 mb-1">Features: {project.keyFeatures}</p>
                             )}
@@ -1042,6 +1034,48 @@ const CreateResume = () => {
                             </div>
                           </div>
                         ))}
+                      </div>
+                    )}
+
+                    {/* Experience */}
+                    {resumeData.experience.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Experience</h3>
+                        {resumeData.experience.map((exp, index) => (
+                          <div key={index} className="mb-4">
+                            <p className="font-medium text-sm">{exp.position} at {exp.company}</p>
+                            <p className="text-xs text-gray-600">{exp.duration} | {exp.location}</p>
+                            <p className="text-xs text-gray-600 mt-1">{exp.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Education */}
+                    {resumeData.education.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Education</h3>
+                        {resumeData.education.map((edu, index) => (
+                          <div key={index} className="mb-2">
+                            <p className="font-medium text-sm">{edu.institution || "Dhaka College"}</p>
+                            <p className="text-sm text-gray-600">{edu.degree || "B. Sc Honours in Mathematics"} {edu.field && `in ${edu.field}`}</p>
+                            <p className="text-xs text-gray-500">{edu.duration || "2022 – Present (Expected Graduation: 2026)"}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Languages */}
+                    {resumeData.languages.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Languages</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {resumeData.languages.map((language, index) => (
+                            <span key={index} className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+                              {language.name} ({language.proficiency})
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>

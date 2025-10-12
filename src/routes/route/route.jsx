@@ -22,7 +22,6 @@ import Hire from "../../pages/Business/Hire/Hire";
 import Learn from "../../pages/Business/Learn/Learn";
 import PostJob from "../../pages/Business/PostJob/PostJob";
 import JobDetails from "../../pages/jobs/JobDetails/JobDetails";
-import ResumePage from "../../pages/ai-resume/ResumePage";
 import ProfileHired from "../../pages/Profile/ProfileHired/ProfileHired";
 import AiJobMatch from "../../pages/AIJobMatch/AiJobMatch";
 import UserDashboard from "../../components/DashboardItems/UserDashboard/UserDashboard";
@@ -75,10 +74,6 @@ export const route = createBrowserRouter([
       {
         path: "/business",
         element: <Business></Business>
-      },
-      {
-        path: 'ai-resume',
-        element: <ResumePage />
       },
       {
         path: "ai-job-match",
