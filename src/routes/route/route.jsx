@@ -29,6 +29,7 @@ import About from "../../components/About/About";
 import Contact from "../../components/Contact/Contact";
 import CreateResume from "../../pages/create-resume/CreateResume";
 import ResumeCheck from "../../pages/check-resume/ResumeCheck";
+import MockInterview from "../../pages/mock-interview/MockInterview";
 
 
 
@@ -96,6 +97,10 @@ export const route = createBrowserRouter([
       {
         path: '/check-resume',
         element: <ResumeCheck />
+      },
+      {
+        path: '/mock-interview',
+        element: <MockInterview />
       }
     ],
   },

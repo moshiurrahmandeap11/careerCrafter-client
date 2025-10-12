@@ -29,10 +29,11 @@ import {
     selectHasAnalysis,
     selectCanAnalyze
 } from '../../redux-selectors/resumeCheckSelectors';
+import { ReTitle } from 're-title';
 
 const ResumeCheck = () => {
     const dispatch = useDispatch();
-    const [localFile, setLocalFile] = useState(null); // Store actual File object locally
+    const [localFile, setLocalFile] = useState(null);
 
     // Select data from Redux store
     const uploadedFile = useSelector(selectUploadedFile);
@@ -146,6 +147,7 @@ const ResumeCheck = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8">
+            <ReTitle title='Check Resume'/>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Toast Notification */}
                 <AnimatePresence>
