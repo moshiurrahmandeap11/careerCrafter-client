@@ -21,6 +21,7 @@ import {
   Settings,
   LogOut,
   Star,
+  FileCheck2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "../Loader/Loader";
@@ -165,6 +166,7 @@ const Navbar = () => {
       "/notifications": "Notifications",
       "/profile": "Profile",
       "/create-resume": "Create Resume",
+      "/check-resume": "Check Resume",
       "/ai-job-match": "AI Job Match",
       "/ai-coach": "AI Coach",
       "/business": "Business",
@@ -178,6 +180,7 @@ const Navbar = () => {
     } else {
       // Handle nested routes
       if (path.includes("/create-resume")) setActiveNav("Create Resume");
+      else if (path.includes("/check-resume")) setActiveNav("Check Resume");
       else if (path.includes("/ai-job-match")) setActiveNav("AI Job Match");
       else if (path.includes("/ai-coach")) setActiveNav("AI Coach");
       else if (path.includes("/profile")) setActiveNav("Profile");
@@ -244,6 +247,7 @@ const Navbar = () => {
         Business: "/business",
         Premium: "/premium",
         "Create Resume": "/create-resume",
+        "Check Resume": "/check-resume",
         "AI Job Match": "/ai-job-match",
         "AI Coach": "/ai-coach",
         Profile: "/profile",
@@ -313,6 +317,7 @@ const Navbar = () => {
   const aiToolsItems = useMemo(
     () => [
       { label: "Create Resume", icon: FileText, path: "/create-resume" },
+      { label: "Check Resume", icon: FileCheck2, path: "/check-resume" },
       { label: "AI Job Match", icon: Target, path: "/ai-job-match" },
       { label: "AI Coach", icon: Bot, path: "/ai-coach" },
     ],
@@ -402,11 +407,10 @@ const Navbar = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`relative flex flex-col items-center p-2 rounded-xl min-w-16 transition-colors ${
-                    aiToolsItems.some((item) => activeNav === item.label)
+                  className={`relative flex flex-col items-center p-2 rounded-xl min-w-16 transition-colors ${aiToolsItems.some((item) => activeNav === item.label)
                       ? "text-purple-600 bg-purple-50"
                       : "text-gray-600 hover:bg-gray-50"
-                  }`}
+                    }`}
                   onClick={() => setShowAIToolsMenu(!showAIToolsMenu)}
                 >
                   <div className="relative">
@@ -430,11 +434,10 @@ const Navbar = () => {
                         <button
                           key={item.label}
                           onClick={() => handleAIToolClick(item.label)}
-                          className={`w-full px-4 py-2 text-left text-sm flex items-center space-x-3 transition-colors ${
-                            activeNav === item.label
+                          className={`w-full px-4 py-2 text-left text-sm flex items-center space-x-3 transition-colors ${activeNav === item.label
                               ? "bg-purple-50 text-purple-600"
                               : "text-gray-700 hover:bg-gray-50"
-                          }`}
+                            }`}
                         >
                           <item.icon className="w-4 h-4" />
                           <span>{item.label}</span>
@@ -470,11 +473,10 @@ const Navbar = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`flex items-center space-x-2 p-2 rounded-xl transition-colors ${
-                    activeNav === "Profile"
+                  className={`flex items-center space-x-2 p-2 rounded-xl transition-colors ${activeNav === "Profile"
                       ? "bg-blue-50 text-blue-600"
                       : "text-gray-600 hover:bg-gray-50"
-                  }`}
+                    }`}
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                 >
                   <div className="relative">
@@ -894,9 +896,8 @@ const DesktopNavItem = ({
   <motion.button
     whileHover={{ scale: 1.05 }}
     whileTap={{ scale: 0.95 }}
-    className={`relative flex flex-col items-center p-2 rounded-xl min-w-16 transition-colors ${
-      active ? "text-blue-600 bg-blue-50" : "text-gray-600 hover:bg-gray-50"
-    }`}
+    className={`relative flex flex-col items-center p-2 rounded-xl min-w-16 transition-colors ${active ? "text-blue-600 bg-blue-50" : "text-gray-600 hover:bg-gray-50"
+      }`}
     onClick={onClick}
   >
     <div className="relative">
@@ -912,13 +913,12 @@ const DesktopNavItem = ({
 // Mobile Nav Item Component
 const MobileNavItem = ({ label, icon: Icon, active, onClick, premium }) => (
   <button
-    className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-colors ${
-      active
+    className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-colors ${active
         ? premium
           ? "bg-amber-50 text-amber-600"
           : "bg-blue-50 text-blue-600"
         : "text-gray-700 hover:bg-gray-50"
-    }`}
+      }`}
     onClick={onClick}
   >
     <Icon className="w-5 h-5" />
@@ -937,9 +937,8 @@ const MobileBottomNavItem = ({
 }) => (
   <motion.button
     whileTap={{ scale: 0.95 }}
-    className={`relative flex flex-col items-center p-2 rounded-xl flex-1 transition-colors ${
-      active ? "text-blue-600" : "text-gray-600"
-    }`}
+    className={`relative flex flex-col items-center p-2 rounded-xl flex-1 transition-colors ${active ? "text-blue-600" : "text-gray-600"
+      }`}
     onClick={onClick}
   >
     <div className="relative">
