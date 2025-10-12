@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import Groq from 'groq-sdk';
 
 const groq = new Groq({
-  apiKey: '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',
+  apiKey: import.meta.env.GROQ_API_KEY || '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',
   dangerouslyAllowBrowser: true
 });
 
