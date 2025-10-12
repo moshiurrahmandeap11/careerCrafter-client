@@ -168,7 +168,7 @@ const Navbar = () => {
       "/create-resume": "Create Resume",
       "/check-resume": "Check Resume",
       "/ai-job-match": "AI Job Match",
-      "/ai-coach": "AI Coach",
+      "/mock-interview": "Mock Interview",
       "/business": "Business",
       "/premium": "Premium",
       "/settings": "Settings",
@@ -182,7 +182,7 @@ const Navbar = () => {
       if (path.includes("/create-resume")) setActiveNav("Create Resume");
       else if (path.includes("/check-resume")) setActiveNav("Check Resume");
       else if (path.includes("/ai-job-match")) setActiveNav("AI Job Match");
-      else if (path.includes("/ai-coach")) setActiveNav("AI Coach");
+      else if (path.includes("/mock-interview")) setActiveNav("Mock Interview");
       else if (path.includes("/profile")) setActiveNav("Profile");
       else if (path.includes("/settings")) setActiveNav("Settings");
     }
@@ -249,7 +249,7 @@ const Navbar = () => {
         "Create Resume": "/create-resume",
         "Check Resume": "/check-resume",
         "AI Job Match": "/ai-job-match",
-        "AI Coach": "/ai-coach",
+        "Mock Interview": "/mock-interview",
         Profile: "/profile",
         Settings: "/settings",
       };
@@ -319,7 +319,7 @@ const Navbar = () => {
       { label: "Create Resume", icon: FileText, path: "/create-resume" },
       { label: "Check Resume", icon: FileCheck2, path: "/check-resume" },
       { label: "AI Job Match", icon: Target, path: "/ai-job-match" },
-      { label: "AI Coach", icon: Bot, path: "/ai-coach" },
+      { label: "Mock Interview", icon: Bot, path: "/mock-interview" },
     ],
     []
   );
