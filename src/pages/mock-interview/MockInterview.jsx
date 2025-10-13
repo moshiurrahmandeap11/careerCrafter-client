@@ -25,7 +25,8 @@ import {
   submitAnswer,
   submitInterview,
   resetInterview,
-  setTimer
+  setTimer,
+  evaluateAnswer
 } from '../../redux-slices/mockInterviewSlice';
 
 import {
@@ -37,7 +38,8 @@ import {
   selectIsInterviewCompleted,
   selectQuestions,
   selectUserAnswers,
-  selectCorrectAnswers
+  selectCorrectAnswers,
+  selectIsEvaluating
 } from '../../redux-selectors/mockInterviewSelectors';
 
 const MockInterview = () => {
@@ -54,6 +56,7 @@ const MockInterview = () => {
   const questions = useSelector(selectQuestions);
   const userAnswers = useSelector(selectUserAnswers);
   const correctAnswers = useSelector(selectCorrectAnswers);
+  const isEvaluating = useSelector(selectIsEvaluating);
 
   // Local state
   const [userInfo, setUserInfo] = useState({
@@ -113,7 +116,7 @@ const MockInterview = () => {
     }));
   };
 
-  const handleAnswerSubmit = (e) => {
+  const handleAnswerSubmit = async (e) => {
     e.preventDefault();
     if (currentAnswer.trim() && isInterviewActive) {
       dispatch(submitAnswer({
@@ -121,6 +124,16 @@ const MockInterview = () => {
         answer: currentAnswer.trim(),
         timeSpent: questions[currentQuestion]?.timeLimit - timeRemaining
       }));
+      
+      // Trigger evaluation for the submitted answer
+      if (currentAnswer.trim()) {
+        dispatch(evaluateAnswer({
+          question: questions[currentQuestion]?.question,
+          userAnswer: currentAnswer.trim(),
+          correctAnswer: questions[currentQuestion]?.correctAnswer,
+          questionIndex: currentQuestion
+        }));
+      }
       
       setCurrentAnswer('');
       
@@ -189,11 +202,39 @@ const MockInterview = () => {
   };
 
   const calculateScore = () => {
-    return userAnswers.reduce((total, answer, index) => {
-      if (answer.isCorrect) return total + 1;
-      if (answer.userAnswer && !answer.isCorrect) return total - 0.25;
+    return userAnswers.reduce((total, answer) => {
+      if (answer.evaluation === 'correct') return total + 1;
+      if (answer.evaluation === 'partial') return total + 0.5;
+      if (answer.userAnswer && answer.evaluation === 'incorrect') return total - 0.25;
       return total;
     }, 0);
+  };
+
+  const getEvaluationColor = (evaluation) => {
+    switch (evaluation) {
+      case 'correct': return 'green';
+      case 'partial': return 'blue';
+      case 'incorrect': return 'red';
+      default: return 'gray';
+    }
+  };
+
+  const getEvaluationIcon = (evaluation) => {
+    switch (evaluation) {
+      case 'correct': return <CheckCircle className="w-4 h-4" />;
+      case 'partial': return <AlertCircle className="w-4 h-4" />;
+      case 'incorrect': return <XCircle className="w-4 h-4" />;
+      default: return <AlertCircle className="w-4 h-4" />;
+    }
+  };
+
+  const getEvaluationText = (evaluation) => {
+    switch (evaluation) {
+      case 'correct': return 'Correct';
+      case 'partial': return 'Partially Correct';
+      case 'incorrect': return 'Incorrect';
+      default: return 'Not Evaluated';
+    }
   };
 
   // Animation variants
@@ -245,7 +286,7 @@ const MockInterview = () => {
             </span>
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Practice your interview skills with AI and get instant feedback on your performance.
+            Practice your interview skills with AI and get instant feedback on your performance. Answer in any language!
           </p>
         </motion.div>
 
@@ -406,6 +447,8 @@ const MockInterview = () => {
 
                 <p className="text-center text-gray-600">
                   Each question will have a time limit based on its complexity.
+                  <br />
+                  <span className="text-blue-600 font-medium">You can answer in any language!</span>
                 </p>
 
                 <div className="flex space-x-4">
@@ -439,6 +482,9 @@ const MockInterview = () => {
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">Mock Interview</h2>
                   <p className="text-gray-600">Topic: {interviewTopic}</p>
+                  <p className="text-sm text-blue-600 font-medium">
+                    💡 You can answer in any language!
+                  </p>
                 </div>
                 
                 <div className="flex items-center space-x-4">
@@ -480,14 +526,14 @@ const MockInterview = () => {
               <form onSubmit={handleAnswerSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Answer
+                    Your Answer (Any language is accepted)
                   </label>
                   <textarea
                     value={currentAnswer}
                     onChange={(e) => setCurrentAnswer(e.target.value)}
                     rows={6}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-                    placeholder="Type your answer here..."
+                    placeholder="Type your answer here in any language..."
                     disabled={isPaused}
                   />
                 </div>
@@ -504,7 +550,7 @@ const MockInterview = () => {
                   
                   <button
                     type="submit"
-                    disabled={!currentAnswer.trim() || isPaused}
+                    disabled={!currentAnswer.trim() || isPaused || isEvaluating}
                     className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                   >
                     <SkipForward className="w-4 h-4" />
@@ -530,7 +576,7 @@ const MockInterview = () => {
               </div>
 
               {/* Score Summary */}
-              <div className="grid grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-4 gap-6 mb-8">
                 <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
                   <div className="text-2xl font-bold text-green-700 mb-2">{calculateScore().toFixed(2)}</div>
                   <div className="text-sm font-medium text-green-600">Final Score</div>
@@ -538,14 +584,21 @@ const MockInterview = () => {
                 
                 <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 text-center">
                   <div className="text-2xl font-bold text-blue-700 mb-2">
-                    {userAnswers.filter(answer => answer.isCorrect).length}
+                    {userAnswers.filter(answer => answer.evaluation === 'correct').length}
                   </div>
                   <div className="text-sm font-medium text-blue-600">Correct Answers</div>
+                </div>
+
+                <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 text-center">
+                  <div className="text-2xl font-bold text-yellow-700 mb-2">
+                    {userAnswers.filter(answer => answer.evaluation === 'partial').length}
+                  </div>
+                  <div className="text-sm font-medium text-yellow-600">Partial Answers</div>
                 </div>
                 
                 <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 text-center">
                   <div className="text-2xl font-bold text-orange-700 mb-2">
-                    {userAnswers.filter(answer => answer.userAnswer && !answer.isCorrect).length}
+                    {userAnswers.filter(answer => answer.evaluation === 'incorrect').length}
                   </div>
                   <div className="text-sm font-medium text-orange-600">Wrong Answers</div>
                 </div>
@@ -570,19 +623,26 @@ const MockInterview = () => {
                     >
                       <div className="flex items-start space-x-4">
                         <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                          userAnswer?.isCorrect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                          userAnswer?.evaluation === 'correct' ? 'bg-green-100 text-green-600' :
+                          userAnswer?.evaluation === 'partial' ? 'bg-blue-100 text-blue-600' :
+                          'bg-red-100 text-red-600'
                         }`}>
-                          {userAnswer?.isCorrect ? (
-                            <CheckCircle className="w-4 h-4" />
-                          ) : (
-                            <XCircle className="w-4 h-4" />
-                          )}
+                          {getEvaluationIcon(userAnswer?.evaluation)}
                         </div>
                         
                         <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 mb-2">
-                            Q{index + 1}: {question.question}
-                          </h4>
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-semibold text-gray-900">
+                              Q{index + 1}: {question.question}
+                            </h4>
+                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                              userAnswer?.evaluation === 'correct' ? 'bg-green-100 text-green-800' :
+                              userAnswer?.evaluation === 'partial' ? 'bg-blue-100 text-blue-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {getEvaluationText(userAnswer?.evaluation)}
+                            </span>
+                          </div>
                           
                           <div className="space-y-3">
                             <div>
@@ -592,11 +652,11 @@ const MockInterview = () => {
                               </div>
                             </div>
 
-                            {!userAnswer?.isCorrect && (
+                            {(userAnswer?.evaluation === 'incorrect' || userAnswer?.evaluation === 'partial') && (
                               <div>
                                 <div className="text-sm font-medium text-green-700 mb-1 flex items-center space-x-1">
                                   <CheckCircle className="w-4 h-4" />
-                                  <span>Correct Answer:</span>
+                                  <span>Expected Answer:</span>
                                 </div>
                                 <div className="text-green-700 bg-green-50 rounded-lg p-3">
                                   {correctAnswers[index]}
@@ -606,7 +666,11 @@ const MockInterview = () => {
 
                             <div className="flex justify-between text-sm text-gray-500">
                               <span>Time spent: {userAnswer?.timeSpent || 0}s</span>
-                              <span>Score: {userAnswer?.isCorrect ? '+1' : userAnswer?.userAnswer ? '-0.25' : '0'}</span>
+                              <span>Score: {
+                                userAnswer?.evaluation === 'correct' ? '+1' : 
+                                userAnswer?.evaluation === 'partial' ? '+0.5' : 
+                                userAnswer?.userAnswer ? '-0.25' : '0'
+                              }</span>
                             </div>
                           </div>
                         </div>
