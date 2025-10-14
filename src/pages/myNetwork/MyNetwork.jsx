@@ -1,5 +1,7 @@
-import React, { useEffect } from 'react';
+// components/MyNetwork.jsx
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import useAuth from '../../hooks/UseAuth/useAuth';
 import { 
   Search, 
   UserPlus, 
@@ -10,7 +12,8 @@ import {
   Clock,
   Settings,
   Menu,
-  X
+  X,
+  Users2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionCard } from '../../components/network-components/ConnectionCard';
@@ -18,7 +21,6 @@ import { PendingCard } from '../../components/network-components/PendingCard';
 import { SuggestionCard } from '../../components/network-components/SuggestionCard';
 import { ReTitle } from 're-title';
 
-// Import Redux actions and selectors
 import {
   fetchAllNetworkData,
   setSearchTerm,
@@ -26,12 +28,15 @@ import {
   acceptInvitation,
   ignoreInvitation,
   connectWithSuggestion,
-  removeConnection
+  removeConnection,
+  clearError
 } from '../../redux-slices/networkSlice';
+
 import {
   selectConnections,
   selectPendingInvitations,
   selectSuggestions,
+  selectAllUsers,
   selectLoading,
   selectError,
   selectSearchTerm,
@@ -39,49 +44,116 @@ import {
   selectFilteredConnections,
   selectTabCounts
 } from '../../redux-selectors/networkSelectors';
+import axiosIntense from '../../hooks/AxiosIntense/axiosIntense';
 
 const MyNetwork = () => {
   const dispatch = useDispatch();
+  const { user: currentUser, loading: authLoading } = useAuth();
   
-  // Select data from Redux store
   const connections = useSelector(selectConnections);
   const pendingInvitations = useSelector(selectPendingInvitations);
   const suggestions = useSelector(selectSuggestions);
-  const loading = useSelector(selectLoading);
+  const allUsers = useSelector(selectAllUsers);
+  const loading = useSelector(selectLoading) || authLoading;
   const error = useSelector(selectError);
   const searchTerm = useSelector(selectSearchTerm);
   const activeTab = useSelector(selectActiveTab);
   const filteredConnections = useSelector(selectFilteredConnections);
   const tabCounts = useSelector(selectTabCounts);
-
+  const email = (currentUser?.email);
+console.log(allUsers);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+const [userId, setUserId] = useState(null);
 
-  useEffect(() => {
-    dispatch(fetchAllNetworkData());
-  }, [dispatch]);
+useEffect(() => {
+  const tryFetching = async () => {
+    try {
+      const res = await axiosIntense.get(`/users/email/${email}`);
+      setUserId(res.data._id);
+    } catch (err) {
+      console.error("❌ Failed to fetch user ID:", err);
+    }
+  };
+  if (email) tryFetching();
+}, [email]);
+
+useEffect(() => {
+  if (!authLoading && currentUser?.uid && userId) {
+    console.log("📡 Fetching all network data for user:", userId);
+    dispatch(fetchAllNetworkData(userId));
+  }
+}, [dispatch, authLoading, currentUser, userId]);
+
+
+
 
   const handleTabClick = (tabId) => {
     dispatch(setActiveTab(tabId));
     setMobileMenuOpen(false);
   };
 
-  const handleAcceptInvitation = (invitationId) => {
-    dispatch(acceptInvitation(invitationId));
+  const handleAcceptInvitation = async (invitationId) => {
+    try {
+      await dispatch(acceptInvitation({ 
+        invitationId, 
+        userId: currentUser.id 
+      })).unwrap();
+      // Refresh data to get updated lists
+      dispatch(fetchAllNetworkData(currentUser.id));
+    } catch (error) {
+      console.error('Failed to accept invitation:', error);
+    }
   };
 
-  const handleIgnoreInvitation = (invitationId) => {
-    dispatch(ignoreInvitation(invitationId));
+  const handleIgnoreInvitation = async (invitationId) => {
+    try {
+      await dispatch(ignoreInvitation({ 
+        invitationId, 
+        userId: currentUser.id 
+      })).unwrap();
+      // Refresh data to get updated lists
+      dispatch(fetchAllNetworkData(currentUser.id));
+    } catch (error) {
+      console.error('Failed to ignore invitation:', error);
+    }
   };
 
-  const handleConnectWithSuggestion = (suggestionId) => {
-    dispatch(connectWithSuggestion(suggestionId));
+  const handleConnectWithSuggestion = async (suggestionId) => {
+    try {
+      await dispatch(connectWithSuggestion({ 
+        suggestionId, 
+        currentUserId: currentUser.id 
+      })).unwrap();
+      // Refresh data to get updated lists
+      dispatch(fetchAllNetworkData(currentUser.id));
+    } catch (error) {
+      console.error('Failed to connect with suggestion:', error);
+    }
   };
 
-  const handleRemoveConnection = (connectionId) => {
-    dispatch(removeConnection(connectionId));
+  const handleRemoveConnection = async (connectionId) => {
+    try {
+      await dispatch(removeConnection(connectionId)).unwrap();
+      // Refresh data to get updated lists
+      dispatch(fetchAllNetworkData(currentUser.id));
+    } catch (error) {
+      console.error('Failed to remove connection:', error);
+    }
   };
 
-  // Animation variants
+  // ✅ FIX: Connected IDs সঠিকভাবে extract
+  const connectedUserIds = connections.map(c => c.user?._id?.toString()).filter(Boolean);
+  const currentUserId = currentUser?.id?.toString();
+
+  // ✅ FIX: All Users filter (connected + self exclude)
+  const filteredAllUsers = allUsers.filter(user => {
+    const userId = user._id?.toString();
+    return userId && 
+           userId !== currentUserId && 
+           !connectedUserIds.includes(userId);
+  });
+
+  // ✅ FIX: Framer Motion variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -105,11 +177,11 @@ const MyNetwork = () => {
     },
     hover: {
       x: 4,
-      backgroundColor: "rgba(59, 130, 246, 0.05)"
+      backgroundColor: "#eff6ff"
     },
     active: {
       x: 0,
-      backgroundColor: "rgba(59, 130, 246, 0.1)",
+      backgroundColor: "#dbeafe",
       borderLeftColor: "#3b82f6"
     }
   };
@@ -168,14 +240,19 @@ const MyNetwork = () => {
       icon: Sparkles, 
       description: 'People you may know' 
     },
+    { 
+      id: 'allUsers', 
+      label: 'All Users', 
+      count: filteredAllUsers.length,
+      icon: Users2, 
+      description: 'Browse all users and connect' 
+    },
   ];
 
-  // Mobile Menu Component
   const MobileMenu = () => (
     <AnimatePresence>
       {mobileMenuOpen && (
         <>
-          {/* Overlay */}
           <motion.div
             className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
             variants={overlayVariants}
@@ -185,7 +262,6 @@ const MyNetwork = () => {
             onClick={() => setMobileMenuOpen(false)}
           />
           
-          {/* Menu */}
           <motion.div
             className="fixed left-0 top-0 h-full w-80 bg-white z-50 lg:hidden shadow-xl"
             variants={mobileMenuVariants}
@@ -208,7 +284,6 @@ const MyNetwork = () => {
             </div>
 
             <div className="p-4">
-              {/* Search in Mobile Menu */}
               <div className="relative mb-6">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -220,7 +295,6 @@ const MyNetwork = () => {
                 />
               </div>
 
-              {/* Tabs in Mobile Menu */}
               <motion.div 
                 className="space-y-2"
                 variants={containerVariants}
@@ -292,7 +366,7 @@ const MyNetwork = () => {
             transition={{ delay: 0.2 }}
             className="text-gray-600"
           >
-            Building your network...
+            {authLoading ? 'Authenticating...' : 'Building your network...'}
           </motion.p>
         </motion.div>
       </div>
@@ -313,7 +387,10 @@ const MyNetwork = () => {
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Network Error</h3>
           <p className="text-gray-600 mb-6">{error}</p>
           <motion.button 
-            onClick={() => dispatch(fetchAllNetworkData())}
+            onClick={() => {
+              dispatch(clearError());
+              if (currentUser?.id) dispatch(fetchAllNetworkData(currentUser.id));
+            }}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -328,11 +405,9 @@ const MyNetwork = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <ReTitle title='My Network'/>
-      {/* Mobile Menu */}
       <MobileMenu />
 
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
         <motion.div 
           className="mb-8"
           initial={{ opacity: 0, y: -20 }}
@@ -374,6 +449,7 @@ const MyNetwork = () => {
                   boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.4)"
                 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => handleTabClick('suggestions')}
               >
                 <UserPlus className="w-4 h-4" />
                 <span className="hidden sm:inline">Connect</span>
@@ -382,16 +458,13 @@ const MyNetwork = () => {
           </div>
         </motion.div>
 
-        {/* Two Column Layout */}
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Column - Tabs (Hidden on mobile) */}
           <motion.div 
             className="hidden lg:block lg:w-80 flex-shrink-0"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
-            {/* Search */}
             <div className="relative mb-6">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -403,7 +476,6 @@ const MyNetwork = () => {
               />
             </div>
 
-            {/* Tabs Navigation */}
             <motion.div 
               className="space-y-2 sticky top-8"
               variants={containerVariants}
@@ -444,14 +516,12 @@ const MyNetwork = () => {
             </motion.div>
           </motion.div>
 
-          {/* Right Column - Content */}
           <motion.div 
             className="flex-1"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
           >
-            {/* Mobile Current Tab Indicator */}
             <div className="lg:hidden mb-6">
               <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
                 <div>
@@ -473,7 +543,6 @@ const MyNetwork = () => {
               </div>
             </div>
 
-            {/* Content */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
@@ -489,7 +558,7 @@ const MyNetwork = () => {
                     initial="hidden"
                     animate="visible"
                   >
-                    {filteredConnections.map((connection, index) => (
+                    {filteredConnections.map((connection) => (
                       <ConnectionCard 
                         key={connection.id} 
                         connection={connection}
@@ -506,12 +575,12 @@ const MyNetwork = () => {
                     initial="hidden"
                     animate="visible"
                   >
-                    {pendingInvitations.map((invitation, index) => (
+                    {pendingInvitations.map((invitation) => (
                       <PendingCard 
-                        key={invitation.id} 
+                        key={invitation._id} 
                         invitation={invitation}
-                        onAccept={() => handleAcceptInvitation(invitation.id)}
-                        onIgnore={() => handleIgnoreInvitation(invitation.id)}
+                        onAccept={() => handleAcceptInvitation(invitation._id)}
+                        onIgnore={() => handleIgnoreInvitation(invitation._id)}
                       />
                     ))}
                   </motion.div>
@@ -524,18 +593,35 @@ const MyNetwork = () => {
                     initial="hidden"
                     animate="visible"
                   >
-                    {suggestions.map((suggestion, index) => (
+                    {suggestions.map((suggestion) => (
                       <SuggestionCard 
-                        key={suggestion.id} 
+                        key={suggestion._id} 
                         suggestion={suggestion}
-                        onConnect={() => handleConnectWithSuggestion(suggestion.id)}
+                        onConnect={() => handleConnectWithSuggestion(suggestion._id)}
                       />
                     ))}
                   </motion.div>
                 )}
 
-                {/* Empty state for no data */}
-                {activeTab === 'connections' && connections.length === 0 && (
+                {activeTab === 'allUsers' && (
+                  <motion.div 
+                    className="grid md:grid-cols-2 xl:grid-cols-3 gap-4"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    {filteredAllUsers.map((user) => (
+                      <SuggestionCard 
+                        key={user._id} 
+                        suggestion={user}
+                        onConnect={() => handleConnectWithSuggestion(user._id)}
+                      />
+                    ))}
+                  </motion.div>
+                )}
+
+                {/* Empty states */}
+                {activeTab === 'connections' && filteredConnections.length === 0 && (
                   <motion.div 
                     className="text-center py-12 bg-white rounded-xl border border-gray-200"
                     initial={{ opacity: 0 }}
@@ -544,7 +630,10 @@ const MyNetwork = () => {
                     <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">No connections yet</h3>
                     <p className="text-gray-600 mb-6">Start building your network by connecting with colleagues</p>
-                    <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200">
+                    <button 
+                      className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200"
+                      onClick={() => handleTabClick('suggestions')}
+                    >
                       Find Connections
                     </button>
                   </motion.div>
@@ -573,10 +662,21 @@ const MyNetwork = () => {
                     <p className="text-gray-600 mb-6">Check back later for new connection suggestions</p>
                   </motion.div>
                 )}
+
+                {activeTab === 'allUsers' && filteredAllUsers.length === 0 && (
+                  <motion.div 
+                    className="text-center py-12 bg-white rounded-xl border border-gray-200"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    <Users2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No users available</h3>
+                    <p className="text-gray-600 mb-6">All users are already connected or no users found</p>
+                  </motion.div>
+                )}
               </motion.div>
             </AnimatePresence>
 
-            {/* Empty State for search */}
             <AnimatePresence>
               {activeTab === 'connections' && filteredConnections.length === 0 && searchTerm && (
                 <motion.div 

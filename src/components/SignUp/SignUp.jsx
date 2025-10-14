@@ -34,7 +34,7 @@ const SignUp = () => {
 
     try {
       // Try to create user in DB
-      await axiosIntense.post("/v1/users", {
+      await axiosIntense.post("/users", {
         fullName,
         email: currentUser.email,
         role: "free user",
@@ -96,7 +96,7 @@ const SignUp = () => {
       const currentUser = userCredential.user;
 
       // Post user data to server
-      await axiosIntense.post("/v1/users", {
+      await axiosIntense.post("/users", {
         fullName: formData.fullName,
         email: currentUser.email,
         role: "free user",

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "basic",
+    "name": "Basic",
+    "description": "Essential tools to start your job search",
+    "monthlyPrice": 0,
+    "yearlyPrice": 0,
+    "originalYearlyPrice": 0,
+    "current": true,
+    "icon": "zap",
+    "features": [
+      { "name": "Basic Job Matching", "key": "aiJobMatching", "included": true },
+      { "name": "Resume Upload", "key": "resumeOptimization", "included": true },
+      { "name": "Standard Applications", "key": "coverLetterGeneration", "included": false },
+      { "name": "Basic Interview Tips", "key": "interviewPreparation", "included": false },
+      { "name": "Standard Applications", "key": "priorityApplications", "included": false },
+      { "name": "Basic Company Info", "key": "companyInsights", "included": false },
+      { "name": "No Direct Contact", "key": "directHRContact", "included": false },
+      { "name": "10 Job Searches/Day", "key": "unlimitedSearches", "included": false },
+      { "name": "Basic Analytics", "key": "advancedAnalytics", "included": false },
+      { "name": "Community Support", "key": "dedicatedSupport", "included": false }
+    ]
+  },
+  {
+    "id": "standard",
+    "name": "Standard",
+    "description": "Advanced AI tools for serious job seekers",
+    "monthlyPrice": 19,
+    "yearlyPrice": 182,
+    "originalYearlyPrice": 228,
+    "current": false,
+    "icon": "building",
+    "features": [
+      { "name": "AI Job Matching", "key": "aiJobMatching", "included": true },
+      { "name": "Resume Optimization", "key": "resumeOptimization", "included": true },
+      { "name": "Cover Letter Generation", "key": "coverLetterGeneration", "included": true },
+      { "name": "Interview Preparation", "key": "interviewPreparation", "included": true },
+      { "name": "Priority Applications", "key": "priorityApplications", "included": true },
+      { "name": "Company Insights", "key": "companyInsights", "included": true },
+      { "name": "No Direct Contact", "key": "directHRContact", "included": false },
+      { "name": "50 Job Searches/Day", "key": "unlimitedSearches", "included": false },
+      { "name": "Advanced Analytics", "key": "advancedAnalytics", "included": true },
+      { "name": "Email Support", "key": "dedicatedSupport", "included": true }
+    ]
+  },
+  {
+    "id": "premium",
+    "name": "Premium",
+    "description": "Complete toolkit for career acceleration",
+    "monthlyPrice": 39,
+    "yearlyPrice": 374,
+    "originalYearlyPrice": 468,
+    "current": false,
+    "icon": "crown",
+    "features": [
+      { "name": "Advanced AI Job Matching", "key": "aiJobMatching", "included": true },
+      { "name": "AI Resume Optimization", "key": "resumeOptimization", "included": true },
+      { "name": "AI Cover Letter Generation", "key": "coverLetterGeneration", "included": true },
+      { "name": "AI Interview Preparation", "key": "interviewPreparation", "included": true },
+      { "name": "Top Priority Applications", "key": "priorityApplications", "included": true },
+      { "name": "Deep Company Insights", "key": "companyInsights", "included": true },
+      { "name": "Direct HR Contact", "key": "directHRContact", "included": true },
+      { "name": "Unlimited Job Searches", "key": "unlimitedSearches", "included": true },
+      { "name": "Advanced Analytics", "key": "advancedAnalytics", "included": true },
+      { "name": "Dedicated Support", "key": "dedicatedSupport", "included": true }
+    ]
+  }
+]

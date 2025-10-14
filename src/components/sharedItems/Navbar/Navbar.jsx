@@ -1,771 +1,953 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router';
-import { Search, Home, Users, Briefcase, MessageCircle, Bell, User, Building, Crown, Menu, X, FileText, Sparkles, Target, Bot } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Logo from '../Logo/Logo';
-import Loader from '../Loader/Loader';
-import useAuth from '../../../hooks/UseAuth/useAuth';
-import Swal from 'sweetalert2';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router";
+import {
+  Search,
+  Home,
+  Users,
+  Briefcase,
+  MessageCircle,
+  Bell,
+  User,
+  Building,
+  Crown,
+  Menu,
+  X,
+  FileText,
+  Sparkles,
+  Target,
+  Bot,
+  Zap,
+  ChevronDown,
+  Settings,
+  LogOut,
+  Star,
+  FileCheck2,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Loader from "../Loader/Loader";
+import useAuth from "../../../hooks/UseAuth/useAuth";
+import Swal from "sweetalert2";
+import axiosIntense from "../../../hooks/AxiosIntense/axiosIntense";
 
 const Navbar = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, userLogOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [activeNav, setActiveNav] = useState('Home');
+  const [activeNav, setActiveNav] = useState("Home");
   const [showSearch, setShowSearch] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
+  const [logoData, setLogoData] = useState(null);
+  const [logoLoading, setLogoLoading] = useState(true);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showAIToolsMenu, setShowAIToolsMenu] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
 
-  const avatar = "https://i.postimg.cc/0y6myZrg/businessman-character-avatar-isolated-24877-60111.avif";
+  // Fallback avatar images
+  const fallbackAvatars = [
+    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
+    "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face",
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
+  ];
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
+  // Get a consistent fallback avatar based on user ID or random
+  const getFallbackAvatar = useCallback(() => {
+    if (user?.id) {
+      const index = user.id.charCodeAt(0) % fallbackAvatars.length;
+      return fallbackAvatars[index];
     }
-  };
+    return fallbackAvatars[0];
+  }, [user]);
 
-  const itemVariants = {
-    hidden: { y: -20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 24
+  // Fetch user profile from API
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user?.email) {
+        setProfileLoading(false);
+        return;
       }
-    }
-  };
 
-  const mobileMenuVariants = {
-    closed: {
-      x: "-100%",
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 40
+      try {
+        setProfileLoading(true);
+        const response = await axiosIntense.get(`/users/email/${user.email}`);
+        setUserProfile(response.data);
+      } catch {
+        setUserProfile(null);
+      } finally {
+        setProfileLoading(false);
       }
-    },
-    open: {
-      x: 0,
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 40
-      }
-    }
-  };
+    };
 
-  const overlayVariants = {
-    closed: {
-      opacity: 0,
-      transition: {
-        duration: 0.2
-      }
-    },
-    open: {
-      opacity: 1,
-      transition: {
-        duration: 0.2
-      }
-    }
-  };
+    fetchUserProfile();
+  }, [user?.email]);
 
-  const searchVariants = {
-    collapsed: {
-      width: 0,
-      opacity: 0,
-      transition: {
-        duration: 0.2
-      }
-    },
-    expanded: {
-      width: "100%",
-      opacity: 1,
-      transition: {
-        duration: 0.3
-      }
+  // Get user avatar - priority: userProfile -> auth user -> fallback
+  const userAvatar = useMemo(() => {
+    if (userProfile?.profileImage) {
+      return userProfile.profileImage;
     }
-  };
+    if (user?.profileImage) {
+      return user.profileImage;
+    }
+    return getFallbackAvatar();
+  }, [userProfile, user, getFallbackAvatar]);
+
+  // Get user display name - priority: userProfile -> auth user -> default
+  const userDisplayName = useMemo(() => {
+    if (userProfile?.fullName) {
+      return userProfile.fullName;
+    }
+    if (user?.displayName) {
+      return user.displayName;
+    }
+    if (user?.name) {
+      return user.name;
+    }
+    return "Guest User";
+  }, [userProfile, user]);
+
+  // Get user email
+  const userEmail = useMemo(() => {
+    return user?.email || "Sign in to your account";
+  }, [user]);
+
+  // Check if user is premium
+  const isPremiumUser = useMemo(() => {
+    return userProfile?.isPremium || userProfile?.role === "premium user";
+  }, [userProfile]);
+
+  // Fetch logo from API
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const response = await axiosIntense.get("/logo");
+        setLogoData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch logo:", error);
+        setLogoData({ type: "text", text: "CC" });
+      } finally {
+        setLogoLoading(false);
+      }
+    };
+
+    fetchLogo();
+  }, []);
+
+  // Minimal Logo Component
+  const LogoComponent = useCallback(() => {
+    if (logoLoading) {
+      return (
+        <div className="w-8 h-8 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg animate-pulse" />
+      );
+    }
+
+    return (
+      <div className="flex items-center space-x-2">
+        <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+          <Zap className="w-4 h-4 text-white" />
+        </div>
+        <span className="font-bold text-xl text-gray-900 hidden sm:block">
+          CareerCrafter
+        </span>
+      </div>
+    );
+  }, [logoLoading]);
 
   // Set active nav based on current route
   useEffect(() => {
     const path = location.pathname;
-    if (path === '/') setActiveNav('Home');
-    else if (path.includes('network')) setActiveNav('My Network');
-    else if (path.includes('jobs')) setActiveNav('Jobs');
-    else if (path.includes('messages')) setActiveNav('Messages');
-    else if (path.includes('notifications')) setActiveNav('Notifications');
-    else if (path.includes('profile')) setActiveNav('Profile');
-    else if (path.includes('ai-resume')) setActiveNav('AI Resume');
-    else if (path.includes('ai-job-match')) setActiveNav('AI Job Match');
-    else if (path.includes('ai-coach')) setActiveNav('AI Coach');
-    else if (path.includes('business')) setActiveNav('Business');
-    else if (path.includes('premium')) setActiveNav('Premium');
-  }, [location]);
+    const navMap = {
+      "/": "Home",
+      "/network": "Network",
+      "/jobs": "Jobs",
+      "/messages": "Messages",
+      "/notifications": "Notifications",
+      "/profile": "Profile",
+      "/create-resume": "Create Resume",
+      "/check-resume": "Check Resume",
+      "/ai-job-match": "AI Job Match",
+      "/mock-interview": "Mock Interview",
+      "/business": "Business",
+      "/premium": "Premium",
+      "/settings": "Settings",
+    };
 
-  // Close mobile menu when route changes
+    const matchedNav = Object.entries(navMap).find(([route]) => path === route);
+    if (matchedNav) {
+      setActiveNav(matchedNav[1]);
+    } else {
+      // Handle nested routes
+      if (path.includes("/create-resume")) setActiveNav("Create Resume");
+      else if (path.includes("/check-resume")) setActiveNav("Check Resume");
+      else if (path.includes("/ai-job-match")) setActiveNav("AI Job Match");
+      else if (path.includes("/mock-interview")) setActiveNav("Mock Interview");
+      else if (path.includes("/profile")) setActiveNav("Profile");
+      else if (path.includes("/settings")) setActiveNav("Settings");
+    }
+  }, [location.pathname]);
+
+  // Close menus when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setShowSearch(false);
-  }, [location]);
+    setShowProfileMenu(false);
+    setShowAIToolsMenu(false);
+  }, [location.pathname]);
 
-  if (loading) {
-    return <Loader />;
-  }
-
-  const handleProfileClick = () => {
+  const handleProfileClick = useCallback(() => {
     if (user) {
-      navigate('/profile');
-      setActiveNav('Profile');
+      navigate("/profile");
     } else {
       Swal.fire({
-        title: 'Login Required',
-        text: 'You need to login first',
-        icon: 'warning',
-        showCancelButton: false,
-        confirmButtonText: 'Login',
-        confirmButtonColor: '#dc2626',
+        title: "Login Required",
+        text: "You need to login first",
+        icon: "warning",
+        confirmButtonText: "Login",
+        confirmButtonColor: "#2563eb",
       }).then((result) => {
         if (result.isConfirmed) {
-          navigate('/auth/signin');
+          navigate("/auth/signin");
         }
       });
     }
-  };
-
-  const handleNavClick = (navItem) => {
-    setActiveNav(navItem);
-    setIsMobileMenuOpen(false);
-
-    switch (navItem) {
-      case 'Home':
-        navigate('/');
-        break;
-      case 'My Network':
-      case 'Network':
-        navigate('/network');
-        break;
-      case 'Jobs':
-        navigate('/jobs');
-        break;
-      case 'Messages':
-        navigate('/messages');
-        break;
-      case 'Notifications':
-        navigate('/notifications');
-        break;
-      case 'Business':
-        navigate('/business');
-        break;
-      case 'Premium':
-        navigate('/premium');
-        break;
-      case 'AI Resume':
-        navigate('/ai-resume');
-        break;
-      case 'AI Job Match':
-        navigate('/ai-job-match');
-        break;
-      case 'AI Coach':
-        navigate('/ai-coach');
-        break;
-      default:
-        break;
+  }, [user, navigate]);
+  const handleDashboard = useCallback(() => {
+    if (user) {
+      navigate("/dashboard/user");
+    } else {
+      Swal.fire({
+        title: "Login Required",
+        text: "You need to login first",
+        icon: "warning",
+        confirmButtonText: "Login",
+        confirmButtonColor: "#2563eb",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/auth/signin");
+        }
+      });
     }
-  };
+  }, [user, navigate]);
 
-  const handleSearch = (e) => {
-    if (e.key === 'Enter' && searchValue.trim()) {
-      // Implement search functionality
-      console.log('Searching for:', searchValue);
-      setShowSearch(false);
-    }
-  };
+  const handleNavClick = useCallback(
+    (navItem) => {
+      setActiveNav(navItem);
+      setIsMobileMenuOpen(false);
+      setShowProfileMenu(false);
+      setShowAIToolsMenu(false);
 
-  // Main navigation items
-  const mainNavItems = [
-    { label: 'Home', icon: Home, path: '/' },
-    { label: 'My Network', icon: Users, path: '/network' },
-    { label: 'Jobs', icon: Briefcase, path: '/jobs' },
-    { label: 'Messages', icon: MessageCircle, path: '/messages', notification: true },
-    { label: 'Notifications', icon: Bell, path: '/notifications', notification: true },
-  ];
+      const routeMap = {
+        Home: "/",
+        Network: "/network",
+        Jobs: "/jobs",
+        Messages: "/messages",
+        Notifications: "/notifications",
+        Business: "/business",
+        Premium: "/premium",
+        "Create Resume": "/create-resume",
+        "Check Resume": "/check-resume",
+        "AI Job Match": "/ai-job-match",
+        "Mock Interview": "/mock-interview",
+        Profile: "/profile",
+        Settings: "/settings",
+      };
 
-  // AI features navigation
-  const aiNavItems = [
-    { label: 'AI Resume', icon: FileText, path: '/ai-resume', premium: true },
-    { label: 'AI Job Match', icon: Target, path: '/ai-job-match', premium: true },
-    { label: 'AI Coach', icon: Bot, path: '/ai-coach', premium: true },
-  ];
+      const route = routeMap[navItem];
+      if (route) {
+        navigate(route);
+      }
+    },
+    [navigate]
+  );
 
-  // Additional menu items for mobile sidebar
-  const additionalMenuItems = [
-    { label: 'Business', icon: Building, path: '/business' },
-    { label: 'Premium', icon: Crown, path: '/premium', premium: true },
-  ];
+  const handleAIToolClick = useCallback(
+    (tool) => {
+      handleNavClick(tool);
+      setShowAIToolsMenu(false);
+    },
+    [handleNavClick]
+  );
 
-  // Mobile bottom navigation - All items except Notifications
-  const mobileBottomNavItems = [
-    { label: 'Home', icon: Home, path: '/' },
-    { label: 'Network', icon: Users, path: '/network' },
-    { label: 'Jobs', icon: Briefcase, path: '/jobs' },
-    { label: 'Messages', icon: MessageCircle, path: '/messages', notification: true },
-  ];
+  const handleSearch = useCallback(
+    (e) => {
+      if (e.key === "Enter" && searchValue.trim()) {
+        navigate(`/search?q=${encodeURIComponent(searchValue)}`);
+        setShowSearch(false);
+        setSearchValue("");
+      }
+    },
+    [searchValue, navigate]
+  );
+
+  const handleLogout = useCallback(() => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out of your account",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, logout!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        userLogOut();
+        navigate("/");
+      }
+    });
+  }, [userLogOut, navigate]);
+
+  // Navigation items
+  const mainNavItems = useMemo(
+    () => [
+      { label: "Home", icon: Home, path: "/" },
+      { label: "Network", icon: Users, path: "/network" },
+      { label: "Jobs", icon: Briefcase, path: "/jobs" },
+      {
+        label: "Messages",
+        icon: MessageCircle,
+        path: "/messages",
+        notification: 3,
+      },
+    ],
+    []
+  );
+
+  const aiToolsItems = useMemo(
+    () => [
+      { label: "Create Resume", icon: FileText, path: "/create-resume" },
+      { label: "Check Resume", icon: FileCheck2, path: "/check-resume" },
+      { label: "AI Job Match", icon: Target, path: "/ai-job-match" },
+      { label: "Mock Interview", icon: Bot, path: "/mock-interview" },
+    ],
+    []
+  );
+
+  // Business and Premium items for desktop
+  const businessPremiumItems = useMemo(
+    () => [
+      { label: "Business", icon: Building, path: "/business" },
+      { label: "Premium", icon: Crown, path: "/premium" },
+    ],
+    []
+  );
+
+  const mobileNavItems = useMemo(
+    () => [
+      { label: "Home", icon: Home, path: "/" },
+      { label: "Network", icon: Users, path: "/network" },
+      { label: "Jobs", icon: Briefcase, path: "/jobs" },
+      {
+        label: "Messages",
+        icon: MessageCircle,
+        path: "/messages",
+        notification: 3,
+      },
+      {
+        label: "Notifications",
+        icon: Bell,
+        path: "/notifications",
+        notification: 5,
+      },
+    ],
+    []
+  );
+
+  if (loading || profileLoading) {
+    return <Loader />;
+  }
 
   return (
     <>
-      {/* Desktop & Tablet Navbar - Double Row Layout */}
-      <motion.nav 
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-        className={`hidden lg:block w-full transition-all duration-300 bg-white shadow-lg border-b border-gray-200/50 sticky top-0 z-50`}
-      >
-        {/* First Row - Logo, Search & Main Actions */}
-        <motion.div variants={itemVariants} className="border-b border-gray-100">
-          <div className="mx-auto w-11/12 px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              {/* Left Section - Logo */}
-              <motion.div 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center space-x-8 flex-shrink-0"
-              >
-                <div
-                  className="flex items-center space-x-3 cursor-pointer group"
-                  onClick={() => handleNavClick('Home')}
-                >
-                  <Logo />
-                  <h1 className="font-bold text-2xl text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors duration-200">
-                    Career Crafter
-                  </h1>
-                </div>
-              </motion.div>
+      {/* Desktop Navigation */}
+      <nav className="hidden lg:block w-full bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center cursor-pointer"
+              onClick={() => handleNavClick("Home")}
+            >
+              <LogoComponent />
+            </motion.div>
 
-              {/* Search Bar */}
-              <motion.div 
-                variants={itemVariants}
-                className="flex-1 max-w-2xl mx-8"
+            {/* Search Bar */}
+            <div className="flex-1 max-w-xl mx-8">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search jobs, people, companies..."
+                  className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200 text-sm"
+                  onKeyPress={handleSearch}
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Navigation Items */}
+            <div className="flex items-center space-x-1">
+              {mainNavItems.map((item) => (
+                <DesktopNavItem
+                  key={item.label}
+                  label={item.label}
+                  icon={item.icon}
+                  active={activeNav === item.label}
+                  onClick={() => handleNavClick(item.label)}
+                  notification={item.notification}
+                />
+              ))}
+
+              {/* AI Tools Dropdown */}
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`relative flex flex-col items-center p-2 rounded-xl min-w-16 transition-colors ${aiToolsItems.some((item) => activeNav === item.label)
+                      ? "text-purple-600 bg-purple-50"
+                      : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                  onClick={() => setShowAIToolsMenu(!showAIToolsMenu)}
+                >
+                  <div className="relative">
+                    <Sparkles className="w-5 h-5" />
+                    {aiToolsItems.some((item) => activeNav === item.label) && (
+                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full" />
+                    )}
+                  </div>
+                  <span className="text-xs mt-1 font-medium">AI Tools</span>
+                </motion.button>
+
+                <AnimatePresence>
+                  {showAIToolsMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50"
+                    >
+                      {aiToolsItems.map((item) => (
+                        <button
+                          key={item.label}
+                          onClick={() => handleAIToolClick(item.label)}
+                          className={`w-full px-4 py-2 text-left text-sm flex items-center space-x-3 transition-colors ${activeNav === item.label
+                              ? "bg-purple-50 text-purple-600"
+                              : "text-gray-700 hover:bg-gray-50"
+                            }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span>{item.label}</span>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Business and Premium Items */}
+              {businessPremiumItems.map((item) => (
+                <DesktopNavItem
+                  key={item.label}
+                  label={item.label}
+                  icon={item.icon}
+                  active={activeNav === item.label}
+                  onClick={() => handleNavClick(item.label)}
+                />
+              ))}
+
+              {/* Notifications */}
+              <DesktopNavItem
+                label="Notifications"
+                icon={Bell}
+                active={activeNav === "Notifications"}
+                onClick={() => handleNavClick("Notifications")}
+                notification={5}
+              />
+
+              {/* Profile Menu */}
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`flex items-center space-x-2 p-2 rounded-xl transition-colors ${activeNav === "Profile"
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                >
+                  <div className="relative">
+                    <img
+                      src={userProfile?.profileImage || userAvatar}
+                      alt={userDisplayName}
+                      className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = getFallbackAvatar();
+                      }}
+                    />
+                    {isPremiumUser && (
+                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border-2 border-white flex items-center justify-center">
+                        <Star className="w-2 h-2 text-white fill-current" />
+                      </div>
+                    )}
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </motion.button>
+
+                <AnimatePresence>
+                  {showProfileMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50"
+                    >
+                      {/* User Info */}
+                      {user ? (
+                        <>
+                          <div className="px-4 py-3 border-b border-gray-100">
+                            <div className="flex items-center space-x-3">
+                              <div className="relative">
+                                <img
+                                  src={userProfile?.profileImage || userAvatar}
+                                  alt={userDisplayName}
+                                  className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = getFallbackAvatar();
+                                  }}
+                                />
+                                {isPremiumUser && (
+                                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 rounded-full border-2 border-white flex items-center justify-center">
+                                    <Crown className="w-2 h-2 text-white fill-current" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center space-x-2">
+                                  <p className="font-semibold text-gray-900 truncate">
+                                    {userDisplayName}
+                                  </p>
+                                  {isPremiumUser && (
+                                    <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full font-medium flex items-center space-x-1">
+                                      <Crown className="w-3 h-3" />
+                                      <span>Premium</span>
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-600 truncate">
+                                  {userEmail}
+                                </p>
+                                {userProfile?.aiCredits && (
+                                  <p className="text-xs text-green-600 font-medium mt-1">
+                                    {userProfile.aiCredits.toLocaleString()} AI
+                                    Credits
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Menu Items for logged in users */}
+                          <div className="py-1">
+                            <button
+                              onClick={() => handleNavClick("Profile")}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+                            >
+                              <User className="w-4 h-4" />
+                              <span>Your Profile</span>
+                            </button>
+                            <button
+                              onClick={() => handleDashboard("dashboard")}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+                            >
+                              <User className="w-4 h-4" />
+                              <span>Dashboard</span>
+                            </button>
+                            <button
+                              onClick={() => handleNavClick("Settings")}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+                            >
+                              <Settings className="w-4 h-4" />
+                              <span>Settings & Privacy</span>
+                            </button>
+                          </div>
+
+                          {/* Logout */}
+                          <div className="border-t border-gray-100 my-1" />
+                          <button
+                            onClick={handleLogout}
+                            className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-3 transition-colors"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            <span>Sign Out</span>
+                          </button>
+                        </>
+                      ) : (
+                        /* Show only Sign In button for non-logged in users */
+                        <div className="p-4">
+                          <h1 className="text-sm mb-2 text-center font-medium">
+                            You need to sign to access
+                          </h1>
+                          <button
+                            onClick={() => navigate("/auth/signin")}
+                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                          >
+                            <User className="w-4 h-4" />
+                            <span>Sign In</span>
+                          </button>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Top Bar */}
+      <nav className="lg:hidden w-full bg-white/80 border-b border-gray-100 sticky top-0 z-50">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between">
+            {/* Left: Menu Button & Logo */}
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </button>
+
+              <div
+                className="flex items-center cursor-pointer"
+                onClick={() => handleNavClick("Home")}
+              >
+                <LogoComponent />
+              </div>
+            </div>
+
+            {/* Right: Search & Notifications */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+
+              <button
+                className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                onClick={() => handleNavClick("Notifications")}
+              >
+                <Bell className="w-5 h-5" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Search Bar */}
+          <AnimatePresence>
+            {showSearch && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-3 overflow-hidden"
               >
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <motion.input
-                    whileFocus={{ scale: 1.02 }}
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
                     type="text"
-                    placeholder="Search for jobs, people, or companies..."
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm hover:bg-gray-100"
+                    placeholder="Search jobs, people, companies..."
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    autoFocus
                     onKeyPress={handleSearch}
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
                   />
                 </div>
               </motion.div>
-
-              {/* Right Section - Actions */}
-              <motion.div variants={itemVariants} className="flex items-center space-x-4 flex-shrink-0">
-                {/* Business & Premium */}
-                <div className="flex items-center space-x-3">
-                  <NavItem
-                    label="Business"
-                    icon={Building}
-                    active={activeNav === 'Business'}
-                    onClick={() => handleNavClick('Business')}
-                  />
-
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center space-x-2 cursor-pointer group p-2 rounded-lg hover:bg-amber-50 transition-colors duration-200"
-                    onClick={() => handleNavClick('Premium')}
-                  >
-                    <div className="relative">
-                      <Crown className="w-5 h-5 text-amber-500 group-hover:text-amber-600 transition-colors duration-200" />
-                      <motion.div 
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"
-                      ></motion.div>
-                    </div>
-                    <span className={`text-sm font-semibold transition-colors duration-200 ${activeNav === 'Premium' ? 'text-amber-700' : 'text-amber-600 group-hover:text-amber-700'
-                      }`}>
-                      Premium
-                    </span>
-                  </motion.div>
-                </div>
-
-                {/* Profile */}
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center space-x-3 cursor-pointer group p-2 rounded-lg hover:bg-blue-50 transition-colors duration-200"
-                  onClick={handleProfileClick}
-                >
-                  <div className="relative">
-                    {user ? (
-                      <motion.img
-                        whileHover={{ rotate: 5 }}
-                        src={user.profilePicture || avatar}
-                        alt={user.name}
-                        className="w-8 h-8 rounded-full object-cover border-2 border-transparent group-hover:border-blue-500 transition-all duration-200"
-                      />
-                    ) : (
-                      <motion.div 
-                        whileHover={{ rotate: 5 }}
-                        className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center border-2 border-transparent group-hover:border-blue-500 transition-all duration-200"
-                      >
-                        <User className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors duration-200" />
-                      </motion.div>
-                    )}
-                  </div>
-                  <span className={`text-sm font-medium transition-colors duration-200 ${activeNav === 'Profile'
-                      ? 'text-blue-600'
-                      : 'text-gray-700 group-hover:text-blue-600'
-                    }`}>
-                    Profile
-                  </span>
-                </motion.div>
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Second Row - Navigation & AI Features */}
-        <motion.div variants={itemVariants} className="bg-white">
-          <div className="w-11/12 mx-auto pb-5 px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-12">
-              {/* Main Navigation */}
-              <motion.div 
-                className="flex items-center space-x-1"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                {mainNavItems.map((item) => (
-                  <NavItem
-                    key={item.label}
-                    label={item.label}
-                    icon={item.icon}
-                    active={activeNav === item.label}
-                    onClick={() => handleNavClick(item.label)}
-                    hasNotification={item.notification}
-                  />
-                ))}
-              </motion.div>
-
-              {/* AI Features Navigation */}
-              <motion.div 
-                className="flex items-center space-x-1"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                <motion.div 
-                  whileHover={{ scale: 1.05 }}
-                  className="flex items-center space-x-2 mr-4 px-3 py-1 bg-gradient-to-r from-purple-50 to-blue-50 rounded-full border border-purple-200"
-                >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                  >
-                    <Sparkles className="w-4 h-4 text-purple-600" />
-                  </motion.div>
-                  <span className="text-sm font-semibold text-purple-700">AI Tools</span>
-                </motion.div>
-                {aiNavItems.map((item) => (
-                  <NavItem
-                    key={item.label}
-                    label={item.label}
-                    icon={item.icon}
-                    active={activeNav === item.label}
-                    onClick={() => handleNavClick(item.label)}
-                    premium={item.premium}
-                  />
-                ))}
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-      </motion.nav>
-
-      {/* Mobile Top Bar */}
-      <motion.nav 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className={`lg:hidden w-full transition-all duration-300 bg-white shadow-lg border-b border-gray-200/50 sticky top-0 z-50`}
-      >
-        <div className="px-4 py-3">
-          <div className="flex items-center justify-between">
-            {/* Left: Menu Button & Logo */}
-            <div className="flex items-center space-x-3 flex-1">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex-shrink-0"
-              >
-                {isMobileMenuOpen ? (
-                  <X className="w-6 h-6 text-gray-700" />
-                ) : (
-                  <Menu className="w-6 h-6 text-gray-700" />
-                )}
-              </motion.button>
-
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center space-x-2 cursor-pointer flex-shrink-0"
-                onClick={() => handleNavClick('Home')}
-              >
-                <Logo />
-                <h1 className="font-bold text-lg text-gray-900">Career Crafter</h1>
-              </motion.div>
-            </div>
-
-            {/* Right: Search & Notifications */}
-            <div className="flex items-center space-x-3">
-              {/* Search Toggle */}
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setShowSearch(!showSearch)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-              >
-                <Search className="w-5 h-5 text-gray-700" />
-              </motion.button>
-
-              {/* Notifications */}
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-                onClick={() => handleNavClick('Notifications')}
-              >
-                <Bell className="w-5 h-5 text-gray-700" />
-                <motion.div 
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"
-                ></motion.div>
-              </motion.button>
-            </div>
-          </div>
-
-          {/* Mobile Search Bar - Toggle */}
-          <AnimatePresence>
-            {showSearch && (
-              <motion.div
-                initial="collapsed"
-                animate="expanded"
-                exit="collapsed"
-                variants={searchVariants}
-                className="mt-3 relative overflow-hidden"
-              >
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search jobs, people, companies..."
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm"
-                  autoFocus
-                  onKeyPress={handleSearch}
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                />
-              </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* Mobile Side Menu */}
+        {/* Mobile Sidebar */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <>
+              {/* Backdrop */}
               <motion.div
-                variants={overlayVariants}
-                initial="closed"
-                animate="open"
-                exit="closed"
-                className="fixed inset-0 z-50 bg-black bg-opacity-50"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/40 bg-opacity-50 z-40"
                 onClick={() => setIsMobileMenuOpen(false)}
               />
+
+              {/* Sidebar */}
               <motion.div
-                variants={mobileMenuVariants}
-                initial="closed"
-                animate="open"
-                exit="closed"
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
                 className="fixed left-0 top-0 bottom-0 w-80 bg-white shadow-xl z-50"
-                onClick={(e) => e.stopPropagation()}
               >
-                <div className="p-6 border-b border-gray-200">
+                {/* Header */}
+                <div className="p-6 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
-                    <Logo />
-                    <h1 className="font-bold text-xl text-gray-900">Career Crafter</h1>
+                    <LogoComponent />
                   </div>
                 </div>
 
-                <motion.div 
-                  className="p-4 space-y-2 max-h-[calc(100vh-100px)] overflow-y-auto"
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
+                {/* Profile Section */}
+                <div
+                  className="p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+                  onClick={handleProfileClick}
                 >
-                  {/* User Profile Section */}
-                  <motion.div
-                    variants={itemVariants}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="flex items-center space-x-3 p-4 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors duration-200 border border-gray-100"
-                    onClick={handleProfileClick}
-                  >
+                  <div className="flex items-center space-x-3">
                     <div className="relative">
-                      {user ? (
-                        <motion.img
-                          whileHover={{ rotate: 5 }}
-                          src={user.profilePicture || avatar}
-                          alt={user.name}
-                          className="w-12 h-12 rounded-full object-cover border-2 border-blue-500"
-                        />
-                      ) : (
-                        <motion.div 
-                          whileHover={{ rotate: 5 }}
-                          className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center border-2 border-blue-500"
-                        >
-                          <User className="w-6 h-6 text-gray-600" />
-                        </motion.div>
+                      <img
+                        src={userAvatar}
+                        alt={userDisplayName}
+                        className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = getFallbackAvatar();
+                        }}
+                      />
+                      {isPremiumUser && (
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 rounded-full border-2 border-white flex items-center justify-center">
+                          <Crown className="w-2 h-2 text-white fill-current" />
+                        </div>
                       )}
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">
-                        {user ? user.name : 'Guest User'}
-                      </h3>
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-semibold text-gray-900">
+                          {userDisplayName}
+                        </h3>
+                        {isPremiumUser && (
+                          <span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 text-xs rounded-full font-medium">
+                            Premium
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-600">
-                        {user ? 'View your profile' : 'Login to your account'}
+                        {user ? "View your profile" : "Sign in to your account"}
                       </p>
+                      {userProfile?.aiCredits && (
+                        <p className="text-xs text-green-600 font-medium mt-1">
+                          {userProfile.aiCredits.toLocaleString()} AI Credits
+                        </p>
+                      )}
                     </div>
-                  </motion.div>
+                  </div>
+                </div>
 
-                  {/* AI Features Section */}
-                  <motion.div variants={itemVariants} className="pt-4 pb-2">
-                    <div className="flex items-center space-x-2 px-4 mb-3">
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                {/* Settings & Logout - Only show for logged in users */}
+                {user && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+                      Account
+                    </h4>
+                    <div className="space-y-1">
+                      <MobileNavItem
+                        label="Settings"
+                        icon={Settings}
+                        active={activeNav === "Settings"}
+                        onClick={() => handleNavClick("Settings")}
+                      />
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center space-x-3 p-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
                       >
-                        <Sparkles className="w-5 h-5 text-purple-600" />
-                      </motion.div>
-                      <span className="font-semibold text-purple-700">AI Career Tools</span>
+                        <LogOut className="w-5 h-5" />
+                        <span className="font-medium">Sign Out</span>
+                      </button>
                     </div>
-                    {aiNavItems.map((item, index) => (
-                      <MobileNavItem
-                        key={item.label}
-                        label={item.label}
-                        icon={item.icon}
-                        active={activeNav === item.label}
-                        onClick={() => handleNavClick(item.label)}
-                        premium={item.premium}
-                        index={index}
-                      />
-                    ))}
-                  </motion.div>
+                  </div>
+                )}
 
-                  {/* Additional Menu Items */}
-                  <motion.div variants={itemVariants} className="pt-4 pb-2">
-                    <div className="px-4 mb-3">
-                      <span className="font-semibold text-gray-700">More</span>
+                {/* Navigation Sections */}
+                <div className="p-4 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]">
+                  {/* Main Navigation */}
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+                      Menu
+                    </h4>
+                    <div className="space-y-1">
+                      {mainNavItems.map((item) => (
+                        <MobileNavItem
+                          key={item.label}
+                          {...item}
+                          active={activeNav === item.label}
+                          onClick={() => handleNavClick(item.label)}
+                        />
+                      ))}
                     </div>
-                    {additionalMenuItems.map((item, index) => (
+                  </div>
+
+                  {/* AI Tools */}
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+                      AI Tools
+                    </h4>
+                    <div className="space-y-1">
+                      {aiToolsItems.map((item) => (
+                        <MobileNavItem
+                          key={item.label}
+                          {...item}
+                          active={activeNav === item.label}
+                          onClick={() => handleNavClick(item.label)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* More */}
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+                      More
+                    </h4>
+                    <div className="space-y-1">
                       <MobileNavItem
-                        key={item.label}
-                        label={item.label}
-                        icon={item.icon}
-                        active={activeNav === item.label}
-                        onClick={() => handleNavClick(item.label)}
-                        premium={item.premium}
-                        index={index + aiNavItems.length}
+                        label="Business"
+                        icon={Building}
+                        active={activeNav === "Business"}
+                        onClick={() => handleNavClick("Business")}
                       />
-                    ))}
-                  </motion.div>
-                </motion.div>
+                      <MobileNavItem
+                        label="Premium"
+                        icon={Crown}
+                        active={activeNav === "Premium"}
+                        onClick={() => handleNavClick("Premium")}
+                        premium
+                      />
+                    </div>
+                  </div>
+
+                  {/* Settings & Logout */}
+                  {user && (
+                    <div>
+                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+                        Account
+                      </h4>
+                      <div className="space-y-1">
+                        <MobileNavItem
+                          label="Settings"
+                          icon={Settings}
+                          active={activeNav === "Settings"}
+                          onClick={() => handleNavClick("Settings")}
+                        />
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center space-x-3 p-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut className="w-5 h-5" />
+                          <span className="font-medium">Sign Out</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </motion.div>
             </>
           )}
         </AnimatePresence>
-      </motion.nav>
+      </nav>
 
-      {/* Mobile Bottom Navigation - All items except Notifications */}
-      <motion.nav 
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 shadow-2xl backdrop-blur-sm"
-      >
+      {/* Mobile Bottom Navigation */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 z-40">
         <div className="flex items-center justify-around px-2 py-2">
-          {mobileBottomNavItems.map((item, index) => (
+          {mobileNavItems.map((item) => (
             <MobileBottomNavItem
               key={item.label}
               icon={item.icon}
               label={item.label}
               active={activeNav === item.label}
               onClick={() => handleNavClick(item.label)}
-              hasNotification={item.notification}
-              index={index}
+              notification={item.notification}
             />
           ))}
         </div>
-      </motion.nav>
+      </nav>
     </>
   );
 };
 
-// Desktop Navigation Item Component
-const NavItem = ({ label, icon: Icon, active = false, onClick, hasNotification = false, premium = false }) => (
-  <motion.div
-    whileHover={{ scale: 1.05, y: -2 }}
-    whileTap={{ scale: 0.95 }}
-    className={`flex flex-col items-center cursor-pointer group relative p-3 rounded-xl transition-all duration-200 min-w-20 ${active
-        ? premium
-          ? 'text-amber-600 bg-amber-50'
-          : 'text-blue-600 bg-blue-50'
-        : premium
-          ? 'text-amber-600 hover:text-amber-700 hover:bg-amber-50'
-          : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
-      }`}
-    onClick={onClick}
-  >
-    <div className="relative">
-      <Icon className="w-5 h-5" />
-      {hasNotification && (
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"
-        ></motion.div>
-      )}
-      {premium && (
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full border-2 border-white"
-        ></motion.div>
-      )}
-    </div>
-    <span className="font-medium text-xs mt-1">{label}</span>
-    {active && (
-      <motion.div 
-        layoutId="activeNavIndicator"
-        className={`absolute -bottom-1 left-3 right-3 h-0.5 rounded-full ${premium ? 'bg-amber-600' : 'bg-blue-600'
-          }`}
-      ></motion.div>
-    )}
-  </motion.div>
-);
-
-// Mobile Menu Item Component
-const MobileNavItem = ({ label, icon: Icon, active = false, onClick, hasNotification = false, premium = false, index = 0 }) => (
-  <motion.div
-    variants={{
-      hidden: { x: -50, opacity: 0 },
-      visible: {
-        x: 0,
-        opacity: 1,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 24,
-          delay: index * 0.1
-        }
-      }
-    }}
-    whileHover={{ scale: 1.02, x: 5 }}
-    whileTap={{ scale: 0.98 }}
-    className={`flex items-center space-x-4 p-4 rounded-xl cursor-pointer transition-all duration-200 ${active
-        ? premium
-          ? 'text-amber-600 bg-amber-50 border border-amber-100'
-          : 'text-blue-600 bg-blue-50 border border-blue-100'
-        : premium
-          ? 'text-amber-600 hover:bg-amber-50 border border-amber-100'
-          : 'text-gray-700 hover:bg-gray-50 border border-transparent'
-      }`}
-    onClick={onClick}
-  >
-    <div className="relative">
-      <Icon className="w-6 h-6" />
-      {hasNotification && (
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"
-        ></motion.div>
-      )}
-      {premium && (
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full border-2 border-white"
-        ></motion.div>
-      )}
-    </div>
-    <span className={`font-medium text-lg ${premium ? 'font-semibold' : ''}`}>
-      {label}
-    </span>
-    {active && (
-      <motion.div 
-        layoutId="mobileActiveIndicator"
-        className={`ml-auto w-2 h-2 rounded-full ${premium ? 'bg-amber-600' : 'bg-blue-600'
-          }`}
-      ></motion.div>
-    )}
-  </motion.div>
-);
-
-// Mobile Bottom Navigation Item Component
-const MobileBottomNavItem = ({ icon: Icon, label, active = false, onClick, hasNotification = false, index = 0 }) => (
+// Desktop Nav Item Component
+const DesktopNavItem = ({
+  label,
+  icon: Icon,
+  active,
+  onClick,
+  notification,
+}) => (
   <motion.button
-    variants={{
-      hidden: { y: 50, opacity: 0 },
-      visible: {
-        y: 0,
-        opacity: 1,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 24,
-          delay: index * 0.1
-        }
-      }
-    }}
-    whileHover={{ scale: 1.1, y: -2 }}
-    whileTap={{ scale: 0.9 }}
-    className={`flex flex-col items-center cursor-pointer group p-2 rounded-xl transition-all duration-200 flex-1 max-w-20 ${active
-        ? 'text-blue-600 bg-blue-50'
-        : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    className={`relative flex flex-col items-center p-2 rounded-xl min-w-16 transition-colors ${active ? "text-blue-600 bg-blue-50" : "text-gray-600 hover:bg-gray-50"
       }`}
     onClick={onClick}
   >
     <div className="relative">
       <Icon className="w-5 h-5" />
-      {hasNotification && (
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"
-        ></motion.div>
+      {notification && (
+        <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
       )}
     </div>
-    <span className="text-xs font-medium mt-1">{label}</span>
-    {active && (
-      <motion.div 
-        layoutId="bottomNavIndicator"
-        className="absolute -bottom-1 left-3 right-3 h-0.5 bg-blue-600 rounded-full"
-      ></motion.div>
-    )}
+    <span className="text-xs mt-1 font-medium">{label}</span>
+  </motion.button>
+);
+
+// Mobile Nav Item Component
+const MobileNavItem = ({ label, icon: Icon, active, onClick, premium }) => (
+  <button
+    className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-colors ${active
+        ? premium
+          ? "bg-amber-50 text-amber-600"
+          : "bg-blue-50 text-blue-600"
+        : "text-gray-700 hover:bg-gray-50"
+      }`}
+    onClick={onClick}
+  >
+    <Icon className="w-5 h-5" />
+    <span className="font-medium">{label}</span>
+    {premium && <Crown className="w-4 h-4 text-amber-500 ml-auto" />}
+  </button>
+);
+
+// Mobile Bottom Nav Item Component
+const MobileBottomNavItem = ({
+  icon: Icon,
+  label,
+  active,
+  onClick,
+  notification,
+}) => (
+  <motion.button
+    whileTap={{ scale: 0.95 }}
+    className={`relative flex flex-col items-center p-2 rounded-xl flex-1 transition-colors ${active ? "text-blue-600" : "text-gray-600"
+      }`}
+    onClick={onClick}
+  >
+    <div className="relative">
+      <Icon className="w-5 h-5" />
+      {notification && (
+        <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
+      )}
+    </div>
+    <span className="text-xs mt-1">{label}</span>
   </motion.button>
 );
 

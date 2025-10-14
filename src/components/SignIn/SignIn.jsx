@@ -8,9 +8,11 @@ import {
   FaEye,
 } from "react-icons/fa";
 import useAuth from "../../hooks/UseAuth/useAuth";
+import Swal from "sweetalert2";
+import axiosIntense from "../../hooks/AxiosIntense/axiosIntense";
 
 const SignIn = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, googleLogin, facebookLogin, githubLogin, userLogin } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -33,6 +35,51 @@ const SignIn = () => {
     );
   }
 
+    const handleSocialLogin = async (loginFn, providerName) => {
+  try {
+    const userCredential = await loginFn();
+    const currentUser = userCredential.user;
+    const fullName =
+      currentUser.displayName || currentUser.email.split("@")[0] || "User";
+
+    try {
+      // Try to create user in DB
+      await axiosIntense.post("/users", {
+        fullName,
+        email: currentUser.email,
+        role: "free user",
+        createdAt: new Date().toISOString(),
+        creationDate: new Date().toLocaleDateString(),
+      });
+    } catch (error) {
+      // If already exists, it's fine
+      if (error.response?.status !== 400) {
+        throw error;
+      }
+    }
+
+    Swal.fire({
+      icon: "success",
+      title: `Signed in with ${providerName}`,
+      timer: 2000,
+      timerProgressBar: true,
+      showConfirmButton: false,
+    }).then(() => navigate("/auth/where-listen"));
+  } catch (error) {
+    console.error(`${providerName} login failed:`, error);
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: `${providerName} login failed. Try again!`,
+      confirmButtonColor: "#dc2626",
+    });
+  }
+};
+
+  const handleGoogleLogin = () => handleSocialLogin(googleLogin, "Google");
+  const handleFacebookLogin = () => handleSocialLogin(facebookLogin, "Facebook");
+  const handleGithubLogin = () => handleSocialLogin(githubLogin, "GitHub");
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -41,25 +88,56 @@ const SignIn = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Add sign-in logic here
-    navigate(-1); // Redirect after successful sign-in
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!formData.email || !formData.password) {
+    Swal.fire({
+      icon: "warning",
+      title: "Missing fields",
+      text: "Please enter email & password",
+      confirmButtonColor: "#dc2626",
+    });
+    return;
+  }
+
+  try {
+    // Firebase login via useAuth
+    await userLogin(formData.email, formData.password);
+
+    Swal.fire({
+      icon: "success",
+      title: "Signed in successfully!",
+      timer: 1000,
+      showConfirmButton: false,
+      timerProgressBar: true,
+    });
+
+    // Redirect to home
+    navigate("/");
+  } catch (error) {
+    console.error("Sign in failed:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Sign in failed",
+      text: error.message || "Invalid credentials or network error",
+      confirmButtonColor: "#dc2626",
+    });
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-6 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8 bg-white p-6 sm:p-8 rounded-xl shadow-2xl">
         {/* Social Login */}
         <div className="flex justify-center space-x-4">
-          <button className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors">
+          <button onClick={handleGoogleLogin} className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors">
             <FaGoogle className="w-6 h-6" />
           </button>
-          <button className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors">
+          <button onClick={handleFacebookLogin} className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors">
             <FaFacebook className="w-6 h-6" />
           </button>
-          <button className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors">
+          <button onClick={handleGithubLogin} className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors">
             <FaGithub className="w-6 h-6" />
           </button>
         </div>

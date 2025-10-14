@@ -56,7 +56,7 @@ const WhatToDo = () => {
     }
     setIsLoading(true);
     try {
-      const response = await axiosIntense.patch(`v1/users/email/${email}`, { purpose: selectedPurpose });
+      const response = await axiosIntense.patch(`/users/email/${email}`, { purpose: selectedPurpose });
       if (response.status === 200) {
         navigate("/profile");
       }
@@ -75,7 +75,7 @@ const WhatToDo = () => {
     const checkUserPurpose = async () => {
       if (!email) return;
       try {
-        const res = await axiosIntense.get(`/v1/users/email/${email}`);
+        const res = await axiosIntense.get(`/users/email/${email}`);
         if (res?.data?.purpose) {
           navigate("/profile");
         }

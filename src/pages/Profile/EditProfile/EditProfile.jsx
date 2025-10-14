@@ -161,7 +161,7 @@ const EditProfile = ({ profile, onClose, onUpdate }) => {
                 }
             }
 
-            await axiosIntense.patch(`/v1/users/email/${profile.email}`, updatedFormData);
+            await axiosIntense.patch(`/users/email/${profile.email}`, updatedFormData);
             setSuccess(true);
             setTimeout(() => {
                 onUpdate(); // Refresh profile data
@@ -263,24 +263,27 @@ const EditProfile = ({ profile, onClose, onUpdate }) => {
                 />
             </div>
 
-            {/* Role */}
-            <div>
-                <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-                    Role
-                </label>
-                <select
-                    id="role"
-                    name="role"
-                    value={formData.role}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                >
-                    <option value="">Select Role</option>
-                    <option value="free user">Free User</option>
-                    <option value="premium user">Premium User</option>
-                    <option value="pro user">Pro User</option>
-                </select>
-            </div>
+{/* Role */}
+<div>
+  <label
+    htmlFor="role"
+    className="block text-sm font-medium text-gray-700 mb-2"
+  >
+    Role <span className="text-gray-400 text-xs">(read-only)</span>
+  </label>
+  <select
+    id="role"
+    name="role"
+    value={formData.role}
+    disabled // 🔒 makes it uneditable
+    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+  >
+    <option value="free user">Free User</option>
+    <option value="premium user">Premium User</option>
+    <option value="pro user">Pro User</option>
+  </select>
+</div>
+
 
             {/* Purpose */}
             <div>

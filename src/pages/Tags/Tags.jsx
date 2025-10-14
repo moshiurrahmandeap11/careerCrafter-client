@@ -18,7 +18,7 @@ const Tags = () => {
     const checkUserTags = async () => {
       if (!email) return;
       try {
-        const res = await axiosIntense.get(`/v1/users/email/${email}`);
+        const res = await axiosIntense.get(`/users/email/${email}`);
         if (res.data?.tags?.length > 0) {
           navigate("/auth/what-to-do", { replace: true });
         }
@@ -91,12 +91,12 @@ const Tags = () => {
     setIsLoading(true);
 
     try {
-      const response = await axiosIntense.patch(`/v1/users/email/${email}`, {
+      const response = await axiosIntense.patch(`/users/email/${email}`, {
         tags: selectedTags,
       });
 
       if (response.status === 200 || response.status === 201) {
-        navigate("/what-to-do");
+        navigate("/auth/what-to-do");
       }
     } catch (error) {
       console.error("Error submitting tags:", error.response?.data || error.message);

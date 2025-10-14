@@ -15,7 +15,7 @@ const WhereListen = () => {
       if (!user) return;
 
       try {
-        const res = await axiosIntense.get(`/v1/users/email/${user.email}`);
+        const res = await axiosIntense.get(`/users/email/${user.email}`);
         if (res.data?.sources && res.data.sources.length > 0) {
           // Already selected before → redirect to /tags
           navigate("/auth/tags", { replace: true });
@@ -50,12 +50,12 @@ const WhereListen = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await axiosIntense.patch(`/v1/users/email/${user.email}`, {
+      const response = await axiosIntense.patch(`/users/email/${user.email}`, {
         sources: selectedSources,
       });
 
       if (response.status === 200 || response.status === 201) {
-        navigate("/tags");
+        navigate("/auth/tags");
       } else {
         console.error("Failed to submit sources");
       }

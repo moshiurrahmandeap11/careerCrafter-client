@@ -4,6 +4,7 @@ import Navbar from '../../components/sharedItems/Navbar/Navbar';
 
 import PopUp from '../../components/sharedItems/PopUp/PopUp';
 import useAuth from '../../hooks/UseAuth/useAuth';
+import Footer from '../../components/sharedItems/Footer/Footer';
 
 const RootLayout = () => {
   const { user , loading} = useAuth();
@@ -31,7 +32,9 @@ useEffect(() => {
       <main>
         <Outlet />
       </main>
-      <footer></footer>
+      <footer>
+        <Footer />
+      </footer>
 
       {/* Show popup only if needed */}
       {showPopup && <PopUp onClose={handleClosePopup} />}
