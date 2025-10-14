@@ -63,6 +63,7 @@ const MessagesPage = () => {
   const [allUser, setAllUser] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");  
 
+
   const fetchMessages = async (friendEmail) => {
     if (!user?.email) {
       console.warn("fetchMessages aborted: user.email not ready yet");
@@ -382,7 +383,7 @@ const MessagesPage = () => {
                   initial="hidden"
                   animate="visible"
                 >
-                  {allUser
+                  {(allUser || [])
                     ?.filter((user) =>
                       user.fullName
                         .toLowerCase()
