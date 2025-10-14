@@ -13,7 +13,9 @@ import {
   Globe,
   Lock,
   ArrowRight,
-  Gift
+  Gift,
+  Smartphone,
+  Banknote
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReTitle } from 're-title';
@@ -32,7 +34,8 @@ import {
   selectPlan,
   processPayment,
   clearPaymentStatus,
-  createStripePaymentIntent
+  createStripePaymentIntent,
+  createSSLCommerzPayment
 } from '../../redux-slices/premiumSlice';
 import {
   selectPlans,
@@ -43,7 +46,8 @@ import {
   selectPaymentProcessing,
   selectPaymentSuccess,
   selectAwardedCredits,
-  selectClientSecret
+  selectClientSecret,
+  selectSSLCommerzUrl
 } from '../../redux-selectors/premiumSelectors';
 import useAuth from '../../hooks/UseAuth/useAuth';
 
@@ -93,6 +97,7 @@ const PremiumContent = () => {
   const paymentSuccess = useSelector(selectPaymentSuccess);
   const awardedCredits = useSelector(selectAwardedCredits);
   const clientSecret = useSelector(selectClientSecret);
+  const sslCommerzUrl = useSelector(selectSSLCommerzUrl);
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
@@ -105,6 +110,13 @@ const PremiumContent = () => {
   useEffect(() => {
     dispatch(fetchPremiumPlans());
   }, [dispatch]);
+
+  // Redirect to SSLCommerz when URL is available
+  useEffect(() => {
+    if (sslCommerzUrl) {
+      window.location.href = sslCommerzUrl;
+    }
+  }, [sslCommerzUrl]);
 
   // Toast message effect
   useEffect(() => {
@@ -124,7 +136,6 @@ const PremiumContent = () => {
   const handlePlanSelect = async (planId) => {
     dispatch(selectPlan(planId));
     
-    // For Stripe card payments, create payment intent
     const selectedPlan = plans.find(p => p.id === planId);
     if (selectedPlan) {
       const amount = billingCycle === 'yearly' ? selectedPlan.yearlyPrice : selectedPlan.monthlyPrice;
@@ -151,22 +162,29 @@ const PremiumContent = () => {
       planName: currentSelectedPlan?.name,
       billingCycle: billingCycle,
       amount: billingCycle === 'yearly' ? currentSelectedPlan?.yearlyPrice : currentSelectedPlan?.monthlyPrice,
-      userEmail: user?.email
+      userEmail: user?.email,
+      userName: user?.name || user?.email?.split('@')[0]
     };
 
-    dispatch(processPayment(paymentPayload))
-      .unwrap()
-      .then((result) => {
-        setShowPaymentModal(false);
-        setFormData({
-          mobileNumber: '',
-          bankName: '',
-          accountNumber: ''
+    // For SSLCommerz payments, create payment session
+    if (paymentMethod === 'mobile' || paymentMethod === 'bank') {
+      dispatch(createSSLCommerzPayment(paymentPayload));
+    } else {
+      // For Stripe card payments
+      dispatch(processPayment(paymentPayload))
+        .unwrap()
+        .then((result) => {
+          setShowPaymentModal(false);
+          setFormData({
+            mobileNumber: '',
+            bankName: '',
+            accountNumber: ''
+          });
+        })
+        .catch((error) => {
+          console.error('❌ Payment process failed:', error);
         });
-      })
-      .catch((error) => {
-        console.error('❌ Payment process failed:', error);
-      });
+    }
   };
 
   const handleInputChange = (field, value) => {
@@ -498,7 +516,6 @@ const StripeCardForm = ({ onSubmit, processing, amount, clientSecret }) => {
       setIsProcessing(false);
     } else {
       if (paymentIntent.status === 'succeeded') {
-        // Payment succeeded - call the parent onSubmit
         onSubmit(e);
       }
     }
@@ -564,12 +581,9 @@ const PaymentModal = ({
   clientSecret
 }) => {
   const paymentMethods = [
-    { id: 'card', name: 'Credit/Debit Card', icon: CreditCard },
-    { id: 'bkash', name: 'bKash', icon: Globe },
-    { id: 'nogod', name: 'Nagad', icon: Shield },
-    { id: 'rocket', name: 'Rocket', icon: Zap },
-    { id: 'upay', name: 'Upay', icon: Sparkles },
-    { id: 'bank', name: 'Bank Transfer', icon: Building }
+    { id: 'card', name: 'Credit/Debit Card', icon: CreditCard, description: 'Pay with Visa, Mastercard, or Amex' },
+    { id: 'mobile', name: 'Mobile Payment', icon: Smartphone, description: 'bKash, Nagad, Rocket, Upay' },
+    { id: 'bank', name: 'Bank Transfer', icon: Banknote, description: 'Direct bank transfer' }
   ];
 
   // Calculate correct price based on billing cycle
@@ -640,21 +654,28 @@ const PaymentModal = ({
             {/* Payment Methods */}
             <div className="p-6 border-b border-gray-200">
               <h3 className="font-semibold text-gray-900 mb-4">Select Payment Method</h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
                 {paymentMethods.map(method => (
                   <button
                     key={method.id}
                     onClick={() => {
                       setPaymentMethod(method.id);
                     }}
-                    className={`p-3 border-2 rounded-xl text-left transition-all duration-200 ${paymentMethod === method.id
+                    className={`w-full p-4 border-2 rounded-xl text-left transition-all duration-200 ${paymentMethod === method.id
                       ? 'border-purple-500 bg-purple-50'
                       : 'border-gray-200 hover:border-gray-300'
                       }`}
                   >
-                    <method.icon className={`w-5 h-5 mb-2 ${paymentMethod === method.id ? 'text-purple-600' : 'text-gray-600'
-                      }`} />
-                    <span className="text-sm font-medium text-gray-700">{method.name}</span>
+                    <div className="flex items-center space-x-3">
+                      <method.icon className={`w-6 h-6 ${paymentMethod === method.id ? 'text-purple-600' : 'text-gray-600'}`} />
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">{method.name}</div>
+                        <div className="text-sm text-gray-500">{method.description}</div>
+                      </div>
+                      {paymentMethod === method.id && (
+                        <Check className="w-5 h-5 text-purple-600" />
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -671,8 +692,8 @@ const PaymentModal = ({
                 />
               ) : (
                 <form onSubmit={onSubmit}>
-                  {/* Mobile Payment Methods */}
-                  {['bkash', 'nogod', 'rocket', 'upay'].includes(paymentMethod) && (
+                  {/* Mobile Payment Method */}
+                  {paymentMethod === 'mobile' && (
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -686,10 +707,14 @@ const PaymentModal = ({
                           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                           required
                         />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Supports bKash, Nagad, Rocket, Upay
+                        </p>
                       </div>
                     </div>
                   )}
 
+                  {/* Bank Transfer Method */}
                   {paymentMethod === 'bank' && (
                     <div className="space-y-4">
                       <div>
@@ -725,7 +750,10 @@ const PaymentModal = ({
                   <div className="flex items-center space-x-2 mt-6 p-3 bg-blue-50 rounded-lg">
                     <Lock className="w-4 h-4 text-blue-600" />
                     <span className="text-sm text-blue-700">
-                      Your payment information is secure and encrypted
+                      {paymentMethod === 'card' 
+                        ? 'Your payment information is secure and encrypted with Stripe'
+                        : 'Your payment is processed securely via SSLCommerz'
+                      }
                     </span>
                   </div>
 
@@ -737,7 +765,12 @@ const PaymentModal = ({
                     whileHover={{ scale: processing ? 1 : 1.02 }}
                     whileTap={{ scale: processing ? 1 : 0.98 }}
                   >
-                    <span>Complete Payment - ${displayPrice}</span>
+                    <span>
+                      {paymentMethod === 'card' 
+                        ? `Pay $${displayPrice}` 
+                        : `Continue to Payment - $${displayPrice}`
+                      }
+                    </span>
                     <ArrowRight className="w-4 h-4" />
                   </motion.button>
                 </form>

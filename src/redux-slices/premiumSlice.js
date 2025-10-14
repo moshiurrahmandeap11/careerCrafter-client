@@ -38,55 +38,81 @@ export const createStripePaymentIntent = createAsyncThunk(
   }
 );
 
+// Async thunk for creating SSLCommerz payment
+export const createSSLCommerzPayment = createAsyncThunk(
+  'premium/createSSLCommerzPayment',
+  async (paymentData, { rejectWithValue }) => {
+    try {
+      const response = await fetch('http://localhost:3000/v1/payments/create-sslcommerz-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create SSLCommerz payment');
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // Async thunk for processing payment
 export const processPayment = createAsyncThunk(
   'premium/processPayment',
   async (paymentData, { getState, rejectWithValue }) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      // Calculate credits
-      const creditsAwarded = calculateCredits(paymentData.planId, getState().premium.billingCycle);
-      
-      // Prepare data for backend
-      const backendPaymentData = {
-        planId: paymentData.planId,
-        planName: paymentData.planName,
-        paymentMethod: paymentData.paymentMethod,
-        amount: paymentData.amount,
-        billingCycle: paymentData.billingCycle,
-        userEmail: paymentData.userEmail,
-        creditsAwarded: creditsAwarded,
-        paymentData: {
-          ...paymentData,
-          // Remove sensitive data or include only what's needed
-          cardNumber: paymentData.cardNumber ? '***' + paymentData.cardNumber.slice(-4) : undefined,
-          cvv: paymentData.cvv ? '***' : undefined
+      // For Stripe payments, we don't need to simulate delay as Stripe handles it
+      if (paymentData.paymentMethod === 'card') {
+        // Calculate credits
+        const creditsAwarded = calculateCredits(paymentData.planId, getState().premium.billingCycle);
+        
+        // Prepare data for backend
+        const backendPaymentData = {
+          planId: paymentData.planId,
+          planName: paymentData.planName,
+          paymentMethod: paymentData.paymentMethod,
+          amount: paymentData.amount,
+          billingCycle: paymentData.billingCycle,
+          userEmail: paymentData.userEmail,
+          creditsAwarded: creditsAwarded,
+          paymentData: paymentData
+        };
+
+        // Send payment data to backend
+        const response = await fetch('http://localhost:3000/v1/payments/process-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(backendPaymentData),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Payment failed');
         }
-      };
 
-      // Send payment data to backend
-      const response = await fetch('http://localhost:3000/v1/payments/process-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(backendPaymentData),
-      });
+        const result = await response.json();
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Payment failed');
+        return {
+          success: true,
+          transactionId: result.transactionId,
+          creditsAwarded: creditsAwarded,
+          paymentData: paymentData,
+          backendResponse: result
+        };
       }
 
-      const result = await response.json();
-
-      return {
-        success: true,
-        transactionId: result.transactionId,
-        creditsAwarded: creditsAwarded,
-        paymentData: paymentData,
-        backendResponse: result
-      };
+      // For non-Stripe payments, this shouldn't be called directly
+      throw new Error('Invalid payment method for direct processing');
 
     } catch (error) {
       console.error('❌ Payment processing error:', error);
@@ -121,7 +147,8 @@ const premiumSlice = createSlice({
     paymentSuccess: false,
     awardedCredits: 0,
     transactionId: null,
-    clientSecret: null
+    clientSecret: null,
+    sslCommerzUrl: null
   },
   reducers: {
     setBillingCycle: (state, action) => {
@@ -139,6 +166,7 @@ const premiumSlice = createSlice({
       state.awardedCredits = 0;
       state.transactionId = null;
       state.clientSecret = null;
+      state.sslCommerzUrl = null;
       state.error = null;
     },
     showToast: (state, action) => {
@@ -172,6 +200,18 @@ const premiumSlice = createSlice({
       })
       .addCase(createStripePaymentIntent.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(createSSLCommerzPayment.pending, (state) => {
+        state.paymentProcessing = true;
+        state.error = null;
+      })
+      .addCase(createSSLCommerzPayment.fulfilled, (state, action) => {
+        state.paymentProcessing = false;
+        state.sslCommerzUrl = action.payload.GatewayPageURL;
+      })
+      .addCase(createSSLCommerzPayment.rejected, (state, action) => {
+        state.paymentProcessing = false;
         state.error = action.payload;
       })
       .addCase(processPayment.pending, (state) => {
