@@ -21,6 +21,9 @@ import {
   addProject,
   updateProject,
   removeProject,
+  addProjectFeature,
+  updateProjectFeature,
+  removeProjectFeature,
   addLanguage,
   updateLanguage,
   removeLanguage,
@@ -40,11 +43,10 @@ import {
   selectToast,
   selectIsFormValid
 } from '../../redux-selectors/resumeSelectors';
-import { ReTitle } from 're-title';
 
 const CreateResume = () => {
   const dispatch = useDispatch();
-  
+
   // Select data from Redux store
   const resumeData = useSelector(selectResumeData);
   const activeTab = useSelector(selectActiveTab);
@@ -145,7 +147,7 @@ const CreateResume = () => {
       projects: updateProject,
       languages: updateLanguage
     };
-    
+
     dispatch(updateActions[section]({ index, field, value }));
   };
 
@@ -157,7 +159,7 @@ const CreateResume = () => {
       projects: addProject,
       languages: addLanguage
     };
-    
+
     dispatch(addActions[section]());
   };
 
@@ -169,8 +171,21 @@ const CreateResume = () => {
       projects: removeProject,
       languages: removeLanguage
     };
-    
+
     dispatch(removeActions[section](index));
+  };
+
+  // Project features handlers
+  const handleAddProjectFeature = (projectIndex) => {
+    dispatch(addProjectFeature({ projectIndex }));
+  };
+
+  const handleUpdateProjectFeature = (projectIndex, featureIndex, value) => {
+    dispatch(updateProjectFeature({ projectIndex, featureIndex, value }));
+  };
+
+  const handleRemoveProjectFeature = (projectIndex, featureIndex) => {
+    dispatch(removeProjectFeature({ projectIndex, featureIndex }));
   };
 
   const handleSaveResume = () => {
@@ -185,16 +200,15 @@ const CreateResume = () => {
   // Tab navigation
   const tabs = [
     { id: 'personal', label: 'Personal Info', icon: User },
-    { id: 'education', label: 'Education', icon: GraduationCap },
-    { id: 'experience', label: 'Experience', icon: Briefcase },
     { id: 'skills', label: 'Skills', icon: Award },
     { id: 'projects', label: 'Projects', icon: FileText },
+    { id: 'experience', label: 'Experience', icon: Briefcase },
+    { id: 'education', label: 'Education', icon: GraduationCap },
     { id: 'languages', label: 'Languages', icon: Languages }
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8">
-      <ReTitle title='Create Resume'/>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Toast Notification */}
         <AnimatePresence>
@@ -203,11 +217,10 @@ const CreateResume = () => {
               initial={{ opacity: 0, y: -50, scale: 0.3 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -50, scale: 0.5 }}
-              className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg ${
-                toast.type === 'error' 
-                  ? 'bg-red-500 text-white' 
-                  : 'bg-green-500 text-white'
-              }`}
+              className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg ${toast.type === 'error'
+                ? 'bg-red-500 text-white'
+                : 'bg-green-500 text-white'
+                }`}
             >
               <div className="flex items-center space-x-2">
                 {toast.type === 'error' ? (
@@ -228,14 +241,14 @@ const CreateResume = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <motion.div 
+          <motion.div
             className="inline-flex items-center space-x-2 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-full px-4 py-2 shadow-sm mb-6"
             whileHover={{ scale: 1.05 }}
           >
             <Sparkles className="w-4 h-4 text-amber-600" />
             <span className="text-sm font-semibold text-amber-700">AI-Powered Resume Builder</span>
           </motion.div>
-          
+
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
             Create Your Professional
             <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -308,11 +321,10 @@ const CreateResume = () => {
                             <button
                               key={tab.id}
                               onClick={() => dispatch(setActiveTab(tab.id))}
-                              className={`flex items-center space-x-3 w-full px-4 py-3 text-left rounded-xl transition-all duration-200 mb-2 ${
-                                isActive
-                                  ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                              }`}
+                              className={`flex items-center space-x-3 w-full px-4 py-3 text-left rounded-xl transition-all duration-200 mb-2 ${isActive
+                                ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                }`}
                             >
                               <Icon className="w-5 h-5" />
                               <span className="font-medium">{tab.label}</span>
@@ -334,11 +346,10 @@ const CreateResume = () => {
                       <button
                         key={tab.id}
                         onClick={() => dispatch(setActiveTab(tab.id))}
-                        className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap ${
-                          activeTab === tab.id
-                            ? 'border-blue-500 text-blue-600 bg-blue-50'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        }`}
+                        className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap ${activeTab === tab.id
+                          ? 'border-blue-500 text-blue-600 bg-blue-50'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          }`}
                       >
                         <Icon className="w-4 h-4" />
                         <span>{tab.label}</span>
@@ -551,7 +562,7 @@ const CreateResume = () => {
                         </div>
                       </motion.div>
                     ))}
-                    
+
                     <motion.button
                       variants={itemVariants}
                       onClick={() => addArrayItem('education')}
@@ -643,7 +654,7 @@ const CreateResume = () => {
                         </div>
                       </motion.div>
                     ))}
-                    
+
                     <motion.button
                       variants={itemVariants}
                       onClick={() => addArrayItem('experience')}
@@ -700,7 +711,7 @@ const CreateResume = () => {
                         </button>
                       </motion.div>
                     ))}
-                    
+
                     <motion.button
                       variants={itemVariants}
                       onClick={() => addArrayItem('skills')}
@@ -755,16 +766,47 @@ const CreateResume = () => {
                               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                           </div>
+
+                          {/* Features Section - Bullet Points */}
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Key Features</label>
-                            <textarea
-                              value={project.keyFeatures}
-                              onChange={(e) => handleArrayFieldChange('projects', index, 'keyFeatures', e.target.value)}
-                              placeholder="Integrate multiple payment gateways including Strip and a custom Cash on Delivery, Developed role-based dashboard supporting Admin, Seller and User roles, Admin dashboard for managing users, categories, sales reports and advertisement"
-                              rows={2}
-                              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Key Features</label>
+                            <div className="space-y-2">
+                              {project.features.map((feature, featureIndex) => (
+                                <motion.div
+                                  key={featureIndex}
+                                  className="flex items-center space-x-2"
+                                  initial={{ opacity: 0, x: -20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: featureIndex * 0.1 }}
+                                >
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                                  <input
+                                    type="text"
+                                    value={feature}
+                                    onChange={(e) => handleUpdateProjectFeature(index, featureIndex, e.target.value)}
+                                    placeholder="Enter a key feature..."
+                                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  />
+                                  <button
+                                    onClick={() => handleRemoveProjectFeature(index, featureIndex)}
+                                    className="text-red-500 hover:text-red-700 transition-colors duration-200 p-1"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </motion.div>
+                              ))}
+                              <motion.button
+                                onClick={() => handleAddProjectFeature(index)}
+                                className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                              >
+                                <Plus className="w-4 h-4" />
+                                <span>Add Feature</span>
+                              </motion.button>
+                            </div>
                           </div>
+
                           <div className="grid md:grid-cols-2 gap-4">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">Live Demo URL</label>
@@ -806,7 +848,7 @@ const CreateResume = () => {
                         </div>
                       </motion.div>
                     ))}
-                    
+
                     <motion.button
                       variants={itemVariants}
                       onClick={() => addArrayItem('projects')}
@@ -863,7 +905,7 @@ const CreateResume = () => {
                         </button>
                       </motion.div>
                     ))}
-                    
+
                     <motion.button
                       variants={itemVariants}
                       onClick={() => addArrayItem('languages')}
@@ -968,20 +1010,20 @@ const CreateResume = () => {
                   <div className="space-y-4">
                     {/* Personal Information */}
                     <div className="text-center border-b pb-4">
-                      <h2 className="text-2xl font-bold text-gray-900">{resumeData.personal.name || "Shariful Islam Udoy"}</h2>
-                      <p className="text-gray-600">{resumeData.personal.title || "Frontend Developer (MERN Stack)"}</p>
+                      <h2 className="text-2xl font-bold text-gray-900">{resumeData.personal.name || "Your Name"}</h2>
+                      <p className="text-gray-600">{resumeData.personal.title || "Professional Title"}</p>
                     </div>
-                    
+
                     {/* Contact Information */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                       <div>
-                        <strong>Email:</strong> {resumeData.personal.email || "sharifulislamudoy56@gmail.com"}
+                        <strong>Email:</strong> {resumeData.personal.email || "your.email@example.com"}
                       </div>
                       <div>
-                        <strong>Phone:</strong> {resumeData.personal.phone || "+8801609-359736"}
+                        <strong>Phone:</strong> {resumeData.personal.phone || "+1234567890"}
                       </div>
                       <div>
-                        <strong>Location:</strong> {resumeData.personal.location || "Dhaka, Bangladesh"}
+                        <strong>Location:</strong> {resumeData.personal.location || "Your Location"}
                       </div>
                       {resumeData.personal.website && (
                         <div>
@@ -998,7 +1040,7 @@ const CreateResume = () => {
                     {/* Career Objective */}
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-2">Career Objective</h3>
-                      <p className="text-sm text-gray-600">{resumeData.personal.summary || "Frontend-focused MERN stack developer skilled in React, Next.js, Node.js, and MongoDB. Experienced in building scalable, user-centered web applications with modern ui and collaborating in dynamic teams"}</p>
+                      <p className="text-sm text-gray-600">{resumeData.personal.summary || "Your career objective summary..."}</p>
                     </div>
 
                     {/* Skills */}
@@ -1021,10 +1063,17 @@ const CreateResume = () => {
                         <h3 className="font-semibold text-gray-900 mb-2">Projects</h3>
                         {resumeData.projects.map((project, index) => (
                           <div key={index} className="mb-4">
-                            <p className="font-medium text-sm">{project.name || "MediHurt"}</p>
-                            <p className="text-xs text-gray-600 mb-1">Technologies: {project.technologies || "Tailwind CSS, MongoDB, React.js, Express.js, Cloudinary"}</p>
-                            {project.keyFeatures && (
-                              <p className="text-xs text-gray-600 mb-1">Features: {project.keyFeatures}</p>
+                            <p className="font-medium text-sm">{project.name || "Project Name"}</p>
+                            <p className="text-xs text-gray-600 mb-1">Technologies: {project.technologies || "Technologies used"}</p>
+                            {project.features && project.features.length > 0 && (
+                              <div className="text-xs text-gray-600 mb-1">
+                                <strong>Features:</strong>
+                                <ul className="list-disc list-inside mt-1">
+                                  {project.features.map((feature, featureIndex) => (
+                                    <li key={featureIndex}>{feature}</li>
+                                  ))}
+                                </ul>
+                              </div>
                             )}
                             <div className="flex space-x-4 text-xs">
                               {project.liveLink && (
@@ -1059,9 +1108,9 @@ const CreateResume = () => {
                         <h3 className="font-semibold text-gray-900 mb-2">Education</h3>
                         {resumeData.education.map((edu, index) => (
                           <div key={index} className="mb-2">
-                            <p className="font-medium text-sm">{edu.institution || "Dhaka College"}</p>
-                            <p className="text-sm text-gray-600">{edu.degree || "B. Sc Honours in Mathematics"} {edu.field && `in ${edu.field}`}</p>
-                            <p className="text-xs text-gray-500">{edu.duration || "2022 – Present (Expected Graduation: 2026)"}</p>
+                            <p className="font-medium text-sm">{edu.institution || "Institution Name"}</p>
+                            <p className="text-sm text-gray-600">{edu.degree || "Degree"} {edu.field && `in ${edu.field}`}</p>
+                            <p className="text-xs text-gray-500">{edu.duration || "Duration"}</p>
                           </div>
                         ))}
                       </div>
