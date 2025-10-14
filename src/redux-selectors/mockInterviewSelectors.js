@@ -1,3 +1,4 @@
+// redux-selectors/mockInterviewSelectors.js
 export const selectInterviewState = (state) => state.mockInterview;
 
 export const selectCurrentQuestion = (state) => state.mockInterview.currentQuestion;
@@ -13,6 +14,7 @@ export const selectInterviewTopic = (state) => state.mockInterview.interviewTopi
 export const selectQuestionCount = (state) => state.mockInterview.questionCount;
 export const selectIsLoading = (state) => state.mockInterview.loading;
 export const selectError = (state) => state.mockInterview.error;
+export const selectIsEvaluating = (state) => state.mockInterview.isEvaluating;
 
 // Derived selectors
 export const selectProgress = (state) => {
@@ -29,8 +31,9 @@ export const selectResults = (state) => {
   const { userAnswers, questions, score } = state.mockInterview;
   return {
     totalQuestions: questions.length,
-    correctAnswers: userAnswers.filter(answer => answer.isCorrect).length,
-    wrongAnswers: userAnswers.filter(answer => answer.userAnswer && !answer.isCorrect).length,
+    correctAnswers: userAnswers.filter(answer => answer.evaluation === 'correct').length,
+    partialAnswers: userAnswers.filter(answer => answer.evaluation === 'partial').length,
+    wrongAnswers: userAnswers.filter(answer => answer.evaluation === 'incorrect').length,
     unanswered: userAnswers.filter(answer => !answer.userAnswer).length,
     finalScore: score
   };

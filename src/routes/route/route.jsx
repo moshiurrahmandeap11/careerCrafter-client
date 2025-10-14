@@ -30,6 +30,9 @@ import Contact from "../../components/Contact/Contact";
 import CreateResume from "../../pages/create-resume/CreateResume";
 import ResumeCheck from "../../pages/check-resume/ResumeCheck";
 import MockInterview from "../../pages/mock-interview/MockInterview";
+import PaymentSuccess from "../../pages/premium/PaymentSuccess";
+import PaymentFailed from "../../pages/premium/PaymentFailed";
+import PaymentCanceled from "../../pages/premium/PaymentCanceled";
 
 
 
@@ -101,6 +104,18 @@ export const route = createBrowserRouter([
       {
         path: '/mock-interview',
         element: <MockInterview />
+      },
+      {
+        path: '/payment/success',
+        element: <PaymentSuccess />
+      },
+      {
+        path: '/payment/failed',
+        element: <PaymentFailed />
+      },
+      {
+        path: '/payment/canceled',
+        element: <PaymentCanceled />
       }
     ],
   },

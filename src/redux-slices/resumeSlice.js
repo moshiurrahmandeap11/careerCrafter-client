@@ -158,7 +158,7 @@ const resumeSlice = createSlice({
       state.resumeData.projects.push({ 
         name: '', 
         technologies: '', 
-        keyFeatures: '', 
+        features: [],
         liveLink: '', 
         githubLink: '', 
         description: '' 
@@ -168,6 +168,24 @@ const resumeSlice = createSlice({
       const { index, field, value } = action.payload;
       if (state.resumeData.projects[index]) {
         state.resumeData.projects[index][field] = value;
+      }
+    },
+    addProjectFeature: (state, action) => {
+      const { projectIndex } = action.payload;
+      if (state.resumeData.projects[projectIndex]) {
+        state.resumeData.projects[projectIndex].features.push('');
+      }
+    },
+    updateProjectFeature: (state, action) => {
+      const { projectIndex, featureIndex, value } = action.payload;
+      if (state.resumeData.projects[projectIndex] && state.resumeData.projects[projectIndex].features[featureIndex] !== undefined) {
+        state.resumeData.projects[projectIndex].features[featureIndex] = value;
+      }
+    },
+    removeProjectFeature: (state, action) => {
+      const { projectIndex, featureIndex } = action.payload;
+      if (state.resumeData.projects[projectIndex]) {
+        state.resumeData.projects[projectIndex].features = state.resumeData.projects[projectIndex].features.filter((_, i) => i !== featureIndex);
       }
     },
     removeProject: (state, action) => {
@@ -271,6 +289,9 @@ export const {
   addProject,
   updateProject,
   removeProject,
+  addProjectFeature,
+  updateProjectFeature,
+  removeProjectFeature,
   addLanguage,
   updateLanguage,
   removeLanguage,

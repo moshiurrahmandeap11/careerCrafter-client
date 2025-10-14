@@ -19,11 +19,11 @@ export const selectLanguages = (state) => state.resume.resumeData.languages;
 // Validation selectors
 export const selectIsFormValid = (state) => {
   const { personal, education, skills } = state.resume.resumeData;
-  
-  const hasPersonalInfo = personal.name && personal.title && personal.email && 
-                         personal.phone && personal.location && personal.summary;
+
+  const hasPersonalInfo = personal.name && personal.title && personal.email &&
+    personal.phone && personal.location && personal.summary;
   const hasEducation = education.length > 0;
   const hasSkills = skills.length > 0;
-  
+
   return hasPersonalInfo && hasEducation && hasSkills;
 };
