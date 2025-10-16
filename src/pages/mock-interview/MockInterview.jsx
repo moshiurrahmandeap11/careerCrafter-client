@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { 
   Clock, 
   Play, 
@@ -15,7 +16,10 @@ import {
   Target,
   BarChart3,
   Trophy,
-  RotateCcw
+  RotateCcw,
+  Mic,
+  MicOff,
+  Square
 } from 'lucide-react';
 import useAuth from '../../hooks/UseAuth/useAuth';
 
@@ -58,6 +62,15 @@ const MockInterview = () => {
   const correctAnswers = useSelector(selectCorrectAnswers);
   const isEvaluating = useSelector(selectIsEvaluating);
 
+  // Speech recognition
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+    isMicrophoneAvailable
+  } = useSpeechRecognition();
+
   // Local state
   const [userInfo, setUserInfo] = useState({
     name: user?.displayName || '',
@@ -69,8 +82,25 @@ const MockInterview = () => {
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [isPaused, setIsPaused] = useState(false);
   const [step, setStep] = useState(1); // 1: User info, 2: Topic, 3: Question count, 4: Interview, 5: Results
+  const [isSpeechSupported, setIsSpeechSupported] = useState(true);
 
   const timerRef = useRef(null);
+  const textareaRef = useRef(null);
+
+  // Check browser support on component mount
+  useEffect(() => {
+    if (!browserSupportsSpeechRecognition) {
+      setIsSpeechSupported(false);
+    }
+  }, [browserSupportsSpeechRecognition]);
+
+  // Sync transcript with currentAnswer when not listening
+  useEffect(() => {
+    if (!listening && transcript) {
+      setCurrentAnswer(prev => prev + (prev ? ' ' : '') + transcript);
+      resetTranscript();
+    }
+  }, [listening, transcript, resetTranscript]);
 
   // Timer effect
   useEffect(() => {
@@ -88,6 +118,14 @@ const MockInterview = () => {
       }
     };
   }, [isInterviewActive, isPaused, timeRemaining, dispatch]);
+
+  // Auto-scroll textarea when content grows
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  }, [currentAnswer]);
 
   const handleUserInfoSubmit = (e) => {
     e.preventDefault();
@@ -119,6 +157,11 @@ const MockInterview = () => {
   const handleAnswerSubmit = async (e) => {
     e.preventDefault();
     if (currentAnswer.trim() && isInterviewActive) {
+      // Stop speech recognition if active
+      if (listening) {
+        SpeechRecognition.stopListening();
+      }
+      
       dispatch(submitAnswer({
         questionIndex: currentQuestion,
         answer: currentAnswer.trim(),
@@ -136,6 +179,7 @@ const MockInterview = () => {
       }
       
       setCurrentAnswer('');
+      resetTranscript();
       
       // Move to next question or finish
       if (currentQuestion < questions.length - 1) {
@@ -148,13 +192,19 @@ const MockInterview = () => {
 
   const handleAutoSubmit = () => {
     if (isInterviewActive) {
+      // Stop speech recognition if active
+      if (listening) {
+        SpeechRecognition.stopListening();
+      }
+      
       dispatch(submitAnswer({
         questionIndex: currentQuestion,
-        answer: '', // Empty answer for timeout
+        answer: currentAnswer.trim() || '', // Use current answer if available
         timeSpent: questions[currentQuestion]?.timeLimit
       }));
       
       setCurrentAnswer('');
+      resetTranscript();
       
       if (currentQuestion < questions.length - 1) {
         // Next question logic is handled in the slice
@@ -165,6 +215,11 @@ const MockInterview = () => {
   };
 
   const handleFinishInterview = () => {
+    // Stop speech recognition if active
+    if (listening) {
+      SpeechRecognition.stopListening();
+    }
+    
     dispatch(submitInterview());
     setStep(5);
     
@@ -174,6 +229,11 @@ const MockInterview = () => {
   };
 
   const handleRestart = () => {
+    // Stop speech recognition if active
+    if (listening) {
+      SpeechRecognition.stopListening();
+    }
+    
     dispatch(resetInterview());
     setStep(1);
     setUserInfo({
@@ -185,6 +245,7 @@ const MockInterview = () => {
     setQuestionCount(10);
     setCurrentAnswer('');
     setIsPaused(false);
+    resetTranscript();
     
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -193,6 +254,36 @@ const MockInterview = () => {
 
   const togglePause = () => {
     setIsPaused(!isPaused);
+    
+    // Stop speech recognition when pausing
+    if (listening && !isPaused) {
+      SpeechRecognition.stopListening();
+    }
+  };
+
+  const startListening = () => {
+    resetTranscript();
+    SpeechRecognition.startListening({ 
+      continuous: true,
+      language: 'en-US' // You can make this configurable based on user preference
+    });
+  };
+
+  const stopListening = () => {
+    SpeechRecognition.stopListening();
+    // Transcript will be automatically added to currentAnswer via useEffect
+  };
+
+  const toggleListening = () => {
+    if (listening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
+
+  const clearSpeechText = () => {
+    resetTranscript();
   };
 
   const formatTime = (seconds) => {
@@ -525,15 +616,93 @@ const MockInterview = () => {
               {/* Answer Form */}
               <form onSubmit={handleAnswerSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Answer (Any language is accepted)
-                  </label>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Your Answer (Any language is accepted)
+                    </label>
+                    
+                    {/* Voice Recognition Controls */}
+                    {isSpeechSupported && (
+                      <div className="flex items-center space-x-2">
+                        {transcript && (
+                          <button
+                            type="button"
+                            onClick={clearSpeechText}
+                            className="text-xs text-gray-500 hover:text-gray-700 flex items-center space-x-1"
+                          >
+                            <Square className="w-3 h-3" />
+                            <span>Clear Speech</span>
+                          </button>
+                        )}
+                        
+                        <button
+                          type="button"
+                          onClick={toggleListening}
+                          disabled={isPaused || !isMicrophoneAvailable}
+                          className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
+                            listening 
+                              ? 'bg-red-100 text-red-700 hover:bg-red-200' 
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          } ${(isPaused || !isMicrophoneAvailable) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          {listening ? (
+                            <>
+                              <MicOff className="w-4 h-4" />
+                              <span>Stop Recording</span>
+                            </>
+                          ) : (
+                            <>
+                              <Mic className="w-4 h-4" />
+                              <span>Start Voice Answer</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Speech Recognition Status */}
+                  {isSpeechSupported && listening && (
+                    <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center space-x-2 text-blue-700">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                        <span className="text-sm font-medium">Listening... Speak now</span>
+                      </div>
+                      {transcript && (
+                        <p className="text-xs text-blue-600 mt-1">
+                          Current speech: "{transcript}"
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {!isSpeechSupported && (
+                    <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="text-sm text-yellow-700">
+                        Voice input is not supported in your browser. Please type your answers.
+                      </p>
+                    </div>
+                  )}
+
+                  {!isMicrophoneAvailable && (
+                    <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm text-red-700">
+                        Microphone access is not available. Please check your browser permissions.
+                      </p>
+                    </div>
+                  )}
+
                   <textarea
+                    ref={textareaRef}
                     value={currentAnswer}
                     onChange={(e) => setCurrentAnswer(e.target.value)}
                     rows={6}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-                    placeholder="Type your answer here in any language..."
+                    placeholder="Type your answer here or use the voice input above..."
                     disabled={isPaused}
                   />
                 </div>
