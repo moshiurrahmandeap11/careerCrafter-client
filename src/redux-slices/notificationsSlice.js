@@ -153,6 +153,7 @@ export const {
   setShowMobileFilters,
   toggleNotificationSetting,
   clearError,
+  addNotification,
 } = notificationsSlice.actions;
 
 // ========================
