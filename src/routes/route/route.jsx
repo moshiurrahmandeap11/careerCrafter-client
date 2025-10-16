@@ -37,6 +37,7 @@ import ConnectionPage from "../../pages/myNetwork/MyNetoworkPage/ConnectionPage"
 import PendingConnectPage from "../../pages/myNetwork/MyNetoworkPage/PendingConnectPage";
 import SuggetionConnectPage from "../../pages/myNetwork/MyNetoworkPage/SuggetionConnectPage";
 import AllUserPAge from "../../pages/myNetwork/MyNetoworkPage/AllUserPAge";
+import PrivacyPolicy from "../../components/footer-component/privacy-policy/PrivacyPolicy";
 
 
 
@@ -56,6 +57,10 @@ export const route = createBrowserRouter([
       {
         path: "/profile/hired",
         element: <ProfileHired></ProfileHired>
+      },
+      {
+        path: "/privacy",
+        element: <PrivacyPolicy></PrivacyPolicy>
       },
       {
         path: "/network",
