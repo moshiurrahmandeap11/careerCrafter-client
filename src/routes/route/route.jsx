@@ -33,6 +33,7 @@ import MockInterview from "../../pages/mock-interview/MockInterview";
 import PaymentSuccess from "../../pages/premium/PaymentSuccess";
 import PaymentFailed from "../../pages/premium/PaymentFailed";
 import PaymentCanceled from "../../pages/premium/PaymentCanceled";
+import ConnectionPage from "../../pages/myNetwork/MyNetoworkPage/ConnectionPage";
 
 
 
@@ -56,6 +57,12 @@ export const route = createBrowserRouter([
       {
         path: "/network",
         element: <MyNetwork />,
+        children:[
+          {
+            index:true,
+            element:<ConnectionPage></ConnectionPage>
+          }
+        ]
       },
       {
         path: "/messages",
