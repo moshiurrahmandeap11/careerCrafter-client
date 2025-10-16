@@ -17,6 +17,7 @@ import {
 import Swal from 'sweetalert2';
 import useAuth from '../../hooks/UseAuth/useAuth';
 import axiosIntense from '../../hooks/AxiosIntense/axiosIntense';
+import MainButton from '../sharedItems/MainButton/MainButton';
 
 const HiredPost = () => {
     const { user } = useAuth();
@@ -132,7 +133,7 @@ const HiredPost = () => {
             {/* Create Post Section */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
                 <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
                         {profile?.profileImage ? (
                             <img 
                                 src={profile.profileImage} 
@@ -161,7 +162,7 @@ const HiredPost = () => {
 
             {/* Create Post Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/40 bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         {/* Modal Header */}
                         <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
@@ -220,7 +221,7 @@ const HiredPost = () => {
                                                 Attach your job preferences, resume and portfolio links from your Get Hired profile to this post
                                             </p>
                                         </div>
-                                        <button
+                                        <butto
                                             type="button"
                                             onClick={() => setIncludeHiredData(!includeHiredData)}
                                             className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
@@ -232,7 +233,7 @@ const HiredPost = () => {
                                                     includeHiredData ? 'translate-x-5' : 'translate-x-0'
                                                 }`}
                                             />
-                                        </button>
+                                        </butto>
                                     </div>
 
                                     {/* Preview of included data */}
@@ -283,10 +284,9 @@ const HiredPost = () => {
                                     >
                                         Cancel
                                     </button>
-                                    <button
+                                    <MainButton
                                         type="submit"
                                         disabled={loading || !postData.content.trim()}
-                                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {loading ? (
                                             <>
@@ -299,7 +299,7 @@ const HiredPost = () => {
                                                 <span>Post to Hired</span>
                                             </>
                                         )}
-                                    </button>
+                                    </MainButton>
                                 </div>
                             </form>
                         </div>
@@ -310,20 +310,19 @@ const HiredPost = () => {
             {/* Empty State - Only show if there are no posts */}
             {(!profile?.hiredPosts || profile.hiredPosts.length === 0) && (
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <FileText className="w-10 h-10 text-white" />
                     </div>
                     <h3 className="text-xl font-semibold text-gray-800 mb-2">No Posts Yet</h3>
                     <p className="text-gray-600 mb-6">
                         Share your job search journey to connect with opportunities and employers
                     </p>
-                    <button 
+                    <MainButton 
                         onClick={handleInputClick}
-                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 flex items-center space-x-2 mx-auto shadow-lg hover:shadow-xl"
                     >
                         <Plus className="w-5 h-5" />
                         <span>Create Your First Post</span>
-                    </button>
+                    </MainButton>
                 </div>
             )}
         </div>

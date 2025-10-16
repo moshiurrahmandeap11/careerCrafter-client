@@ -1,3 +1,4 @@
+// MessagesPage.jsx (updated)
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -41,6 +42,8 @@ import useAuth from "../../hooks/UseAuth/useAuth";
 import axiosIntense from "../../hooks/AxiosIntense/axiosIntense";
 import { io } from "socket.io-client";
 import { connectWS } from "../../hooks/connect";
+import { CallModal } from "../../components/CallModal/CallModal";
+import { useWebRTC } from "../../hooks/useWebRTC/useWebRTC";
 
 const MessagesPage = () => {
   const { user, loading: emailLoading } = useAuth();
@@ -61,8 +64,23 @@ const MessagesPage = () => {
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [allUser, setAllUser] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");  
+  const [errorMessage, setErrorMessage] = useState("");
 
+  // Call States
+  const [callState, setCallState] = useState({
+    isCallActive: false,
+    isIncomingCall: false,
+    isOutgoingCall: false,
+    callType: null, // 'video' or 'audio'
+    callerInfo: null,
+    isAudioMuted: false,
+    isVideoOff: false
+  });
+
+  // WebRTC Hook
+  const webrtc = useWebRTC();
+
+  // Fetch messages function
   const fetchMessages = async (friendEmail) => {
     if (!user?.email) {
       console.warn("fetchMessages aborted: user.email not ready yet");
@@ -94,22 +112,103 @@ const MessagesPage = () => {
     }
   };
 
+  // Socket event handlers for calls
+  useEffect(() => {
+    if (!socket.current) return;
+
+    // Handle incoming call
+    socket.current.on("incoming-call", async (data) => {
+      const { from, callType, offer } = {
+        from: data.callerInfo,
+        callType: data.callType,
+        offer: data.offer
+      };
+
+      setCallState({
+        isCallActive: false,
+        isIncomingCall: true,
+        isOutgoingCall: false,
+        callType,
+        callerInfo: from,
+        isAudioMuted: false,
+        isVideoOff: false
+      });
+
+      // Initialize peer connection for incoming call
+      webrtc.initializePeerConnection();
+    });
+
+    // Handle call accepted
+    socket.current.on("call-accepted", async (data) => {
+      const { answer } = data;
+      await webrtc.handleAnswer(answer);
+      setCallState(prev => ({
+        ...prev,
+        isCallActive: true,
+        isOutgoingCall: false
+      }));
+    });
+
+    // Handle call rejected
+    socket.current.on("call-rejected", () => {
+      webrtc.stopCall();
+      setCallState({
+        isCallActive: false,
+        isIncomingCall: false,
+        isOutgoingCall: false,
+        callType: null,
+        callerInfo: null,
+        isAudioMuted: false,
+        isVideoOff: false
+      });
+    });
+
+    // Handle ICE candidates
+    socket.current.on("ice-candidate", (data) => {
+      webrtc.handleIceCandidate(data.candidate);
+    });
+
+    // Handle call ended
+    socket.current.on("call-ended", () => {
+      webrtc.stopCall();
+      setCallState({
+        isCallActive: false,
+        isIncomingCall: false,
+        isOutgoingCall: false,
+        callType: null,
+        callerInfo: null,
+        isAudioMuted: false,
+        isVideoOff: false
+      });
+    });
+
+    return () => {
+      socket.current?.off("incoming-call");
+      socket.current?.off("call-accepted");
+      socket.current?.off("call-rejected");
+      socket.current?.off("ice-candidate");
+      socket.current?.off("call-ended");
+    };
+  }, [webrtc]);
+
+  // Set socket in WebRTC hook
+  useEffect(() => {
+    webrtc.setSocket(socket.current);
+  }, [socket.current, webrtc]);
+
   // Auto-select conversation from Feed
   useEffect(() => {
     const storedConversation = sessionStorage.getItem('selectedConversation');
     if (storedConversation && allUser) {
       const conversationData = JSON.parse(storedConversation);
       
-      // Find if this user already exists in the conversations list
       const existingConversation = allUser?.find(user => 
         user.email === conversationData.email
       );
 
       if (existingConversation) {
-        // If user exists in conversations, select it
         handleConversationSelect(existingConversation);
       } else {
-        // If user doesn't exist, create a new conversation object
         const newConversation = {
           _id: conversationData._id,
           fullName: conversationData.fullName,
@@ -118,12 +217,10 @@ const MessagesPage = () => {
           tags: conversationData.tags || []
         };
         
-        // Add to conversations list and select it
         setAllUser(prev => [...(prev || []), newConversation]);
         handleConversationSelect(newConversation);
       }
       
-      // Clear the stored conversation
       sessionStorage.removeItem('selectedConversation');
     }
   }, [allUser, dispatch]);
@@ -169,7 +266,129 @@ const MessagesPage = () => {
     fetchUser();
   }, [dispatch, user]);
 
-  // --- FUNCTIONS ---
+  // Call Functions
+  const startCall = async (type) => {
+    if (!selectedConversation) return;
+
+    try {
+      webrtc.initializePeerConnection();
+      await webrtc.startLocalStream(type);
+      
+      const offer = await webrtc.createOffer();
+      
+      setCallState({
+        isCallActive: false,
+        isIncomingCall: false,
+        isOutgoingCall: true,
+        callType: type,
+        callerInfo: selectedConversation,
+        isAudioMuted: false,
+        isVideoOff: false
+      });
+
+      // Send call offer to the other user
+      socket.current.emit("start-call", {
+        to: selectedConversation.email,
+        from: {
+          email: user.email,
+          fullName: user.displayName || user.email,
+          profileImage: user.photoURL || ''
+        },
+        callType: type,
+        offer: offer
+      });
+
+    } catch (error) {
+      console.error("Error starting call:", error);
+      alert("Failed to start call. Please check your camera and microphone permissions.");
+    }
+  };
+
+  const acceptCall = async () => {
+    try {
+      await webrtc.startLocalStream(callState.callType);
+      const answer = await webrtc.createAnswer();
+      
+      socket.current.emit("accept-call", {
+        to: callState.callerInfo.email,
+        answer: answer
+      });
+
+      setCallState(prev => ({
+        ...prev,
+        isCallActive: true,
+        isIncomingCall: false
+      }));
+
+    } catch (error) {
+      console.error("Error accepting call:", error);
+      rejectCall();
+    }
+  };
+
+  const rejectCall = () => {
+    if (callState.isIncomingCall) {
+      socket.current.emit("reject-call", {
+        to: callState.callerInfo.email
+      });
+    }
+    
+    webrtc.stopCall();
+    setCallState({
+      isCallActive: false,
+      isIncomingCall: false,
+      isOutgoingCall: false,
+      callType: null,
+      callerInfo: null,
+      isAudioMuted: false,
+      isVideoOff: false
+    });
+  };
+
+  const endCall = () => {
+    socket.current.emit("end-call", {
+      to: callState.callerInfo.email
+    });
+    
+    webrtc.stopCall();
+    setCallState({
+      isCallActive: false,
+      isIncomingCall: false,
+      isOutgoingCall: false,
+      callType: null,
+      callerInfo: null,
+      isAudioMuted: false,
+      isVideoOff: false
+    });
+  };
+
+  const toggleAudio = () => {
+    if (webrtc.localStream) {
+      const audioTracks = webrtc.localStream.getAudioTracks();
+      audioTracks.forEach(track => {
+        track.enabled = !track.enabled;
+      });
+      setCallState(prev => ({
+        ...prev,
+        isAudioMuted: !prev.isAudioMuted
+      }));
+    }
+  };
+
+  const toggleVideo = () => {
+    if (webrtc.localStream) {
+      const videoTracks = webrtc.localStream.getVideoTracks();
+      videoTracks.forEach(track => {
+        track.enabled = !track.enabled;
+      });
+      setCallState(prev => ({
+        ...prev,
+        isVideoOff: !prev.isVideoOff
+      }));
+    }
+  };
+
+  // Rest of your existing functions (handleSearchChange, handleConversationSelect, handleSendMessage, etc.)
   const handleSearchChange = (term) => {
     dispatch(setSearchTerm(term));
   };
@@ -323,6 +542,28 @@ const MessagesPage = () => {
       <ReTitle
         title={`Messages${unreadCount > 0 ? ` (${unreadCount})` : ""}`}
       />
+      
+      {/* Call Modal */}
+      {(callState.isIncomingCall || callState.isOutgoingCall || callState.isCallActive) && (
+        <CallModal
+          callType={callState.callType}
+          isIncoming={callState.isIncomingCall}
+          callerInfo={callState.callerInfo}
+          onAccept={acceptCall}
+          onReject={rejectCall}
+          onEndCall={endCall}
+          localVideoRef={webrtc.localVideoRef}
+          remoteVideoRef={webrtc.remoteVideoRef}
+          localStream={webrtc.localStream}
+          remoteStream={webrtc.remoteStream}
+          isCallActive={callState.isCallActive}
+          onToggleAudio={toggleAudio}
+          onToggleVideo={toggleVideo}
+          isAudioMuted={callState.isAudioMuted}
+          isVideoOff={callState.isVideoOff}
+        />
+      )}
+
       <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div
@@ -461,18 +702,26 @@ const MessagesPage = () => {
                     </div>
 
                     <div className="flex items-center space-x-2">
+                      {/* Video Call Button */}
                       <motion.button
-                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                        onClick={() => startCall('video')}
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
                         whileHover={{ scale: 1.1 }}
+                        title="Video Call"
                       >
                         <Video className="w-5 h-5" />
                       </motion.button>
+                      
+                      {/* Audio Call Button */}
                       <motion.button
-                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                        onClick={() => startCall('audio')}
+                        className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
                         whileHover={{ scale: 1.1 }}
+                        title="Audio Call"
                       >
                         <Phone className="w-5 h-5" />
                       </motion.button>
+                      
                       <motion.button
                         className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
                         whileHover={{ scale: 1.1 }}

@@ -111,14 +111,14 @@ const Profile = () => {
 
     const handleDeletePost = async (postIndex) => {
         const result = await Swal.fire({
-            title: 'আপনি কি নিশ্চিত?',
-            text: "এটি পুনরুদ্ধার করা যাবে না!",
+            title: 'Are you sure?',
+            text: "This cannot be undone!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'হ্যাঁ, মুছে ফেলুন!',
-            cancelButtonText: 'বাতিল'
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
         });
 
         if (result.isConfirmed) {
@@ -129,20 +129,20 @@ const Profile = () => {
                 });
                 
                 Swal.fire({
-                    title: 'মুছে ফেলা হয়েছে!',
-                    text: 'আপনার পোস্ট মুছে ফেলা হয়েছে।',
+                    title: 'Deleted!',
+                    text: 'Your post has been deleted.',
                     icon: 'success',
-                    confirmButtonText: 'ঠিক আছে'
+                    confirmButtonText: 'OK'
                 });
                 
                 fetchProfile(); // Refresh profile data
             } catch (error) {
                 console.error('Error deleting post:', error);
                 Swal.fire({
-                    title: 'ত্রুটি!',
-                    text: 'পোস্ট মুছতে ব্যর্থ। দয়া করে আবার চেষ্টা করুন।',
+                    title: 'Error!',
+                    text: 'Failed to delete post. Please try again.',
                     icon: 'error',
-                    confirmButtonText: 'ঠিক আছে'
+                    confirmButtonText: 'OK'
                 });
             }
         }
@@ -152,10 +152,10 @@ const Profile = () => {
         e.preventDefault();
         if (!editPostData.content.trim()) {
             Swal.fire({
-                title: 'খালি পোস্ট!',
-                text: 'অনুগ্রহ করে কিছু লিখুন',
+                title: 'Empty Post!',
+                text: 'Please write something',
                 icon: 'warning',
-                confirmButtonText: 'ঠিক আছে'
+                confirmButtonText: 'OK'
             });
             return;
         }
@@ -173,10 +173,10 @@ const Profile = () => {
             });
 
             Swal.fire({
-                title: 'সফল!',
-                text: 'আপনার পোস্ট সফলভাবে আপডেট হয়েছে!',
+                title: 'Success!',
+                text: 'Your post has been successfully updated!',
                 icon: 'success',
-                confirmButtonText: 'দারুণ!'
+                confirmButtonText: 'Great!'
             });
 
             setShowPostModal(false);
@@ -185,10 +185,10 @@ const Profile = () => {
         } catch (error) {
             console.error('Error updating post:', error);
             Swal.fire({
-                title: 'ত্রুটি!',
-                text: 'পোস্ট আপডেট করতে ব্যর্থ। দয়া করে আবার চেষ্টা করুন।',
+                title: 'Error!',
+                text: 'Failed to update post. Please try again.',
                 icon: 'error',
-                confirmButtonText: 'ঠিক আছে'
+                confirmButtonText: 'OK'
             });
         }
     };
@@ -208,13 +208,13 @@ const Profile = () => {
                     <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <User className="w-8 h-8 text-red-600" />
                     </div>
-                    <h2 className="text-xl font-semibold text-gray-800 mb-2">প্রোফাইল ত্রুটি</h2>
+                    <h2 className="text-xl font-semibold text-gray-800 mb-2">Profile Error</h2>
                     <p className="text-gray-600 mb-6">{error}</p>
                     <button 
                         onClick={fetchProfile}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-xl transition-all duration-200"
                     >
-                        আবার চেষ্টা করুন
+                        Try Again
                     </button>
                 </div>
             </div>
@@ -253,8 +253,8 @@ const Profile = () => {
                                     )}
                                 </div>
                                 <div>
-                                    <h1 className="text-2xl font-bold text-gray-900">প্রোফাইল</h1>
-                                    <p className="text-gray-500 text-sm">আপনার অ্যাকাউন্ট সেটিংস পরিচালনা করুন</p>
+                                    <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
+                                    <p className="text-gray-500 text-sm">Manage your account settings</p>
                                 </div>
                             </div>
                             <div className="flex items-center space-x-3">
@@ -263,21 +263,21 @@ const Profile = () => {
                                     className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium py-2.5 px-6 rounded-xl transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl"
                                 >
                                     <Award className="w-4 h-4" />
-                                    <span>চাকরি পান</span>
+                                    <span>Get Hired</span>
                                 </button>
                                 <button 
                                     onClick={() => setShowEditModal(true)}
                                     className="bg-white border border-gray-200 hover:border-gray-300 text-gray-700 font-medium py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center space-x-2 shadow-sm hover:shadow-md"
                                 >
                                     <Edit3 className="w-4 h-4" />
-                                    <span>প্রোফাইল সম্পাদনা</span>
+                                    <span>Edit Profile</span>
                                 </button>
                                 <button 
                                     onClick={handleLogOut}
                                     className="bg-white border border-gray-200 hover:border-red-200 hover:bg-red-50 text-red-600 font-medium py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center space-x-2 shadow-sm hover:shadow-md"
                                 >
                                     <LogOut className="w-4 h-4" />
-                                    <span>লগআউট</span>
+                                    <span>Logout</span>
                                 </button>
                             </div>
                         </div>
@@ -321,11 +321,11 @@ const Profile = () => {
                                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
                                                 <div>
                                                     <h2 className="text-2xl font-bold text-gray-900 mb-1">
-                                                        {profile.fullName || 'কোনো নাম নেই'}
+                                                        {profile.fullName || 'No Name'}
                                                     </h2>
                                                     <div className="flex items-center space-x-2 text-gray-600">
                                                         <Mail className="w-4 h-4" />
-                                                        <span className="text-sm">{profile.email || 'কোনো ইমেইল নেই'}</span>
+                                                        <span className="text-sm">{profile.email || 'No Email'}</span>
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-wrap gap-2">
@@ -355,9 +355,9 @@ const Profile = () => {
                                 {profile.hiredPosts && profile.hiredPosts.length > 0 && (
                                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                                         <div className="flex items-center justify-between mb-6">
-                                            <h3 className="text-lg font-semibold text-gray-900">আপনার হায়ারড পোস্টসমূহ</h3>
+                                            <h3 className="text-lg font-semibold text-gray-900">Your Hired Posts</h3>
                                             <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
-                                                {profile.hiredPosts.length} টি পোস্ট
+                                                {profile.hiredPosts.length} Posts
                                             </span>
                                         </div>
                                         
@@ -365,10 +365,10 @@ const Profile = () => {
                                             <table className="w-full">
                                                 <thead>
                                                     <tr className="border-b border-gray-200">
-                                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">বিষয়বস্তু</th>
-                                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">তারিখ</th>
-                                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">প্রোফাইল ডেটা</th>
-                                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">ক্রিয়াকলাপ</th>
+                                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Content</th>
+                                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Date</th>
+                                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Profile Data</th>
+                                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-100">
@@ -394,7 +394,7 @@ const Profile = () => {
                                                                             ? 'bg-green-100 text-green-800' 
                                                                             : 'bg-gray-100 text-gray-800'
                                                                     }`}>
-                                                                        {post.includeProfile ? 'অন্তর্ভুক্ত' : 'অন্তর্ভুক্ত নয়'}
+                                                                        {post.includeProfile ? 'Included' : 'Not Included'}
                                                                     </span>
                                                                 </td>
                                                                 <td className="py-4 px-4">
@@ -402,21 +402,21 @@ const Profile = () => {
                                                                         <button
                                                                             onClick={() => handleViewPost({...post, index: originalIndex})}
                                                                             className="w-8 h-8 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center transition-colors duration-200"
-                                                                            title="পোস্ট দেখুন"
+                                                                            title="View Post"
                                                                         >
                                                                             <Eye className="w-4 h-4" />
                                                                         </button>
                                                                         <button
                                                                             onClick={() => handleEditPost({...post, index: originalIndex})}
                                                                             className="w-8 h-8 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg flex items-center justify-center transition-colors duration-200"
-                                                                            title="পোস্ট সম্পাদনা"
+                                                                            title="Edit Post"
                                                                         >
                                                                             <Edit3 className="w-4 h-4" />
                                                                         </button>
                                                                         <button
                                                                             onClick={() => handleDeletePost(originalIndex)}
                                                                             className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg flex items-center justify-center transition-colors duration-200"
-                                                                            title="পোস্ট মুছুন"
+                                                                            title="Delete Post"
                                                                         >
                                                                             <Trash2 className="w-4 h-4" />
                                                                         </button>
@@ -442,7 +442,7 @@ const Profile = () => {
                                                 <p className="text-2xl font-bold text-gray-900">
                                                     {profile.aiCredits ? profile.aiCredits.toLocaleString() : '0'}
                                                 </p>
-                                                <p className="text-sm text-gray-500">এআই ক্রেডিট</p>
+                                                <p className="text-sm text-gray-500">AI Credits</p>
                                             </div>
                                         </div>
                                     </div>
@@ -456,7 +456,7 @@ const Profile = () => {
                                                 <p className="text-sm font-semibold text-gray-900">
                                                     {formatDate(profile.createdAt)}
                                                 </p>
-                                                <p className="text-sm text-gray-500">সদস্য হয়েছেন</p>
+                                                <p className="text-sm text-gray-500">Member Since</p>
                                             </div>
                                         </div>
                                     </div>
@@ -470,7 +470,7 @@ const Profile = () => {
                                                 <p className="text-2xl font-bold text-gray-900">
                                                     {profile.sources?.length || 0}
                                                 </p>
-                                                <p className="text-sm text-gray-500">সোর্স</p>
+                                                <p className="text-sm text-gray-500">Sources</p>
                                             </div>
                                         </div>
                                     </div>
@@ -481,7 +481,7 @@ const Profile = () => {
                                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                                         <div className="flex items-center space-x-2 mb-4">
                                             <Tag className="w-5 h-5 text-gray-700" />
-                                            <h3 className="font-semibold text-gray-900">দক্ষতা এবং বিশেষজ্ঞতা</h3>
+                                            <h3 className="font-semibold text-gray-900">Skills & Expertise</h3>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {profile.tags.map((tag, index) => (
@@ -501,7 +501,7 @@ const Profile = () => {
                                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                                         <div className="flex items-center space-x-2 mb-4">
                                             <Users className="w-5 h-5 text-gray-700" />
-                                            <h3 className="font-semibold text-gray-900">সংযুক্ত সোর্স</h3>
+                                            <h3 className="font-semibold text-gray-900">Connected Sources</h3>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             {profile.sources.map((source, index) => (
@@ -526,7 +526,7 @@ const Profile = () => {
                             <div className="space-y-6">
                                 {/* Quick Actions */}
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                                    <h3 className="font-semibold text-gray-900 mb-4">দ্রুত ক্রিয়াকলাপ</h3>
+                                    <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
                                     <div className="space-y-3">
                                         <button 
                                             onClick={handleGetHired}
@@ -534,32 +534,32 @@ const Profile = () => {
                                         >
                                             <Award className="w-5 h-5 text-green-600" />
                                             <div>
-                                                <p className="font-medium text-gray-900 text-sm">চাকরি পান</p>
-                                                <p className="text-gray-500 text-xs">আপনার স্বপ্নের চাকরি খুঁজুন</p>
+                                                <p className="font-medium text-gray-900 text-sm">Get Hired</p>
+                                                <p className="text-gray-500 text-xs">Find your dream job</p>
                                             </div>
                                         </button>
 
                                         <button className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-left">
                                             <Settings className="w-5 h-5 text-gray-600" />
                                             <div>
-                                                <p className="font-medium text-gray-900 text-sm">সেটিংস</p>
-                                                <p className="text-gray-500 text-xs">অ্যাকাউন্ট পছন্দ</p>
+                                                <p className="font-medium text-gray-900 text-sm">Settings</p>
+                                                <p className="text-gray-500 text-xs">Account preferences</p>
                                             </div>
                                         </button>
                                         
                                         <button className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 text-left">
                                             <BarChart3 className="w-5 h-5 text-gray-600" />
                                             <div>
-                                                <p className="font-medium text-gray-900 text-sm">বিশ্লেষণ</p>
-                                                <p className="text-gray-500 text-xs">কার্যকলাপের পরিসংখ্যান দেখুন</p>
+                                                <p className="font-medium text-gray-900 text-sm">Analytics</p>
+                                                <p className="text-gray-500 text-xs">View activity statistics</p>
                                             </div>
                                         </button>
                                         
                                         <button className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-200 text-left">
                                             <Target className="w-5 h-5 text-gray-600" />
                                             <div>
-                                                <p className="font-medium text-gray-900 text-sm">লক্ষ্য</p>
-                                                <p className="text-gray-500 text-xs">উদ্দেশ্য নির্ধারণ করুন</p>
+                                                <p className="font-medium text-gray-900 text-sm">Goals</p>
+                                                <p className="text-gray-500 text-xs">Set your objectives</p>
                                             </div>
                                         </button>
                                     </div>
@@ -570,22 +570,22 @@ const Profile = () => {
                                     <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl shadow-lg p-6 text-white">
                                         <div className="flex items-center space-x-2 mb-3">
                                             <Crown className="w-5 h-5" />
-                                            <h3 className="font-semibold">প্রিমিয়াম সদস্য</h3>
+                                            <h3 className="font-semibold">Premium Member</h3>
                                         </div>
                                         <p className="text-amber-100 text-sm mb-4">
-                                            আপনার {profile.planName} প্ল্যানের সাথে এক্সক্লুসিভ ফিচার এবং সুবিধা উপভোগ করুন।
+                                            Enjoy exclusive features and benefits with your {profile.planName} plan.
                                         </p>
                                         <div className="space-y-2 text-sm">
                                             <div className="flex justify-between">
-                                                <span className="text-amber-100">প্ল্যান</span>
+                                                <span className="text-amber-100">Plan</span>
                                                 <span className="font-medium">{profile.planName}</span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="text-amber-100">বিলিং</span>
+                                                <span className="text-amber-100">Billing</span>
                                                 <span className="font-medium">{profile.billingCycle}</span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="text-amber-100">স্থিতি</span>
+                                                <span className="text-amber-100">Status</span>
                                                 <span className="font-medium capitalize">{profile.subscriptionStatus}</span>
                                             </div>
                                         </div>
@@ -596,17 +596,17 @@ const Profile = () => {
                                 <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white">
                                     <div className="flex items-center space-x-2 mb-3">
                                         <Sparkles className="w-5 h-5" />
-                                        <h3 className="font-semibold">এআই ক্রেডিট</h3>
+                                        <h3 className="font-semibold">AI Credits</h3>
                                     </div>
                                     <p className="text-blue-100 text-sm mb-4">
-                                        প্ল্যাটফর্ম জুড়ে শক্তিশালী এআই ফিচার ব্যবহার করতে আপনার ক্রেডিট ব্যবহার করুন।
+                                        Use your credits to access powerful AI features across the platform.
                                     </p>
                                     <div className="flex items-center justify-between">
                                         <span className="text-2xl font-bold">
                                             {profile.aiCredits ? profile.aiCredits.toLocaleString() : '0'}
                                         </span>
                                         <button className="bg-white text-blue-600 px-4 py-2 rounded-xl font-medium text-sm hover:bg-blue-50 transition-colors duration-200">
-                                            আরও পান
+                                            Get More
                                         </button>
                                     </div>
                                 </div>
@@ -617,13 +617,13 @@ const Profile = () => {
                             <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                                 <User className="w-8 h-8 text-gray-400" />
                             </div>
-                            <h2 className="text-xl font-semibold text-gray-800 mb-2">কোনো প্রোফাইল পাওয়া যায়নি</h2>
-                            <p className="text-gray-600 mb-6">আমরা আপনার প্রোফাইল তথ্য খুঁজে পাইনি</p>
+                            <h2 className="text-xl font-semibold text-gray-800 mb-2">No Profile Found</h2>
+                            <p className="text-gray-600 mb-6">We couldn't find your profile information</p>
                             <button 
                                 onClick={fetchProfile}
                                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-xl transition-all duration-200"
                             >
-                                প্রোফাইল রিফ্রেশ করুন
+                                Refresh Profile
                             </button>
                         </div>
                     )}
@@ -635,7 +635,7 @@ const Profile = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-                            <h2 className="text-lg font-semibold text-gray-800">প্রোফাইল সম্পাদনা</h2>
+                            <h2 className="text-lg font-semibold text-gray-800">Edit Profile</h2>
                             <button 
                                 onClick={() => setShowEditModal(false)}
                                 className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-all duration-200"
@@ -662,7 +662,7 @@ const Profile = () => {
                     <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
                             <h2 className="text-lg font-semibold text-gray-800">
-                                {editPostData ? 'পোস্ট সম্পাদনা' : 'পোস্ট দেখুন'}
+                                {editPostData ? 'Edit Post' : 'View Post'}
                             </h2>
                             <button 
                                 onClick={() => {
@@ -683,14 +683,14 @@ const Profile = () => {
                                 <form onSubmit={handleUpdatePost}>
                                     <div className="mb-6">
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            পোস্টের বিষয়বস্তু
+                                            Post Content
                                         </label>
                                         <textarea
                                             value={editPostData.content}
                                             onChange={(e) => setEditPostData({...editPostData, content: e.target.value})}
                                             rows={6}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-                                            placeholder="আপনার চাকরি খোঁজার যাত্রা শেয়ার করুন..."
+                                            placeholder="Share your job search journey..."
                                         />
                                     </div>
                                     <div className="flex items-center justify-between">
@@ -702,13 +702,13 @@ const Profile = () => {
                                             }}
                                             className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200"
                                         >
-                                            বাতিল
+                                            Cancel
                                         </button>
                                         <button
                                             type="submit"
                                             className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-xl transition-all duration-200"
                                         >
-                                            পোস্ট আপডেট
+                                            Update Post
                                         </button>
                                     </div>
                                 </form>
@@ -716,7 +716,7 @@ const Profile = () => {
                                 // View Mode
                                 <div className="space-y-6">
                                     <div>
-                                        <h3 className="text-sm font-medium text-gray-700 mb-2">বিষয়বস্তু</h3>
+                                        <h3 className="text-sm font-medium text-gray-700 mb-2">Content</h3>
                                         <p className="text-gray-800 bg-gray-50 rounded-xl p-4 whitespace-pre-line">
                                             {selectedPost?.content}
                                         </p>
@@ -724,21 +724,21 @@ const Profile = () => {
                                     
                                     <div className="flex items-center space-x-2 text-sm text-gray-600">
                                         <Calendar className="w-4 h-4" />
-                                        <span>পোস্ট করা হয়েছে {formatDate(selectedPost?.timestamp)}</span>
+                                        <span>Posted on {formatDate(selectedPost?.timestamp)}</span>
                                     </div>
 
                                     {selectedPost?.includeProfile && selectedPost.profileData && (
                                         <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
                                             <h4 className="font-semibold text-blue-900 mb-3 flex items-center space-x-2">
                                                 <Briefcase className="w-4 h-4" />
-                                                <span>অন্তর্ভুক্ত প্রোফাইল তথ্য</span>
+                                                <span>Included Profile Information</span>
                                             </h4>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                 {selectedPost.profileData.desiredJobTitle && (
                                                     <div className="flex items-center space-x-2">
                                                         <Award className="w-4 h-4 text-green-600" />
                                                         <span className="text-gray-700">
-                                                            <strong>পছন্দের পদ:</strong> {selectedPost.profileData.desiredJobTitle}
+                                                            <strong>Desired Position:</strong> {selectedPost.profileData.desiredJobTitle}
                                                         </span>
                                                     </div>
                                                 )}
@@ -746,7 +746,7 @@ const Profile = () => {
                                                     <div className="flex items-center space-x-2">
                                                         <Building className="w-4 h-4 text-blue-600" />
                                                         <span className="text-gray-700">
-                                                            <strong>বর্তমান পদ:</strong> {selectedPost.profileData.currentJobTitle}
+                                                            <strong>Current Position:</strong> {selectedPost.profileData.currentJobTitle}
                                                         </span>
                                                     </div>
                                                 )}
@@ -754,7 +754,7 @@ const Profile = () => {
                                                     <div className="flex items-center space-x-2">
                                                         <MapPin className="w-4 h-4 text-red-600" />
                                                         <span className="text-gray-700">
-                                                            <strong>অবস্থান:</strong> {selectedPost.profileData.location}
+                                                            <strong>Location:</strong> {selectedPost.profileData.location}
                                                         </span>
                                                     </div>
                                                 )}
@@ -762,7 +762,7 @@ const Profile = () => {
                                                     <div className="flex items-center space-x-2">
                                                         <DollarSign className="w-4 h-4 text-green-600" />
                                                         <span className="text-gray-700">
-                                                            <strong>প্রত্যাশিত বেতন:</strong> ${selectedPost.profileData.expectedSalary}
+                                                            <strong>Expected Salary:</strong> ${selectedPost.profileData.expectedSalary}
                                                         </span>
                                                     </div>
                                                 )}
@@ -770,7 +770,7 @@ const Profile = () => {
                                                     <div className="flex items-center space-x-2">
                                                         <FileText className="w-4 h-4 text-purple-600" />
                                                         <span className="text-gray-700">
-                                                            <strong>অভিজ্ঞতা:</strong> {selectedPost.profileData.yearsOfExperience}
+                                                            <strong>Experience:</strong> {selectedPost.profileData.yearsOfExperience}
                                                         </span>
                                                     </div>
                                                 )}
@@ -778,7 +778,7 @@ const Profile = () => {
                                                     <div className="flex items-center space-x-2">
                                                         <FileText className="w-4 h-4 text-blue-600" />
                                                         <span className="text-gray-700">
-                                                            <strong>রিজিউম:</strong> উপলব্ধ
+                                                            <strong>Resume:</strong> Available
                                                         </span>
                                                     </div>
                                                 )}
@@ -786,7 +786,7 @@ const Profile = () => {
                                                     <div className="flex items-center space-x-2">
                                                         <Briefcase className="w-4 h-4 text-orange-600" />
                                                         <span className="text-gray-700">
-                                                            <strong>পোর্টফোলিও:</strong> উপলব্ধ
+                                                            <strong>Portfolio:</strong> Available
                                                         </span>
                                                     </div>
                                                 )}
@@ -802,7 +802,7 @@ const Profile = () => {
                                             }}
                                             className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-xl font-medium transition-all duration-200"
                                         >
-                                            বন্ধ করুন
+                                            Close
                                         </button>
                                     </div>
                                 </div>

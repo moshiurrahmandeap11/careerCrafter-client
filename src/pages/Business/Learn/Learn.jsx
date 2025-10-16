@@ -448,7 +448,7 @@ Please try again shortly!`,
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-white">
       <Helmet>
         <title>Free AI Career Mentor - Get Personalized Career Guidance</title>
         <meta
@@ -464,60 +464,49 @@ Please try again shortly!`,
           href="https://careercrafter.moshiurrahman.online/ai-mentor"
         />
       </Helmet>
+      
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-3 md:px-4 py-3 md:py-4">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <BookOpen className="w-4 h-4 md:w-6 md:h-6 text-white" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div>
                 <Link
                   to={"/"}
-                  className="text-lg md:text-2xl font-bold text-gray-900"
+                  className="text-xl font-bold text-gray-900"
                 >
                   Career Crafter
                 </Link>
-                <p className="text-xs md:text-sm text-gray-500">
+                <p className="text-sm text-gray-500">
                   Learn with AI
                 </p>
               </div>
             </div>
-            <div className="flex gap-1 md:gap-2">
+            <div className="flex gap-2">
               <button
                 onClick={() => setActiveTab("explore")}
-                className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-medium transition-all text-sm md:text-base ${
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === "explore"
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 }`}
               >
-                {isMobile ? (
-                  <BookOpen className="w-4 h-4" />
-                ) : (
-                  <>
-                    <BookOpen className="w-4 h-4 inline mr-1 md:mr-2" />
-                    Explore
-                  </>
-                )}
+                <BookOpen className="w-4 h-4 inline mr-2" />
+                Explore
               </button>
               <button
                 onClick={() => setActiveTab("mentor")}
-                className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-medium transition-all text-sm md:text-base ${
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === "mentor"
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 }`}
               >
-                {isMobile ? (
-                  <MessageSquare className="w-4 h-4" />
-                ) : (
-                  <>
-                    <MessageSquare className="w-4 h-4 inline mr-1 md:mr-2" />
-                    AI Mentor
-                  </>
-                )}
+                <MessageSquare className="w-4 h-4 inline mr-2" />
+                AI Mentor
               </button>
             </div>
           </div>
@@ -525,29 +514,28 @@ Please try again shortly!`,
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-3 md:px-4 py-4 md:py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         {activeTab === "explore" ? (
-          <div className="space-y-6 md:space-y-8">
+          <div className="space-y-8">
             {/* Hero Section */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl md:rounded-2xl p-6 md:p-8 text-white">
+            <div className="bg-blue-600 rounded-xl p-8 text-white">
               <div className="max-w-3xl">
-                <h2 className="text-2xl md:text-4xl font-bold mb-3 md:mb-4">
+                <h2 className="text-3xl font-bold mb-4">
                   Start Your Learning Journey
                 </h2>
-                <p className="text-base md:text-xl opacity-90 mb-4 md:mb-6">
-                  Unlock your potential with AI-powered personalized learning
-                  paths and instant career guidance
+                <p className="text-lg text-blue-100 mb-6">
+                  Unlock your potential with AI-powered personalized learning paths and instant career guidance
                 </p>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex gap-3">
                   <button
                     onClick={() => setActiveTab("mentor")}
-                    className="bg-white text-blue-600 px-4 py-2 md:px-6 md:py-3 rounded-lg font-semibold hover:shadow-lg transition-all inline-flex items-center gap-2 text-sm md:text-base"
+                    className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center gap-2"
                   >
-                    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
+                    <Sparkles className="w-5 h-5" />
                     Talk to AI Mentor
                   </button>
-                  <button className="bg-white/20 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg font-semibold hover:bg-white/30 transition-all inline-flex items-center gap-2 text-sm md:text-base">
-                    <TrendingUp className="w-4 h-4 md:w-5 md:h-5" />
+                  <button className="bg-white/20 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/30 transition-colors inline-flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
                     View Progress
                   </button>
                 </div>
@@ -555,44 +543,44 @@ Please try again shortly!`,
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 {
-                  icon: <Users className="w-4 h-4 md:w-5 md:h-5" />,
+                  icon: <Users className="w-5 h-5" />,
                   label: "Enrollments",
                   value: userStats
                     ? formatNumber(userStats.totalEnrolled)
                     : "0",
                 },
                 {
-                  icon: <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />,
+                  icon: <CheckCircle className="w-5 h-5" />,
                   label: "Completed",
                   value: userStats
                     ? formatNumber(userStats.totalCompleted)
                     : "0",
                 },
                 {
-                  icon: <Clock className="w-4 h-4 md:w-5 md:h-5" />,
+                  icon: <Clock className="w-5 h-5" />,
                   label: "Time Spent",
                   value: userStats
                     ? `${Math.floor(userStats.totalTimeSpent / 60)}h`
                     : "0h",
                 },
                 {
-                  icon: <Award className="w-4 h-4 md:w-5 md:h-5" />,
+                  icon: <Award className="w-5 h-5" />,
                   label: "Avg Score",
                   value: userStats ? `${userStats.averageScore}%` : "0%",
                 },
               ].map((stat, idx) => (
                 <div
                   key={idx}
-                  className="bg-white rounded-lg md:rounded-xl p-4 md:p-6 shadow-sm border border-gray-100"
+                  className="bg-white rounded-lg p-6 border border-gray-200"
                 >
-                  <div className="text-blue-600 mb-1 md:mb-2">{stat.icon}</div>
-                  <div className="text-lg md:text-2xl font-bold text-gray-900">
+                  <div className="text-blue-600 mb-2">{stat.icon}</div>
+                  <div className="text-2xl font-bold text-gray-900">
                     {stat.value}
                   </div>
-                  <div className="text-xs md:text-sm text-gray-600">
+                  <div className="text-sm text-gray-600">
                     {stat.label}
                   </div>
                 </div>
@@ -601,19 +589,19 @@ Please try again shortly!`,
 
             {/* Learning Paths */}
             <div>
-              <div className="flex items-center justify-between mb-4 md:mb-6">
-                <h3 className="text-xl md:text-2xl font-bold text-gray-900">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">
                   Popular Learning Paths
                 </h3>
                 <span className="text-sm text-gray-500">
                   {learningPaths.length} paths available
                 </span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {learningPaths.map((path) => (
                   <div
                     key={path._id}
-                    className="bg-white rounded-lg md:rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all cursor-pointer group"
+                    className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all cursor-pointer group"
                     onClick={() => {
                       setSelectedTopic(path.title);
                       setActiveTab("mentor");
@@ -622,28 +610,21 @@ Please try again shortly!`,
                       );
                     }}
                   >
-                    <div
-                      className={`h-1 md:h-2 bg-gradient-to-r ${getCategoryColor(
-                        path.category
-                      )}`}
-                    ></div>
-                    <div className="p-4 md:p-6">
-                      <div className="flex items-start gap-3 md:gap-4">
+                    <div className="p-6">
+                      <div className="flex items-start gap-4">
                         <div
-                          className={`w-8 h-8 md:w-12 md:h-12 rounded-lg bg-gradient-to-br ${getCategoryColor(
-                            path.category
-                          )} flex items-center justify-center text-white flex-shrink-0`}
+                          className={`w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0`}
                         >
                           {getCategoryIcon(path.category)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-base md:text-xl font-bold text-gray-900 mb-1 md:mb-2 group-hover:text-blue-600 transition-colors line-clamp-1">
+                          <h4 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                             {path.title}
                           </h4>
-                          <p className="text-sm md:text-base text-gray-600 mb-2 md:mb-4 line-clamp-2">
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                             {path.description}
                           </p>
-                          <div className="flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm text-gray-500">
+                          <div className="flex flex-wrap gap-3 text-xs text-gray-500">
                             <span className="flex items-center gap-1">
                               <BookOpen className="w-3 h-3" />
                               {path.courses} courses
@@ -667,7 +648,7 @@ Please try again shortly!`,
                             </span>
                           </div>
                           {path.duration && (
-                            <div className="mt-2 text-xs text-blue-600 font-medium">
+                            <div className="mt-3 text-sm text-blue-600 font-medium">
                               {path.duration}
                             </div>
                           )}
@@ -681,19 +662,19 @@ Please try again shortly!`,
           </div>
         ) : (
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-xl md:rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               {/* Chat Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 md:p-6 text-white">
+              <div className="bg-blue-600 p-6 text-white">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 md:gap-3">
-                    <div className="w-8 h-8 md:w-12 md:h-12 bg-white/20 rounded-full flex items-center justify-center">
-                      <Sparkles className="w-4 h-4 md:w-6 md:h-6" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <Sparkles className="w-6 h-6" />
                     </div>
                     <div>
-                      <h3 className="text-lg md:text-xl font-bold">
+                      <h3 className="text-xl font-bold">
                         AI Career Mentor
                       </h3>
-                      <p className="text-xs md:text-sm opacity-90">
+                      <p className="text-sm text-blue-100">
                         Powered by Career Crafter • Fast & Intelligent Responses
                       </p>
                     </div>
@@ -701,29 +682,28 @@ Please try again shortly!`,
                   {messages.length > 0 && (
                     <button
                       onClick={clearChatHistory}
-                      className="text-xs md:text-sm bg-white/20 hover:bg-white/30 px-3 py-1.5 md:px-4 md:py-2 rounded-lg transition-all"
+                      className="text-sm bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors"
                     >
-                      {isMobile ? "Clear" : "Clear Chat"}
+                      Clear Chat
                     </button>
                   )}
                 </div>
               </div>
 
               {/* Chat Messages */}
-              <div className="h-80 md:h-96 overflow-y-auto p-4 md:p-6 space-y-3 md:space-y-4 bg-gray-50">
+              <div className="h-96 overflow-y-auto p-6 space-y-4 bg-gray-50">
                 {messages.length === 0 ? (
-                  <div className="text-center py-8 md:py-12">
-                    <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                      <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <MessageSquare className="w-8 h-8 text-blue-600" />
                     </div>
-                    <h4 className="text-base md:text-lg font-semibold text-gray-900 mb-2">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">
                       Start a conversation with your AI Mentor
                     </h4>
-                    <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6 max-w-md mx-auto">
-                      Get instant career advice, learning recommendations, and
-                      personalized guidance
+                    <p className="text-base text-gray-600 mb-6 max-w-md mx-auto">
+                      Get instant career advice, learning recommendations, and personalized guidance
                     </p>
-                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-3 max-w-2xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
                       {quickPrompts.map((prompt, idx) => (
                         <button
                           key={idx}
@@ -731,7 +711,7 @@ Please try again shortly!`,
                             setInputMessage(prompt);
                             setTimeout(() => handleSendMessage(), 100);
                           }}
-                          className="text-left p-2 md:p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all text-xs md:text-sm hover:bg-blue-50"
+                          className="text-left p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all text-sm hover:bg-blue-50"
                         >
                           {prompt}
                         </button>
@@ -748,13 +728,13 @@ Please try again shortly!`,
                         }`}
                       >
                         <div
-                          className={`max-w-[85%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 ${
+                          className={`max-w-[80%] rounded-lg px-4 py-3 ${
                             msg.role === "user"
                               ? "bg-blue-600 text-white"
                               : "bg-white text-gray-900 border border-gray-200 shadow-sm"
                           }`}
                         >
-                          <p className="whitespace-pre-wrap text-xs md:text-sm leading-relaxed">
+                          <p className="whitespace-pre-wrap text-sm leading-relaxed">
                             {msg.content}
                           </p>
                           {msg.timestamp && (
@@ -773,8 +753,8 @@ Please try again shortly!`,
                     ))}
                     {isLoading && (
                       <div className="flex justify-start">
-                        <div className="bg-white text-gray-900 border border-gray-200 rounded-xl md:rounded-2xl px-4 py-3 shadow-sm flex items-center gap-2">
-                          <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin text-blue-600" />
+                        <div className="bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-3 shadow-sm flex items-center gap-2">
+                          <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
                           <span className="text-sm text-gray-600">
                             AI Mentor is thinking...
                           </span>
@@ -787,7 +767,7 @@ Please try again shortly!`,
               </div>
 
               {/* Chat Input */}
-              <div className="p-3 md:p-4 bg-white border-t border-gray-200">
+              <div className="p-4 bg-white border-t border-gray-200">
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -795,24 +775,23 @@ Please try again shortly!`,
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Ask about career advice, learning paths, skills development..."
-                    className="flex-1 px-3 py-2 md:px-4 md:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                     disabled={isLoading}
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={isLoading || !inputMessage.trim()}
-                    className="px-3 py-2 md:px-6 md:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center min-w-[60px]"
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[60px]"
                   >
                     {isLoading ? (
-                      <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
+                      <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
-                      <Send className="w-4 h-4 md:w-5 md:h-5" />
+                      <Send className="w-5 h-5" />
                     )}
                   </button>
                 </div>
                 <div className="mt-2 text-xs text-gray-500 text-center">
-                  Powered by Career Crafter • Fast responses • Expert career
-                  guidance
+                  Powered by Career Crafter • Fast responses • Expert career guidance
                 </div>
               </div>
             </div>

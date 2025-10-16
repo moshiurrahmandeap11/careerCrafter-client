@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Play, Star, Users, Award, TrendingUp, Sparkles, ArrowRight } from 'lucide-react';
+import { Search, Play, Star, Users, Award, TrendingUp, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router';
+import MainButton from '../../../components/sharedItems/MainButton/MainButton';
 
 const Hero = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsVisible(true);
@@ -17,13 +20,24 @@ const Hero = () => {
     { number: '4.9/5', label: 'User Rating', icon: Star },
   ];
 
-  // Sponsor logos
+  // Original sponsor logos - high quality brands
   const sponsors = [
-    { name: 'TechCorp', logo: 'https://i.postimg.cc/VkZCgzcZ/sponsor-rubber-stamp-red-sponsor-rubber-grunge-stamp-seal-illustration-free-vector-removebg-preview.png' },
-    { name: 'InnovateLabs', logo: 'https://i.postimg.cc/VkZCgzcZ/sponsor-rubber-stamp-red-sponsor-rubber-grunge-stamp-seal-illustration-free-vector-removebg-preview.png' },
-    { name: 'FutureWorks', logo: 'https://i.postimg.cc/VkZCgzcZ/sponsor-rubber-stamp-red-sponsor-rubber-grunge-stamp-seal-illustration-free-vector-removebg-preview.png' },
-    { name: 'DreamJobs', logo: 'https://i.postimg.cc/VkZCgzcZ/sponsor-rubber-stamp-red-sponsor-rubber-grunge-stamp-seal-illustration-free-vector-removebg-preview.png' },
-    { name: 'CareerBoost', logo: 'https://i.postimg.cc/VkZCgzcZ/sponsor-rubber-stamp-red-sponsor-rubber-grunge-stamp-seal-illustration-free-vector-removebg-preview.png' },
+    { 
+      name: 'Google', 
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/800px-Google_2015_logo.svg.png' 
+    },
+    { 
+      name: 'Microsoft', 
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Microsoft_logo_%282012%29.svg/1024px-Microsoft_logo_%282012%29.svg.png' 
+    },
+    { 
+      name: 'Amazon', 
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/1024px-Amazon_logo.svg.png' 
+    },
+    { 
+      name: 'Apple', 
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/800px-Apple_logo_black.svg.png' 
+    },
   ];
 
   // Animation variants
@@ -33,7 +47,7 @@ const Hero = () => {
       opacity: 1,
       transition: {
         staggerChildren: 0.1,
-        delayChildren: 0.3
+        delayChildren: 0.2
       }
     }
   };
@@ -44,91 +58,15 @@ const Hero = () => {
       y: 0,
       opacity: 1,
       transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 12
-      }
-    }
-  };
-
-  const floatingCardVariants = {
-    initial: { y: 0 },
-    animate: {
-      y: [-10, 10, -10],
-      transition: {
-        duration: 4,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }
-    }
-  };
-
-  const imageHoverVariants = {
-    initial: { scale: 1 },
-    hover: {
-      scale: 1.05,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut"
-      }
-    }
-  };
-
-  const buttonHoverVariants = {
-    initial: { scale: 1 },
-    hover: {
-      scale: 1.05,
-      boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.4)",
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 17
-      }
-    },
-    tap: { scale: 0.95 }
-  };
-
-  const gradientOrbVariants = {
-    animate: {
-      scale: [1, 1.2, 1],
-      opacity: [0.3, 0.5, 0.3],
-      transition: {
-        duration: 6,
-        repeat: Infinity,
-        ease: "easeInOut"
+        duration: 0.5
       }
     }
   };
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Animated gradient orbs */}
-        <motion.div
-          className="absolute -top-20 -right-20 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl"
-          variants={gradientOrbVariants}
-          animate="animate"
-        />
-        <motion.div
-          className="absolute -bottom-20 -left-20 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl"
-          variants={gradientOrbVariants}
-          animate="animate"
-          initial={{ opacity: 0.3 }}
-        />
-        <motion.div
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-200 rounded-full mix-blend-multiply filter blur-xl"
-          variants={gradientOrbVariants}
-          animate="animate"
-          initial={{ opacity: 0.2 }}
-        />
-        
-        {/* Grid pattern */}
-        <div className="absolute inset-0 opacity-10 bg-[linear-gradient(rgba(0,0,0,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.1)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
-      </div>
-
+    <div className="relative w-full min-h-screen overflow-hidden bg-white">
       {/* Main Content */}
-      <div className="relative z-10 w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div className="relative z-10 w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div 
           className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center"
           variants={containerVariants}
@@ -139,64 +77,43 @@ const Hero = () => {
           {/* Left Column - Text Content */}
           <div className="space-y-8">
             
-            {/* Premium Badge */}
+            {/* Simple Badge */}
             <motion.div 
-              className="inline-flex items-center space-x-2 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-full px-4 py-2 shadow-sm"
+              className="inline-flex items-center space-x-2 bg-gray-100 border border-gray-200 rounded-full px-4 py-2"
               variants={itemVariants}
-              whileHover={{ scale: 1.05 }}
             >
-              <Sparkles className="w-4 h-4 text-amber-600" />
-              <span className="text-sm font-semibold text-amber-700">AI-Powered Career Platform</span>
-              <motion.div 
-                className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"
-                animate={{ scale: [1, 1.5, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
+              <span className="text-sm font-medium text-gray-700">Trusted Career Platform</span>
             </motion.div>
 
             {/* Main Heading */}
             <motion.div className="space-y-4" variants={itemVariants}>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight leading-tight">
-                Craft Your
-                <motion.span 
-                  className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
-                  animate={{ backgroundPosition: ['0%', '100%'] }}
-                  transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
-                  style={{ 
-                    backgroundSize: '200% 100%',
-                    backgroundImage: 'linear-gradient(to right, #2563eb, #7c3aed, #2563eb)'
-                  }}
-                >
+                Find Your
+                <span className="block text-blue-600">
                   Dream Career
-                </motion.span>
+                </span>
               </h1>
               
-              <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 leading-relaxed max-w-lg">
-                Discover opportunities, connect with professionals, and build a career that inspires you with our AI-powered platform.
+              <p className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-lg">
+                Discover opportunities, connect with professionals, and build a career that inspires you.
               </p>
             </motion.div>
 
             {/* Stats Grid */}
             <motion.div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4" variants={containerVariants}>
-              {stats.map((stat, index) => {
+              {stats.map((stat) => {
                 const Icon = stat.icon;
                 return (
                   <motion.div 
                     key={stat.label}
-                    className="text-center p-3 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm"
+                    className="text-center p-3 rounded-lg bg-gray-50 border border-gray-200"
                     variants={itemVariants}
-                    whileHover={{ 
-                      scale: 1.05, 
-                      y: -5,
-                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
-                    }}
-                    transition={{ type: "spring", stiffness: 300 }}
                   >
                     <div className="flex justify-center mb-2">
                       <Icon className="w-5 h-5 text-blue-600" />
                     </div>
-                    <div className="text-lg sm:text-xl font-bold text-gray-900">{stat.number}</div>
-                    <div className="text-xs text-gray-600 font-medium">{stat.label}</div>
+                    <div className="text-lg font-bold text-gray-900">{stat.number}</div>
+                    <div className="text-xs text-gray-600">{stat.label}</div>
                   </motion.div>
                 );
               })}
@@ -206,49 +123,31 @@ const Hero = () => {
             <motion.div className="space-y-4" variants={itemVariants}>
               <div className="relative max-w-xl">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <motion.input
+                <input
                   type="text"
                   placeholder="Search for jobs, companies, or skills..."
-                  className="w-full pl-12 pr-32 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-lg shadow-lg"
-                  whileFocus={{ scale: 1.02 }}
+                  className="w-full pl-12 pr-32 py-4 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
                 />
-                <motion.button 
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-xl font-semibold flex items-center space-x-2"
-                  variants={buttonHoverVariants}
-                  initial="initial"
-                  whileHover="hover"
-                  whileTap="tap"
+                <MainButton 
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold flex items-center space-x-2 hover:bg-blue-700 transition-colors"
                 >
                   <span>Search</span>
                   <ArrowRight className="w-4 h-4" />
-                </motion.button>
+                </MainButton>
               </div>
 
               {/* Quick Actions */}
-              <motion.div className="flex flex-wrap gap-3" variants={itemVariants}>
-                <motion.button 
-                  className="inline-flex items-center space-x-2 bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm font-medium text-gray-700"
-                  whileHover={{ 
-                    borderColor: "#3b82f6",
-                    color: "#2563eb",
-                    y: -2
-                  }}
-                  transition={{ type: "spring", stiffness: 400 }}
+              <div className="flex flex-wrap gap-3">
+                <MainButton 
                 >
                   <Play className="w-4 h-4" />
                   <span>Watch Demo</span>
-                </motion.button>
-                <motion.button 
-                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl px-4 py-2 text-sm font-semibold"
-                  variants={buttonHoverVariants}
-                  initial="initial"
-                  whileHover="hover"
-                  whileTap="tap"
+                </MainButton>
+                <MainButton onClick={() => navigate("/create-resume")}
                 >
-                  <Sparkles className="w-4 h-4" />
-                  <span>Try AI Resume</span>
-                </motion.button>
-              </motion.div>
+                  <span>Create Resume</span>
+                </MainButton>
+              </div>
             </motion.div>
           </div>
 
@@ -260,78 +159,44 @@ const Hero = () => {
             
             {/* Main Image Container */}
             <div className="relative">
-              {/* Floating Cards */}
-              <motion.div 
-                className="absolute -top-6 -left-6 bg-white rounded-2xl p-4 shadow-2xl border border-gray-100 transform rotate-3 z-20"
-                variants={floatingCardVariants}
-                initial="initial"
-                animate="animate"
-                whileHover={{ scale: 1.1, rotate: 0 }}
-              >
+              {/* Simple Card */}
+              <div className="absolute -top-4 -left-4 bg-white rounded-lg p-3 shadow-lg border border-gray-200 z-20">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-green-600" />
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-green-600" />
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-gray-900">+25% Growth</div>
                     <div className="text-xs text-gray-600">This month</div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* Main Hero Image */}
-              <motion.div 
-                className="relative rounded-3xl overflow-hidden shadow-2xl border-8 border-white"
-                variants={imageHoverVariants}
-                initial="initial"
-                whileHover="hover"
-              >
+              <div className="relative rounded-xl overflow-hidden shadow-lg border border-gray-200">
                 <img
                   src="https://i.postimg.cc/t4qcPNXx/image.jpg"
                   alt="Professionals networking and collaborating"
                   className="w-full h-auto object-cover"
                 />
                 
-                {/* Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                
-                {/* Floating AI Badge */}
-                <motion.div 
-                  className="absolute top-4 right-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-2 rounded-full text-sm font-semibold shadow-lg flex items-center space-x-1"
-                  whileHover={{ scale: 1.1 }}
-                  animate={{ 
-                    boxShadow: [
-                      "0 10px 25px -5px rgba(139, 92, 246, 0.4)",
-                      "0 20px 40px -5px rgba(139, 92, 246, 0.6)",
-                      "0 10px 25px -5px rgba(139, 92, 246, 0.4)"
-                    ]
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Sparkles className="w-4 h-4" />
-                  <span>AI Powered</span>
-                </motion.div>
-              </motion.div>
+                {/* Simple Badge */}
+                <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold">
+                  New
+                </div>
+              </div>
 
-              {/* Bottom Floating Card */}
-              <motion.div 
-                className="absolute -bottom-6 -right-6 bg-white rounded-2xl p-4 shadow-2xl border border-gray-100 transform -rotate-3 z-20"
-                variants={floatingCardVariants}
-                initial="initial"
-                animate="animate"
-                whileHover={{ scale: 1.1, rotate: 0 }}
-              >
+              {/* Bottom Card */}
+              <div className="absolute -bottom-4 -right-4 bg-white rounded-lg p-3 shadow-lg border border-gray-200 z-20">
                 <div className="flex items-center space-x-3">
                   <div className="flex -space-x-2">
                     {[1, 2, 3].map((i) => (
-                      <motion.div 
+                      <div 
                         key={i} 
-                        className="w-8 h-8 bg-blue-100 rounded-full border-2 border-white flex items-center justify-center"
-                        whileHover={{ scale: 1.2, zIndex: 10 }}
-                        transition={{ type: "spring", stiffness: 400 }}
+                        className="w-6 h-6 bg-blue-100 rounded-full border-2 border-white flex items-center justify-center"
                       >
                         <Users className="w-3 h-3 text-blue-600" />
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                   <div>
@@ -339,71 +204,67 @@ const Hero = () => {
                     <div className="text-xs text-gray-600">This week</div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         </motion.div>
       </div>
 
       {/* Sponsors Section */}
-      <motion.div 
-        className="relative z-10 bg-white/80 backdrop-blur-sm border-t border-gray-100 py-8 lg:py-12"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.5 }}
-      >
+      <div className="bg-gray-50 border-t border-gray-200 py-8 lg:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-6 lg:mb-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
+            transition={{ delay: 0.5 }}
           >
-            <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">
               Trusted by leading companies
             </p>
           </motion.div>
           
-          <div className="relative">
+          <div className="relative overflow-hidden">
             {/* Gradient Fades */}
-            <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10"></div>
-            <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10"></div>
+            <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-gray-50 to-transparent z-10"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-gray-50 to-transparent z-10"></div>
             
-            {/* Scrolling Sponsor Logos */}
+            {/* Infinite Scrolling Sponsor Logos */}
             <motion.div 
               className="flex space-x-12 lg:space-x-16"
-              animate={{ x: [0, -1032] }}
+              animate={{ 
+                x: [0, -1200],
+              }}
               transition={{ 
                 x: {
                   repeat: Infinity,
                   repeatType: "loop",
-                  duration: 30,
+                  duration: 40,
                   ease: "linear",
                 }
               }}
             >
+              {/* Double the sponsors for seamless looping */}
               {[...sponsors, ...sponsors].map((sponsor, index) => (
                 <motion.div
-                  key={index}
-                  className="flex-shrink-0 flex items-center justify-center opacity-60 grayscale"
+                  key={`${sponsor.name}-${index}`}
+                  className="flex-shrink-0 flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity duration-300"
                   whileHover={{ 
-                    opacity: 1, 
-                    grayscale: 0,
-                    scale: 1.1,
+                    scale: 1.05,
                     transition: { duration: 0.2 }
                   }}
                 >
                   <img
                     src={sponsor.logo}
                     alt={sponsor.name}
-                    className="h-8 lg:h-10 object-contain filter brightness-0 invert-[0.3] hover:invert-0 transition-all duration-300"
+                    className="h-8 lg:h-10 object-contain max-w-[120px] lg:max-w-[150px]"
                   />
                 </motion.div>
               ))}
             </motion.div>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

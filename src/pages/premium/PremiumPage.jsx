@@ -50,6 +50,7 @@ import {
   selectSSLCommerzUrl
 } from '../../redux-selectors/premiumSelectors';
 import useAuth from '../../hooks/UseAuth/useAuth';
+import axiosIntense from '../../hooks/AxiosIntense/axiosIntense';
 
 // Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_REACT_APP_STRIPE_PUBLISHABLE_KEY);
@@ -86,6 +87,18 @@ const PremiumPage = () => {
 const PremiumContent = () => {
   const dispatch = useDispatch();
   const { user } = useAuth()
+  const [userProfile, setUserProfile] = useState([])
+
+ 
+  
+  const email = user?.email;
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await axiosIntense.get(`/users/email/${email}`);
+      setUserProfile(response.data);
+    }
+    fetchUser();
+  },[email])
 
   // Select data from Redux store
   const plans = useSelector(selectPlans);
@@ -277,7 +290,7 @@ const PremiumContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+    <div className="min-h-screen bg-white">
       <ReTitle title="Go Premium - AI Job Platform" />
 
       {/* Success Toast */}
@@ -314,67 +327,63 @@ const PremiumContent = () => {
         )}
       </AnimatePresence>
 
-      <div className="w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <motion.div
-            className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-          >
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
             <Crown className="w-4 h-4" />
-            <span>UNLOCK PREMIUM FEATURES</span>
-          </motion.div>
+            <span>Premium Plans</span>
+          </div>
 
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            Accelerate Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">Job Search</span>
+            Choose Your Plan
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Get AI-powered job matching, resume optimization, and exclusive opportunities to land your dream job faster.
+          
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Unlock AI-powered job matching and exclusive opportunities to accelerate your career.
           </p>
-        </motion.div>
+
+          {/* User Status Display */}
+          {userProfile?.isPremium && (
+            <div className="inline-flex items-center space-x-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium mt-6">
+              <Check className="w-4 h-4" />
+              <span>Welcome back, {userProfile?.fullName?.split(' ')[0]}!</span>
+              <span className="bg-green-200 px-2 py-1 rounded text-xs">
+                {userProfile?.planName} Plan
+              </span>
+            </div>
+          )}
+        </div>
 
         {/* Billing Toggle */}
-        <motion.div
-          className="flex justify-center mb-12"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          <div className="bg-white p-1 rounded-xl border border-gray-200 shadow-sm inline-flex">
+        <div className="flex justify-center mb-12">
+          <div className="bg-gray-100 p-1 rounded-lg inline-flex">
             <button
               onClick={() => handleBillingCycleChange('monthly')}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${billingCycle === 'monthly'
-                ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md'
-                : 'text-gray-600 hover:text-gray-900'
-                }`}
+              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                billingCycle === 'monthly'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
             >
               Monthly
             </button>
             <button
               onClick={() => handleBillingCycleChange('yearly')}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${billingCycle === 'yearly'
-                ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md'
-                : 'text-gray-600 hover:text-gray-900'
-                }`}
+              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                billingCycle === 'yearly'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
             >
-              Yearly <span className="text-green-500 text-sm ml-1">(Save 20%)</span>
+              Yearly
+              <span className="ml-1 text-xs text-green-600 font-semibold">(Save 20%)</span>
             </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* Pricing Cards */}
-        <motion.div
-          className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <div className="grid lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
             <PricingCard
               key={plan.id}
@@ -383,40 +392,53 @@ const PremiumContent = () => {
               index={index}
               onSelect={handlePlanSelect}
               calculateCredits={calculateCredits}
+              userProfile={userProfile}
             />
           ))}
-        </motion.div>
+        </div>
+
       </div>
     </div>
   );
 };
 
 // Pricing Card Component
-const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits }) => {
+const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits, userProfile }) => {
   const isPopular = plan.name === 'Standard';
+  const isCurrentPlan = userProfile?.currentPlan === plan.id || userProfile?.planName === plan.name;
   const price = billingCycle === 'yearly' ? plan.yearlyPrice : plan.monthlyPrice;
   const originalPrice = billingCycle === 'yearly' ? plan.originalYearlyPrice : null;
   const credits = calculateCredits(plan.id);
 
   return (
-    <motion.div
-      variants={cardVariants}
-      whileHover="hover"
-      className={`relative rounded-2xl border-2 p-8 transition-all duration-300 ${isPopular
-        ? 'border-purple-500 bg-gradient-to-b from-white to-purple-50 shadow-xl scale-105'
-        : 'border-gray-200 bg-white shadow-sm'
-        }`}
-    >
-      {isPopular && (
+    <div className={`relative rounded-xl border p-6 transition-all duration-200 ${
+      isCurrentPlan
+        ? 'border-green-500 bg-green-50'
+        : isPopular
+        ? 'border-blue-500 bg-blue-50'
+        : 'border-gray-200 bg-white hover:border-gray-300'
+    }`}>
+      {/* Current Plan Badge */}
+      {isCurrentPlan && (
         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-          <span className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
-            MOST POPULAR
+          <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
+            <Check className="w-3 h-3" />
+            <span>Current Plan</span>
+          </span>
+        </div>
+      )}
+
+      {/* Popular Badge */}
+      {isPopular && !isCurrentPlan && (
+        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+          <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+            Most Popular
           </span>
         </div>
       )}
 
       {/* Plan Header */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-6">
         <div className="flex items-center justify-center space-x-2 mb-4">
           {plan.icon === 'zap' && <Zap className="w-6 h-6 text-yellow-500" />}
           {plan.icon === 'building' && <Building className="w-6 h-6 text-blue-500" />}
@@ -425,7 +447,7 @@ const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits }) 
         </div>
 
         <div className="mb-4">
-          <div className="flex items-baseline justify-center space-x-2">
+          <div className="flex items-baseline justify-center space-x-1">
             <span className="text-4xl font-bold text-gray-900">${price}</span>
             <span className="text-gray-500">/{billingCycle === 'yearly' ? 'year' : 'month'}</span>
           </div>
@@ -436,14 +458,14 @@ const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits }) 
           )}
         </div>
 
-        <p className="text-gray-600 text-sm">{plan.description}</p>
+        <p className="text-gray-600 text-sm mb-4">{plan.description}</p>
 
         {/* Credits Display */}
         {credits > 0 && (
-          <div className="mt-3 p-2 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
             <div className="flex items-center justify-center space-x-1">
               <Gift className="w-4 h-4 text-yellow-600" />
-              <span className="text-sm font-semibold text-yellow-700">
+              <span className="text-sm font-medium text-yellow-700">
                 {credits.toLocaleString()} AI Credits
               </span>
               {billingCycle === 'yearly' && (
@@ -455,15 +477,17 @@ const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits }) 
       </div>
 
       {/* Features List */}
-      <div className="space-y-4 mb-8">
+      <div className="space-y-3 mb-6">
         {plan.features.map((feature, idx) => (
           <div key={idx} className="flex items-center space-x-3">
             {feature.included ? (
-              <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+              <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
             ) : (
-              <X className="w-5 h-5 text-gray-300 flex-shrink-0" />
+              <X className="w-4 h-4 text-gray-300 flex-shrink-0" />
             )}
-            <span className={`text-sm ${feature.included ? 'text-gray-700' : 'text-gray-400'}`}>
+            <span className={`text-sm ${
+              feature.included ? 'text-gray-700' : 'text-gray-400'
+            }`}>
               {feature.name}
             </span>
           </div>
@@ -471,18 +495,27 @@ const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits }) 
       </div>
 
       {/* CTA Button */}
-      <motion.button
-        onClick={() => onSelect(plan.id)}
-        className={`w-full py-4 rounded-xl font-semibold transition-all duration-200 ${isPopular
-          ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:shadow-lg'
-          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+      <button
+        onClick={() => !isCurrentPlan && onSelect(plan.id)}
+        disabled={isCurrentPlan}
+        className={`w-full py-3 rounded-lg font-medium transition-colors ${
+          isCurrentPlan
+            ? 'bg-green-500 text-white cursor-not-allowed'
+            : isPopular
+            ? 'bg-blue-500 text-white hover:bg-blue-600'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+        }`}
       >
-        {plan.current ? 'Current Plan' : `Get ${plan.name}`}
-      </motion.button>
-    </motion.div>
+        {isCurrentPlan ? (
+          <div className="flex items-center justify-center space-x-2">
+            <Check className="w-4 h-4" />
+            <span>Current Plan</span>
+          </div>
+        ) : (
+          `Get ${plan.name}`
+        )}
+      </button>
+    </div>
   );
 };
 
@@ -590,61 +623,36 @@ const PaymentModal = ({
   const displayPrice = billingCycle === 'yearly' ? plan.yearlyPrice : plan.monthlyPrice;
 
   return (
-    <motion.div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <motion.div
-        className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-      >
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">
-              {processing ? 'Processing Payment...' : 'Complete Payment'}
+            <h2 className="text-lg font-semibold text-gray-900">
+              {processing ? 'Processing...' : 'Complete Payment'}
             </h2>
             {!processing && (
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                className="p-1 hover:bg-gray-100 rounded"
               >
                 <X className="w-5 h-5 text-gray-600" />
               </button>
             )}
           </div>
-          <p className="text-gray-600 mt-2">
-            You're subscribing to <span className="font-semibold">{plan.name}</span> plan
-            ({billingCycle === 'yearly' ? 'Yearly' : 'Monthly'})
+          <p className="text-gray-600 text-sm mt-1">
+            {plan.name} plan ({billingCycle === 'yearly' ? 'Yearly' : 'Monthly'})
           </p>
-
-          {/* User Email Display */}
-          {userEmail && (
-            <div className="mt-2 p-2 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">
-                <span className="font-medium">Account:</span> {userEmail}
-              </p>
-            </div>
-          )}
 
           {/* Credits Info */}
           {credits > 0 && (
-            <div className="mt-3 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
-              <div className="flex items-center space-x-2">
-                <Gift className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-semibold text-purple-700">
-                  Bonus: {credits.toLocaleString()} AI Credits
+            <div className="mt-3 p-2 bg-yellow-50 rounded border border-yellow-200">
+              <div className="flex items-center space-x-1">
+                <Gift className="w-4 h-4 text-yellow-600" />
+                <span className="text-sm font-medium text-yellow-700">
+                  {credits.toLocaleString()} AI Credits
                 </span>
               </div>
-              {billingCycle === 'yearly' && credits > 400000 && (
-                <p className="text-xs text-purple-600 mt-1">
-                  🎁 12x credits for yearly subscription!
-                </p>
-              )}
             </div>
           )}
         </div>
@@ -653,27 +661,28 @@ const PaymentModal = ({
           <>
             {/* Payment Methods */}
             <div className="p-6 border-b border-gray-200">
-              <h3 className="font-semibold text-gray-900 mb-4">Select Payment Method</h3>
-              <div className="space-y-3">
+              <h3 className="font-medium text-gray-900 mb-3">Payment Method</h3>
+              <div className="space-y-2">
                 {paymentMethods.map(method => (
                   <button
                     key={method.id}
                     onClick={() => {
                       setPaymentMethod(method.id);
                     }}
-                    className={`w-full p-4 border-2 rounded-xl text-left transition-all duration-200 ${paymentMethod === method.id
-                      ? 'border-purple-500 bg-purple-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                    className={`w-full p-3 border rounded-lg text-left transition-colors ${
+                      paymentMethod === method.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <method.icon className={`w-6 h-6 ${paymentMethod === method.id ? 'text-purple-600' : 'text-gray-600'}`} />
+                      <method.icon className={`w-5 h-5 ${paymentMethod === method.id ? 'text-blue-600' : 'text-gray-600'}`} />
                       <div className="flex-1">
-                        <div className="font-medium text-gray-900">{method.name}</div>
-                        <div className="text-sm text-gray-500">{method.description}</div>
+                        <div className="font-medium text-gray-900 text-sm">{method.name}</div>
+                        <div className="text-xs text-gray-500">{method.description}</div>
                       </div>
                       {paymentMethod === method.id && (
-                        <Check className="w-5 h-5 text-purple-600" />
+                        <Check className="w-4 h-4 text-blue-600" />
                       )}
                     </div>
                   </button>
@@ -758,12 +767,10 @@ const PaymentModal = ({
                   </div>
 
                   {/* Submit Button */}
-                  <motion.button
+                  <button
                     type="submit"
                     disabled={processing}
-                    className="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    whileHover={{ scale: processing ? 1 : 1.02 }}
-                    whileTap={{ scale: processing ? 1 : 0.98 }}
+                    className="w-full mt-4 bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span>
                       {paymentMethod === 'card' 
@@ -772,82 +779,54 @@ const PaymentModal = ({
                       }
                     </span>
                     <ArrowRight className="w-4 h-4" />
-                  </motion.button>
+                  </button>
                 </form>
               )}
             </div>
           </>
         ) : (
           /* Processing State */
-          <div className="p-12 text-center">
-            <motion.div
-              animate={{
-                rotate: 360,
-                scale: [1, 1.1, 1]
-              }}
-              transition={{
-                rotate: { duration: 2, repeat: Infinity, ease: "linear" },
-                scale: { duration: 1, repeat: Infinity }
-              }}
-              className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full mx-auto mb-6 flex items-center justify-center"
-            >
-              <CreditCard className="w-8 h-8 text-white" />
-            </motion.div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Processing Your Payment
+          <div className="p-8 text-center">
+            <div className="w-12 h-12 bg-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <CreditCard className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Processing Payment
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm">
               Please wait while we complete your transaction...
             </p>
-            {userEmail && (
-              <p className="text-sm text-gray-500 mt-2">
-                For account: {userEmail}
-              </p>
-            )}
           </div>
         )}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 
 // Success Toast Component
 const SuccessToast = ({ credits, onClose }) => {
   return (
-    <motion.div
-      className="fixed top-4 right-4 z-50 max-w-sm w-full"
-      initial={{ opacity: 0, x: 300 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 300 }}
-    >
-      <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-xl shadow-lg">
+    <div className="fixed top-4 right-4 z-50 max-w-sm w-full">
+      <div className="bg-green-500 text-white p-4 rounded-lg shadow-lg">
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0">
-            <Gift className="w-6 h-6" />
+            <Gift className="w-5 h-5" />
           </div>
           <div className="flex-1">
-            <h4 className="font-bold text-lg mb-1">Payment Successful! </h4>
-            <p className="text-green-100">
-              Welcome to Premium! You've received{' '}
-              <span className="font-bold text-white">
-                {credits.toLocaleString()} AI Credits
-              </span>
-              {credits > 0 && (
-                <span className="block text-sm mt-1">
-                   Start using your credits to boost your job search!
-                </span>
-              )}
+            <h4 className="font-semibold text-sm mb-1">Payment Successful!</h4>
+            <p className="text-green-100 text-sm">
+              You've received {credits.toLocaleString()} AI Credits
             </p>
           </div>
           <button
             onClick={onClose}
-            className="flex-shrink-0 text-green-100 hover:text-white transition-colors duration-200"
+            className="flex-shrink-0 text-green-100 hover:text-white"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
