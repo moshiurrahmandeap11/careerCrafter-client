@@ -8,7 +8,7 @@ const useAxiosSecure = () => {
   // useMemo 
   const axiosSecure = useMemo(() => {
     const instance = axios.create({
-      baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+      baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/v1",
       headers: {
         Authorization: user?.accessToken ? `Bearer ${user.accessToken}` : "",
       },
