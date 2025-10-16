@@ -1,16 +1,17 @@
 import React from "react";
 import { NavLink } from "react-router";
-import { Clock3 } from "lucide-react";
+import { Clock3, Sparkles, UserCheck, UsersRound } from "lucide-react";
 
 const NetworkNavbar = () => {
   return (
     <nav>
-      <ul className="flex flex-col items-center gap-4">
+      <ul className="flex flex-col  gap-4">
 
         {/* Connection nav */}
         <li className="">
           <NavLink
             to="/network"
+            end
             className={({ isActive }) =>
               `block transition-all duration-300 rounded-lg px-4 py-3 
          ${
@@ -22,9 +23,9 @@ const NetworkNavbar = () => {
           >
             <div className="flex gap-20 items-center justify-between">
               <div className="flex items-center gap-3">
-                <Clock3 className="text-blue-500" />
+                <UserCheck className="text-gray-600"/>
                 <div>
-                  <h1 className="font-bold text-gray-800">My Connection</h1>
+                  <h1 className="font-bold text-gray-800">My Connections</h1>
                   <p className="text-sm text-gray-500">
                     Manage your professional network
                   </p>
@@ -53,11 +54,11 @@ const NetworkNavbar = () => {
           >
             <div className="flex gap-20 items-center justify-between">
               <div className="flex items-center gap-3">
-                <Clock3 className="text-blue-500" />
+                <Clock3 className="text-gray-600" />
                 <div>
-                  <h1 className="font-bold text-gray-800">My Connection</h1>
+                  <h1 className="font-bold text-gray-800">Pending Invitations</h1>
                   <p className="text-sm text-gray-500">
-                    Manage your professional network
+                    Reviwe connections requests
                   </p>
                 </div>
               </div>
@@ -83,11 +84,11 @@ const NetworkNavbar = () => {
           >
             <div className="flex gap-20 items-center justify-between">
               <div className="flex items-center gap-3">
-                <Clock3 className="text-blue-500" />
+                <Sparkles className="text-gray-600"/>
                 <div>
-                  <h1 className="font-bold text-gray-800">My Connection</h1>
+                  <h1 className="font-bold text-gray-800">Suggestions</h1>
                   <p className="text-sm text-gray-500">
-                    Manage your professional network
+                    People you may know
                   </p>
                 </div>
               </div>
@@ -113,11 +114,11 @@ const NetworkNavbar = () => {
           >
             <div className="flex gap-20 items-center justify-between">
               <div className="flex items-center gap-3">
-                <Clock3 className="text-blue-500" />
+                <UsersRound  className="text-gray-600"/>
                 <div>
-                  <h1 className="font-bold text-gray-800">My Connection</h1>
+                  <h1 className="font-bold text-gray-800">All user</h1>
                   <p className="text-sm text-gray-500">
-                    Manage your professional network
+                    Browse all users and connect
                   </p>
                 </div>
               </div>
