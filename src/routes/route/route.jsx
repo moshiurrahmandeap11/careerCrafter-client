@@ -37,7 +37,9 @@ import ConnectionPage from "../../pages/myNetwork/MyNetoworkPage/ConnectionPage"
 import PendingConnectPage from "../../pages/myNetwork/MyNetoworkPage/PendingConnectPage";
 import SuggetionConnectPage from "../../pages/myNetwork/MyNetoworkPage/SuggetionConnectPage";
 import AllUserPAge from "../../pages/myNetwork/MyNetoworkPage/AllUserPAge";
-import PrivacyPolicy from "../../components/footer-component/privacy-policy/PrivacyPolicy";
+import PrivacyPolicy from "../../components/footer-component/PrivacyPolicy";
+import TermsService from "../../components/footer-component/TermsService";
+
 
 
 
@@ -61,6 +63,10 @@ export const route = createBrowserRouter([
       {
         path: "/privacy",
         element: <PrivacyPolicy></PrivacyPolicy>
+      },
+      {
+        path: "/terms",
+        element: <TermsService></TermsService>
       },
       {
         path: "/network",
