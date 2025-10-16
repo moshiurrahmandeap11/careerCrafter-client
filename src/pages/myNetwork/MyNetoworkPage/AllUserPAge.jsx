@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchAllConnectedUsers } from "../../../redux-slices/networkSlice";
 import useAuth from "../../../hooks/UseAuth/useAuth";
 import useAxiosSecure from "../../../hooks/AxiosIntense/useAxiosSecure";
+import AlluserConnectionCard from "../../../components/network-components/AlluserConnectionCard";
 
 
 const MyNetwork = () => {
@@ -30,15 +31,9 @@ const MyNetwork = () => {
       {users.length === 0 ? (
         <p>No connected users found.</p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {users.map((user) => (
-            <li
-              key={user._id}
-              className="p-3 border rounded-md shadow-sm hover:bg-gray-50"
-            >
-              <h2 className="font-semibold">{user.name}</h2>
-              <p>{user.email}</p>
-            </li>
+            <AlluserConnectionCard key={user._id} user={user}></AlluserConnectionCard>
           ))}
         </ul>
       )}
