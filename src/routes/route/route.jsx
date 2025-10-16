@@ -33,6 +33,10 @@ import MockInterview from "../../pages/mock-interview/MockInterview";
 import PaymentSuccess from "../../pages/premium/PaymentSuccess";
 import PaymentFailed from "../../pages/premium/PaymentFailed";
 import PaymentCanceled from "../../pages/premium/PaymentCanceled";
+import ConnectionPage from "../../pages/myNetwork/MyNetoworkPage/ConnectionPage";
+import PendingConnectPage from "../../pages/myNetwork/MyNetoworkPage/PendingConnectPage";
+import SuggetionConnectPage from "../../pages/myNetwork/MyNetoworkPage/SuggetionConnectPage";
+import AllUserPAge from "../../pages/myNetwork/MyNetoworkPage/AllUserPAge";
 
 
 
@@ -56,6 +60,25 @@ export const route = createBrowserRouter([
       {
         path: "/network",
         element: <MyNetwork />,
+        children:[
+          {
+            index:true,
+            element:<ConnectionPage></ConnectionPage>
+          },
+          {
+            path:'pending-connection',
+            element:<PendingConnectPage></PendingConnectPage>
+          },
+          {
+            path:'suggetion-connection',
+            element:<SuggetionConnectPage></SuggetionConnectPage>
+
+          },
+          {
+            path:'all-user',
+            element:<AllUserPAge></AllUserPAge>
+          }
+        ]
       },
       {
         path: "/messages",

@@ -64,7 +64,7 @@ const MessagesPage = () => {
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [allUser, setAllUser] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");  
 
   // Call States
   const [callState, setCallState] = useState({
@@ -623,7 +623,7 @@ const MessagesPage = () => {
                   initial="hidden"
                   animate="visible"
                 >
-                  {allUser
+                  {(allUser || [])
                     ?.filter((user) =>
                       user.fullName
                         .toLowerCase()
