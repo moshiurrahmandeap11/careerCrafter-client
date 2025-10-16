@@ -37,13 +37,13 @@ import ConnectionPage from "../../pages/myNetwork/MyNetoworkPage/ConnectionPage"
 import PendingConnectPage from "../../pages/myNetwork/MyNetoworkPage/PendingConnectPage";
 import SuggetionConnectPage from "../../pages/myNetwork/MyNetoworkPage/SuggetionConnectPage";
 import AllUserPAge from "../../pages/myNetwork/MyNetoworkPage/AllUserPAge";
-
-
+import ErrorPage from "../../components/sharedItems/ErrorPage/ErrorPage";
 
 export const route = createBrowserRouter([
   {
     path: "/",
     element: <RootLayout></RootLayout>,
+    errorElement: <ErrorPage type="500"></ErrorPage>,
     children: [
       {
         index: true,
@@ -72,7 +72,6 @@ export const route = createBrowserRouter([
           {
             path:'suggetion-connection',
             element:<SuggetionConnectPage></SuggetionConnectPage>
-
           },
           {
             path:'all-user',
@@ -145,6 +144,7 @@ export const route = createBrowserRouter([
   {
     path: "/auth",
     element: <AuthLayout></AuthLayout>,
+    errorElement: <ErrorPage type="500"></ErrorPage>,
     children: [
       {
         path: "signup",
@@ -175,6 +175,7 @@ export const route = createBrowserRouter([
         <DashboardLayout></DashboardLayout>
       </ProtectedRoute>
     ),
+    errorElement: <ErrorPage type="500"></ErrorPage>,
     children: [
       {
         path: "admin",
@@ -189,6 +190,7 @@ export const route = createBrowserRouter([
   {
     path: "/cc",
     element: <BusinessLayout></BusinessLayout>,
+    errorElement: <ErrorPage type="500"></ErrorPage>,
     children: [
       {
         path: "hire",
@@ -203,5 +205,9 @@ export const route = createBrowserRouter([
         element: <PostJob></PostJob>
       }
     ]
+  },
+  {
+    path: "*",
+    element: <ErrorPage type="404"></ErrorPage>
   }
 ]);
