@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import useAuth from "../../hooks/UseAuth/useAuth";
+import axiosIntense from "../../hooks/AxiosIntense/axiosIntense";
+import Swal from "sweetalert2";
 
 const AlluserConnectionCard = ({ user }) => {
   const {
@@ -11,10 +14,82 @@ const AlluserConnectionCard = ({ user }) => {
     isPremium,
   } = user;
 
+  const authUser=useAuth()
+  const senderEmail=authUser?.user?.email
+  const axiosPublic=axiosIntense
+
+  
+
   const [isConnected, setIsConnected] = useState(false);
 
-  const handleConnect = () => {
-    setIsConnected(!isConnected);
+  const handleConnect = async (receiverEmail) => {
+     if (!senderEmail) {
+      return Swal.fire({
+        icon:'error',
+        title:'Oops...',
+        timerProgressBar:2000,
+        text:'Please log in to send connection requests!',
+        showConfirmButton:false
+
+
+      })
+    }
+
+    
+    if (senderEmail === receiverEmail) {
+      return Swal.fire({
+        icon:'error',
+        title:'Oops...',
+        timerProgressBar:2000,
+        text:'You cannot connect with yourself!',
+        showConfirmButton:false
+
+
+      })
+    };
+    
+
+    try {
+      
+      const res = await axiosPublic.post("/network/send-connect-request", {
+        senderEmail,
+        receiverEmail,
+      });
+
+      if (res.data.success) {
+        setIsConnected(true);
+        Swal.fire({
+        icon:'success',
+        title:'Requsest Send',
+        timerProgressBar:2000,
+        text:`${res.data.message }`,
+        showConfirmButton:true
+
+
+      })
+      } else {
+        Swal.fire({
+        icon:'error',
+        title:'Oops...',
+        timerProgressBar:2000,
+        text:`${res.data.message }`,
+        showConfirmButton:true
+
+
+      });
+      }
+    } catch (error) {
+      console.error("Send connect error:", error);
+      Swal.fire({
+        icon:'error',
+        title:'Oops...',
+        timerProgressBar:2000,
+        text:`${error.response?.data?.message }`,
+        showConfirmButton:true
+
+
+      })
+    } 
   };
 
   return (
@@ -58,7 +133,7 @@ const AlluserConnectionCard = ({ user }) => {
       {/* Right side buttons */}
       <div className="flex flex-row gap-2 mt-4 md:mt-0 w-full md:w-auto">
         <button 
-          onClick={handleConnect}
+          onClick={()=>handleConnect(email)}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             isConnected 
               ? 'bg-green-500 text-white hover:bg-green-600' 
@@ -74,5 +149,6 @@ const AlluserConnectionCard = ({ user }) => {
     </div>
   );
 };
+
 
 export default AlluserConnectionCard;

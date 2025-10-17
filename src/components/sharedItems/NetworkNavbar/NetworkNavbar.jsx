@@ -1,8 +1,11 @@
 import React from "react";
 import { NavLink } from "react-router";
 import { Clock3, Sparkles, UserCheck, UsersRound } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const NetworkNavbar = () => {
+  const { suggestedUsers,users} = useSelector((state) => state.network);
+  
   return (
     <nav>
       <ul className="flex flex-col  gap-4">
@@ -93,7 +96,7 @@ const NetworkNavbar = () => {
                 </div>
               </div>
               <h1 className="font-bold px-4 py-2 text-center rounded-full bg-gray-200 text-gray-700">
-                0
+                {suggestedUsers.length}
               </h1>
             </div>
           </NavLink>
@@ -123,7 +126,7 @@ const NetworkNavbar = () => {
                 </div>
               </div>
               <h1 className="font-bold px-4 py-2 text-center rounded-full bg-gray-200 text-gray-700">
-                0
+                {users.length}
               </h1>
             </div>
           </NavLink>
