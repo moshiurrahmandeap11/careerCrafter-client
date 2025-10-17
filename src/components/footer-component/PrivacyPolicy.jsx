@@ -1,8 +1,8 @@
 import React from "react";
 
 export default function PrivacyPolicy() {
-    const effectiveDate = "[Insert effective date: e.g. October 16, 2025]";
-    const contactEmail = "[Replace with contact@careercrafter.example]";
+    const effectiveDate = "October 16, 2025";
+    const contactEmail = "support@careercrafter.com";
 
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -161,8 +161,6 @@ export default function PrivacyPolicy() {
                     >
                         Print this policy
                     </button>
-
-                    <div className="text-xs text-gray-500">Replace placeholders (effective date, contact email) before publishing.</div>
                 </div>
             </div>
         </div>
