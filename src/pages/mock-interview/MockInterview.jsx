@@ -8,10 +8,6 @@ import {
   CheckCircle, 
   XCircle, 
   AlertCircle,
-  User,
-  Briefcase,
-  Mail,
-  BarChart3,
   RotateCcw,
   Mic,
   MicOff
@@ -78,9 +74,11 @@ const MockInterview = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [step, setStep] = useState(1);
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
+  const [isFirstListening, setIsFirstListening] = useState(true);
 
   const timerRef = useRef(null);
   const textareaRef = useRef(null);
+  const previousTranscriptRef = useRef('');
 
   // Check browser support
   useEffect(() => {
@@ -89,13 +87,32 @@ const MockInterview = () => {
     }
   }, [browserSupportsSpeechRecognition]);
 
-  // Sync transcript with currentAnswer
+  // Fixed: Sync transcript with currentAnswer in real-time without duplication
   useEffect(() => {
-    if (!listening && transcript) {
-      setCurrentAnswer(prev => prev + (prev ? ' ' : '') + transcript);
-      resetTranscript();
+    if (listening && transcript && transcript !== previousTranscriptRef.current) {
+      // If this is the first time listening, replace the current answer
+      // Otherwise, append only the new words
+      if (isFirstListening) {
+        setCurrentAnswer(transcript);
+        setIsFirstListening(false);
+      } else {
+        // Only add new words that aren't already in the current answer
+        const newWords = transcript.replace(previousTranscriptRef.current, '').trim();
+        if (newWords) {
+          setCurrentAnswer(prev => prev + (prev && !prev.endsWith(' ') ? ' ' : '') + newWords);
+        }
+      }
+      previousTranscriptRef.current = transcript;
     }
-  }, [listening, transcript, resetTranscript]);
+  }, [transcript, listening, isFirstListening]);
+
+  // Reset first listening flag when stopping
+  useEffect(() => {
+    if (!listening) {
+      setIsFirstListening(true);
+      previousTranscriptRef.current = '';
+    }
+  }, [listening]);
 
   // Timer effect
   useEffect(() => {
@@ -152,7 +169,7 @@ const MockInterview = () => {
     e.preventDefault();
     if (currentAnswer.trim() && isInterviewActive) {
       if (listening) {
-        SpeechRecognition.stopListening();
+        stopListening();
       }
       
       dispatch(submitAnswer({
@@ -172,6 +189,7 @@ const MockInterview = () => {
       
       setCurrentAnswer('');
       resetTranscript();
+      previousTranscriptRef.current = '';
       
       if (currentQuestion < questions.length - 1) {
         // Next question handled in slice
@@ -184,7 +202,7 @@ const MockInterview = () => {
   const handleAutoSubmit = () => {
     if (isInterviewActive) {
       if (listening) {
-        SpeechRecognition.stopListening();
+        stopListening();
       }
       
       dispatch(submitAnswer({
@@ -195,6 +213,7 @@ const MockInterview = () => {
       
       setCurrentAnswer('');
       resetTranscript();
+      previousTranscriptRef.current = '';
       
       if (currentQuestion < questions.length - 1) {
         // Next question handled in slice
@@ -206,7 +225,7 @@ const MockInterview = () => {
 
   const handleFinishInterview = () => {
     if (listening) {
-      SpeechRecognition.stopListening();
+      stopListening();
     }
     
     dispatch(submitInterview());
@@ -219,7 +238,7 @@ const MockInterview = () => {
 
   const handleRestart = () => {
     if (listening) {
-      SpeechRecognition.stopListening();
+      stopListening();
     }
     
     dispatch(resetInterview());
@@ -234,6 +253,8 @@ const MockInterview = () => {
     setCurrentAnswer('');
     setIsPaused(false);
     resetTranscript();
+    previousTranscriptRef.current = '';
+    setIsFirstListening(true);
     
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -244,12 +265,14 @@ const MockInterview = () => {
     setIsPaused(!isPaused);
     
     if (listening && !isPaused) {
-      SpeechRecognition.stopListening();
+      stopListening();
     }
   };
 
   const startListening = () => {
     resetTranscript();
+    previousTranscriptRef.current = '';
+    setIsFirstListening(true);
     SpeechRecognition.startListening({ 
       continuous: true,
       language: 'en-US'
@@ -258,6 +281,8 @@ const MockInterview = () => {
 
   const stopListening = () => {
     SpeechRecognition.stopListening();
+    setIsFirstListening(true);
+    previousTranscriptRef.current = '';
   };
 
   const toggleListening = () => {
@@ -547,7 +572,7 @@ const MockInterview = () => {
                   {isSpeechSupported && listening && (
                     <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
                       <div className="flex items-center gap-1 text-blue-700">
-                        <span className="text-xs font-medium">Listening...</span>
+                        <span className="text-xs font-medium">Listening... Speak now</span>
                       </div>
                     </div>
                   )}
@@ -558,7 +583,7 @@ const MockInterview = () => {
                     onChange={(e) => setCurrentAnswer(e.target.value)}
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                    placeholder="Type your answer here..."
+                    placeholder="Type your answer here or use voice input..."
                     disabled={isPaused}
                   />
                 </div>
