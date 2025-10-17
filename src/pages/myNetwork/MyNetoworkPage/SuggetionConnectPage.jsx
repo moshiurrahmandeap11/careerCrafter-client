@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import useAxiosSecure from '../../../hooks/AxiosIntense/useAxiosSecure';
 import { fetchSuggestedUsers } from '../../../redux-slices/networkSlice';
 import SuggestionCard from '../../../components/network-components/SuggestionCard';
+import Loader from '../../../components/sharedItems/Loader/Loader'
 
 const SuggetionConnectPage = () => {
     const { user } = useAuth()
@@ -17,13 +18,13 @@ const SuggetionConnectPage = () => {
         }
       
       }, [dispatch,user?.email,axiosSecure]);
-      console.log(user?.email,suggestedUsers)
+      
     
-      if (isLoading) return <p>Loading users...</p>;
+      if (isLoading) return <Loader></Loader>;
       if (error) return <p>Error: {error}</p>;
     return (
         <div className="p-4">
-      <h1 className="text-xl font-bold mb-3">All Connected Users</h1>
+      <h1 className="text-xl font-bold mb-3">People you may know</h1>
       {suggestedUsers.length === 0 ? (
         <p>No connected users found.</p>
       ) : (

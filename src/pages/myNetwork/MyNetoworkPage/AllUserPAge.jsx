@@ -6,6 +6,7 @@ import { fetchAllConnectedUsers } from "../../../redux-slices/networkSlice";
 import useAuth from "../../../hooks/UseAuth/useAuth";
 import useAxiosSecure from "../../../hooks/AxiosIntense/useAxiosSecure";
 import AlluserConnectionCard from "../../../components/network-components/AlluserConnectionCard";
+import Loader from "../../../components/sharedItems/Loader/Loader";
 
 
 const MyNetwork = () => {
@@ -20,14 +21,14 @@ const MyNetwork = () => {
     }
   
   }, [dispatch,user?.email,axiosSecure]);
-  console.log(user?.email,users)
+  
 
-  if (isLoading) return <p>Loading users...</p>;
+  if (isLoading) return <Loader></Loader>;
   if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="p-4">
-      <h1 className="text-xl font-bold mb-3">All Connected Users</h1>
+      <h1 className="text-xl font-bold mb-3">Browse all users and connect</h1>
       {users.length === 0 ? (
         <p>No connected users found.</p>
       ) : (
