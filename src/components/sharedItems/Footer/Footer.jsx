@@ -114,6 +114,7 @@ const Footer = () => {
             <div className="flex items-center space-x-6 text-sm">
               {[
                 { name: 'Privacy Policy', path: '/privacy' },
+                //{ name: 'Privacy Policy', path: '/privacyPolicy' },
                 { name: 'Terms of Service', path: '/terms' },
                 { name: 'Cookie Policy', path: '/cookies' }
               ].map((link) => (
