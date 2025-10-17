@@ -292,7 +292,7 @@ const MessagesPage = () => {
         from: {
           email: user.email,
           fullName: user.displayName || user.email,
-          profileImage: user.photoURL || ''
+          profileImage: user.photoURL || 'https://i.postimg.cc/85JwcYck/boy.png'
         },
         callType: type,
         offer: offer
@@ -431,7 +431,7 @@ const MessagesPage = () => {
       });
       
       setNewMessage("");
-      setMessages((m) => [...m, msg]);
+      // setMessages((m) => [...m, msg]);
       setErrorMessage("");  
     } catch (err) {
       if (err.response?.status === 403) {
@@ -684,11 +684,20 @@ const MessagesPage = () => {
                       </button>
                       <div className="flex items-center space-x-3">
                         <div className="relative">
-                          <img
-                            src={selectedConversation.profileImage}
-                            alt={selectedConversation.fullName}
-                            className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
-                          />
+{selectedConversation.profileImage ? (
+  <img
+    src={selectedConversation.profileImage}
+    alt={selectedConversation.fullName}
+    className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+  />
+) : (
+  <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-lg border-2 border-white shadow-sm">
+    {selectedConversation.fullName
+      ? selectedConversation.fullName.charAt(0).toUpperCase()
+      : "?"}
+  </div>
+)}
+
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900">
