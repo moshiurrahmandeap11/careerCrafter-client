@@ -2,8 +2,8 @@ import { motion } from 'framer-motion'
 import { Building, MessageCircle, MoreHorizontal, Sparkles, Users, UserX, Calendar, MapPin, Mail } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import useAuth from '../../hooks/UseAuth/useAuth';
+import useAxiosSecure from '../../hooks/AxiosIntense/useAxiosSecure'; // useAxiosSecure ব্যবহার করুন
 import Swal from 'sweetalert2';
-import axiosIntense from '../../hooks/AxiosIntense/axiosIntense';
 
 const cardVariants = {
     hidden: { y: 20, opacity: 0 },
@@ -51,9 +51,9 @@ export const ConnectionCard = ({ connection, onRemove }) => {
     const [imageError, setImageError] = useState(false);
     const [profile, setProfile] = useState(null);
     const authUser = useAuth();
+    const axiosSecure = useAxiosSecure(); // useAxiosSecure ব্যবহার করুন
 
     const useremail = authUser?.user?.email;
-
 
     const connectedUser = connection.connectedUser || {};
     const avatar = connectedUser.photo || connectedUser.profileImage || connectedUser.profileImage;
@@ -64,17 +64,15 @@ export const ConnectionCard = ({ connection, onRemove }) => {
     const tags = connectedUser.skills || connectedUser.tags || [];
     const email = connectedUser.email || (connection.user1 === authUser?.user?.email ? connection.user2 : connection.user1);
 
-
     useEffect(() => {
         const fetchProfile = async () => {
             if (!email) return;
             
             try {
-                const res = await axiosIntense.get(`/users/email/${email}`);
+                const res = await axiosSecure.get(`/users/email/${email}`);
                 setProfile(res.data);
             } catch (error) {
                 console.error('Error fetching profile:', error);
-
                 setProfile({
                     fullName: name,
                     profileImage: avatar,
@@ -87,7 +85,7 @@ export const ConnectionCard = ({ connection, onRemove }) => {
         };
 
         fetchProfile();
-    }, [email, name, avatar, title, tags, company]);
+    }, [email, name, avatar, title, tags, company, axiosSecure]);
 
     // প্রোফাইল ডাটা ব্যবহার করুন
     const profileName = profile?.fullName || name;
@@ -111,58 +109,83 @@ export const ConnectionCard = ({ connection, onRemove }) => {
         return `${Math.ceil(diffDays / 30)} months ago`;
     };
 
-    const handleRemoveConnection = async () => {
-        if (!authUser?.user?.email) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Login Required',
-                text: 'Please login to manage connections',
-                timer: 2000
+const handleRemoveConnection = async () => {
+    if (!authUser?.user?.email) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Login Required',
+            text: 'Please login to manage connections',
+            timer: 2000
+        });
+        return;
+    }
+
+    setIsLoading(true);
+    setShowMenu(false);
+
+    try {
+        const result = await Swal.fire({
+            title: 'Remove Connection?',
+            text: `Remove ${profileName} from your connections? You can send a new connection request later if needed.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, Remove',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (result.isConfirmed) {
+            console.log('Removing connection:', connection._id);
+            
+            // Real API call
+            const res = await axiosSecure.delete(`/network/connections/${connection._id}`, {
+                data: { userEmail: authUser.user.email }
             });
-            return;
-        }
 
-        setIsLoading(true);
-        setShowMenu(false);
+            console.log('Remove connection response:', res.data);
 
-        try {
-            const result = await Swal.fire({
-                title: 'Remove Connection?',
-                text: `Remove ${profileName} from your connections?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, Remove',
-                cancelButtonText: 'Cancel'
-            });
-
-            if (result.isConfirmed) {
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 800));
-                
+            if (res.data.success) {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Removed!',
-                    text: `${profileName} removed from connections`,
-                    timer: 1500
+                    title: 'Connection Removed!',
+                    text: `${profileName} has been removed from your connections. You can send a new connection request anytime.`,
+                    timer: 2000,
+                    showConfirmButton: false
                 });
 
+                // Call parent to update the list
                 if (onRemove) {
                     onRemove(connection._id);
                 }
+            } else {
+                throw new Error(res.data.message || 'Failed to remove connection');
             }
-        } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Failed to remove connection',
-                timer: 2000
-            });
-        } finally {
-            setIsLoading(false);
         }
-    };
+    } catch (error) {
+        console.error('Remove connection error:', error);
+        
+        let errorMessage = 'Failed to remove connection';
+        
+        if (error.response) {
+            errorMessage = error.response.data?.message || `Server error: ${error.response.status}`;
+        } else if (error.request) {
+            errorMessage = 'No response from server. Please check your connection.';
+        } else {
+            errorMessage = error.message || 'Unknown error occurred';
+        }
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Failed to Remove',
+            text: errorMessage,
+            timer: 3000,
+            showConfirmButton: true
+        });
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     const handleSendMessage = () => {
         Swal.fire({

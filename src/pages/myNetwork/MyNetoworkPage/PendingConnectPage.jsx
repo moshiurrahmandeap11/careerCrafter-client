@@ -10,12 +10,6 @@ import {
   UserCheck,
   UserX
 } from 'lucide-react';
-
-
-
-
-
-
 import useAuth from '../../../hooks/UseAuth/useAuth';
 import useAxiosSecure from '../../../hooks/AxiosIntense/useAxiosSecure';
 import { fetchPendingRequests, removePendingRequest } from '../../../redux-slices/networkSlice';
@@ -23,6 +17,17 @@ import { clearError } from '../../../redux-slices/messagesSlice';
 import { PendingCard } from '../../../components/network-components/PendingCard';
 import Loader from '../../../components/sharedItems/Loader/Loader';
 import EmptyState from './EmptyState/EmptyState';
+
+// Real time calculation function for stats
+const getTimeAgo = (dateString) => {
+    if (!dateString) return 0;
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now - date;
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    return diffInDays;
+};
 
 const PendingConnectPage = () => {
   const { user } = useAuth();
@@ -32,7 +37,17 @@ const PendingConnectPage = () => {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredRequests, setFilteredRequests] = useState([]);
-  const [sortBy, setSortBy] = useState('recent'); // recent, oldest, name
+  const [sortBy, setSortBy] = useState('recent');
+  const [currentTime, setCurrentTime] = useState(new Date()); // For real-time updates
+
+  // Update time every minute for real-time display
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (user?.email) {
@@ -68,7 +83,7 @@ const PendingConnectPage = () => {
     });
     
     setFilteredRequests(results);
-  }, [pendingRequests, searchTerm, sortBy]);
+  }, [pendingRequests, searchTerm, sortBy, currentTime]); // Add currentTime to dependencies
 
   const handleRequestUpdate = (requestId, action) => {
     dispatch(removePendingRequest(requestId));
@@ -81,23 +96,19 @@ const PendingConnectPage = () => {
     }
   };
 
-  const getDaysAgo = (date) => {
-    const today = new Date();
-    const requestDate = new Date(date);
-    const diffTime = Math.abs(today - requestDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
   const getStats = () => {
     const total = pendingRequests.length;
     const today = new Date();
-    const last7Days = pendingRequests.filter(req => 
-      getDaysAgo(req.createdAt) <= 7
-    ).length;
-    const last30Days = pendingRequests.filter(req => 
-      getDaysAgo(req.createdAt) <= 30
-    ).length;
+    
+    const last7Days = pendingRequests.filter(req => {
+      const daysAgo = getTimeAgo(req.createdAt);
+      return daysAgo <= 7;
+    }).length;
+
+    const last30Days = pendingRequests.filter(req => {
+      const daysAgo = getTimeAgo(req.createdAt);
+      return daysAgo <= 30;
+    }).length;
 
     return { total, last7Days, last30Days };
   };

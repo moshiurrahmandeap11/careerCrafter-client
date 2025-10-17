@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import useAuth from "../../hooks/UseAuth/useAuth";
 import Swal from "sweetalert2";
-import axiosIntense from "../../hooks/AxiosIntense/axiosIntense";
+
 import { User, Crown, Mail, ExternalLink } from 'lucide-react';
+import useAxiosSecure from "../../hooks/AxiosIntense/useAxiosSecure";
 
 // Fallback Avatar Component
 const FallbackAvatar = ({ name, className }) => {
@@ -45,7 +46,7 @@ const SuggestionCard = ({ user }) => {
 
     const authUser = useAuth();
     const senderEmail = authUser?.user?.email;
-    const axiosPublic = axiosIntense;
+    const axiosPublic = useAxiosSecure();
     const [isConnected, setIsConnected] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [imageError, setImageError] = useState(false);

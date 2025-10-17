@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUserConnections, removeConnection } from '../../../redux-slices/networkSlice';
+import { fetchUserConnections, removeConnectionLocal } from '../../../redux-slices/networkSlice'; // removeConnectionLocal ব্যবহার করুন
 import { Users, Search } from 'lucide-react';
 import useAuth from '../../../hooks/UseAuth/useAuth';
 import useAxiosSecure from '../../../hooks/AxiosIntense/useAxiosSecure';
@@ -44,13 +44,8 @@ const ConnectionsPage = () => {
     }, [connections, searchTerm]);
 
     const handleRemoveConnection = (connectionId) => {
-        if (user?.email) {
-            dispatch(removeConnection({ 
-                connectionId, 
-                userEmail: user.email, 
-                axiosSecure 
-            }));
-        }
+        // সরাসরি local state থেকে remove করুন
+        dispatch(removeConnectionLocal(connectionId));
     };
 
     if (isLoading) return <Loader />;

@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { Check, Users, X } from 'lucide-react';
 import { useState } from 'react';
 import useAuth from '../../hooks/UseAuth/useAuth';
-import useAxiosSecure from '../../hooks/AxiosIntense/useAxiosSecure'; // Correct import
+import useAxiosSecure from '../../hooks/AxiosIntense/useAxiosSecure';
 import Swal from 'sweetalert2';
 import MainButton from '../sharedItems/MainButton/MainButton';
 
@@ -27,12 +27,42 @@ const cardVariants = {
     }
 };
 
+// Real time calculation function
+const getTimeAgo = (dateString) => {
+    if (!dateString) return 'Recently';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now - date;
+    const diffInSeconds = Math.floor(diffInMs / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+    
+    if (diffInSeconds < 60) {
+        return 'Just now';
+    } else if (diffInMinutes < 60) {
+        return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+    } else if (diffInHours < 24) {
+        return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    } else if (diffInDays === 1) {
+        return '1 day ago';
+    } else if (diffInDays < 7) {
+        return `${diffInDays} days ago`;
+    } else if (diffInDays < 30) {
+        const weeks = Math.floor(diffInDays / 7);
+        return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+    } else {
+        const months = Math.floor(diffInDays / 30);
+        return `${months} month${months > 1 ? 's' : ''} ago`;
+    }
+};
+
 export const PendingCard = ({ invitation, onUpdate }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [action, setAction] = useState(null); // 'accept' or 'ignore'
     const authUser = useAuth();
     
-    // Use the correct hook name - useAxiosSecure
     const axiosSecure = useAxiosSecure();
 
     const handleAccept = async () => {
@@ -47,7 +77,6 @@ export const PendingCard = ({ invitation, onUpdate }) => {
             return;
         }
 
-        // Validate axios instance
         if (!axiosSecure || typeof axiosSecure.post !== 'function') {
             console.error('Axios instance is not properly initialized');
             Swal.fire({
@@ -64,19 +93,11 @@ export const PendingCard = ({ invitation, onUpdate }) => {
         setAction('accept');
 
         try {
-            console.log('Sending accept request...', {
-                requestId: invitation._id,
-                senderEmail: invitation.senderEmail,
-                receiverEmail: authUser.user.email
-            });
-
             const res = await axiosSecure.post('/network/accept-request', {
                 requestId: invitation._id,
                 senderEmail: invitation.senderEmail,
                 receiverEmail: authUser.user.email
             });
-
-            console.log('Accept response:', res.data);
 
             if (res.data.success) {
                 Swal.fire({
@@ -87,7 +108,6 @@ export const PendingCard = ({ invitation, onUpdate }) => {
                     showConfirmButton: false
                 });
                 
-                // Call parent component to update the list
                 if (onUpdate) {
                     onUpdate(invitation._id, 'accepted');
                 }
@@ -100,13 +120,10 @@ export const PendingCard = ({ invitation, onUpdate }) => {
             let errorMessage = 'Failed to accept connection request';
             
             if (error.response) {
-                // Server responded with error status
                 errorMessage = error.response.data?.message || `Server error: ${error.response.status}`;
             } else if (error.request) {
-                // Request was made but no response received
                 errorMessage = 'No response from server. Please check your connection.';
             } else {
-                // Something else happened
                 errorMessage = error.message || 'Unknown error occurred';
             }
 
@@ -135,7 +152,6 @@ export const PendingCard = ({ invitation, onUpdate }) => {
             return;
         }
 
-        // Validate axios instance
         if (!axiosSecure || typeof axiosSecure.post !== 'function') {
             console.error('Axios instance is not properly initialized');
             Swal.fire({
@@ -152,19 +168,11 @@ export const PendingCard = ({ invitation, onUpdate }) => {
         setAction('ignore');
 
         try {
-            console.log('Sending ignore request...', {
-                requestId: invitation._id,
-                senderEmail: invitation.senderEmail,
-                receiverEmail: authUser.user.email
-            });
-
             const res = await axiosSecure.post('/network/ignore-request', {
                 requestId: invitation._id,
                 senderEmail: invitation.senderEmail,
                 receiverEmail: authUser.user.email
             });
-
-            console.log('Ignore response:', res.data);
 
             if (res.data.success) {
                 Swal.fire({
@@ -175,7 +183,6 @@ export const PendingCard = ({ invitation, onUpdate }) => {
                     showConfirmButton: false
                 });
                 
-                // Call parent component to update the list
                 if (onUpdate) {
                     onUpdate(invitation._id, 'ignored');
                 }
@@ -206,16 +213,6 @@ export const PendingCard = ({ invitation, onUpdate }) => {
             setIsLoading(false);
             setAction(null);
         }
-    };
-
-    // Calculate days ago
-    const getDaysAgo = (createdAt) => {
-        if (!createdAt) return '0';
-        const created = new Date(createdAt);
-        const now = new Date();
-        const diffTime = Math.abs(now - created);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays.toString();
     };
 
     // Get sender details
@@ -255,7 +252,7 @@ export const PendingCard = ({ invitation, onUpdate }) => {
                     )}
                 </div>
                 <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-lg">
-                    {getDaysAgo(invitation.createdAt)}d ago
+                    {getTimeAgo(invitation.createdAt)}
                 </div>
             </div>
 
@@ -274,8 +271,6 @@ export const PendingCard = ({ invitation, onUpdate }) => {
                             ? 'bg-blue-400 text-white cursor-not-allowed' 
                             : 'bg-blue-600 text-white hover:bg-blue-700'
                     }`}
-                    whileHover={!(isLoading && action === 'accept') ? { scale: 1.02 } : {}}
-                    whileTap={!(isLoading && action === 'accept') ? { scale: 0.98 } : {}}
                 >
                     {isLoading && action === 'accept' ? (
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -287,7 +282,7 @@ export const PendingCard = ({ invitation, onUpdate }) => {
                     </span>
                 </MainButton>
                 
-                <motion.button
+                <button
                     onClick={handleIgnore}
                     disabled={isLoading && action === 'ignore'}
                     className={`flex-1 py-2.5 px-4 rounded-lg font-semibold transition-all duration-200 text-sm ${
@@ -295,11 +290,9 @@ export const PendingCard = ({ invitation, onUpdate }) => {
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
-                    whileHover={!(isLoading && action === 'ignore') ? { scale: 1.02 } : {}}
-                    whileTap={!(isLoading && action === 'ignore') ? { scale: 0.98 } : {}}
                 >
                     {isLoading && action === 'ignore' ? 'Ignoring...' : 'Ignore'}
-                </motion.button>
+                </button>
             </div>
         </motion.div>
     );
