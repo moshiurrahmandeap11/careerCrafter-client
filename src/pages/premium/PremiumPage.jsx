@@ -15,7 +15,11 @@ import {
   ArrowRight,
   Gift,
   Smartphone,
-  Banknote
+  Banknote,
+  Calendar,
+  Users,
+  Target,
+  Rocket
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReTitle } from 're-title';
@@ -55,27 +59,6 @@ import axiosIntense from '../../hooks/AxiosIntense/axiosIntense';
 // Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
-const cardVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 24
-    }
-  },
-  hover: {
-    y: -4,
-    transition: {
-      type: "spring",
-      stiffness: 400,
-      damping: 17
-    }
-  }
-};
-
 const PremiumPage = () => {
   return (
     <Elements stripe={stripePromise}>
@@ -89,8 +72,6 @@ const PremiumContent = () => {
   const { user } = useAuth()
   const [userProfile, setUserProfile] = useState([])
 
- 
-  
   const email = user?.email;
   useEffect(() => {
     const fetchUser = async () => {
@@ -153,7 +134,6 @@ const PremiumContent = () => {
     if (selectedPlan) {
       const amount = billingCycle === 'yearly' ? selectedPlan.yearlyPrice : selectedPlan.monthlyPrice;
       
-      // Create Stripe payment intent for card payments
       await dispatch(createStripePaymentIntent({
         planId,
         amount,
@@ -179,11 +159,9 @@ const PremiumContent = () => {
       userName: user?.name || user?.email?.split('@')[0]
     };
 
-    // For SSLCommerz payments, create payment session
     if (paymentMethod === 'mobile' || paymentMethod === 'bank') {
       dispatch(createSSLCommerzPayment(paymentPayload));
     } else {
-      // For Stripe card payments
       dispatch(processPayment(paymentPayload))
         .unwrap()
         .then((result) => {
@@ -195,7 +173,7 @@ const PremiumContent = () => {
           });
         })
         .catch((error) => {
-          console.error('❌ Payment process failed:', error);
+          console.error('Payment process failed:', error);
         });
     }
   };
@@ -218,80 +196,42 @@ const PremiumContent = () => {
     return billingCycle === 'yearly' ? credits * 12 : credits;
   };
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <motion.div
-            animate={{
-              rotate: 360,
-              scale: [1, 1.1, 1]
-            }}
-            transition={{
-              rotate: { duration: 2, repeat: Infinity, ease: "linear" },
-              scale: { duration: 1, repeat: Infinity }
-            }}
-            className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center"
-          >
-            <Crown className="w-8 h-8 text-white" />
-          </motion.div>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-gray-600"
-          >
-            Loading premium plans...
-          </motion.p>
-        </motion.div>
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="w-14 h-14 bg-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center animate-pulse">
+            <Rocket className="w-6 h-6 text-white" />
+          </div>
+          <p className="text-gray-600">Loading plans...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-        <motion.div
-          className="text-center bg-white p-8 rounded-xl shadow-sm border border-gray-200 max-w-md"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className="w-16 h-16 bg-red-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <Crown className="w-8 h-8 text-red-600" />
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="text-center max-w-sm">
+          <div className="w-14 h-14 bg-red-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+            <X className="w-6 h-6 text-red-600" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Loading Error</h3>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <motion.button
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Something went wrong</h3>
+          <p className="text-gray-600 mb-4 text-sm">{error}</p>
+          <button
             onClick={() => dispatch(fetchPremiumPlans())}
-            className="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-200"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600"
           >
             Try Again
-          </motion.button>
-        </motion.div>
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-white">
-      <ReTitle title="Go Premium - AI Job Platform" />
+      <ReTitle title="Upgrade Your Account" />
 
       {/* Success Toast */}
       <AnimatePresence>
@@ -327,40 +267,37 @@ const PremiumContent = () => {
         )}
       </AnimatePresence>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <Crown className="w-4 h-4" />
-            <span>Premium Plans</span>
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium mb-4">
+            <Star className="w-3 h-3" />
+            <span>Upgrade Account</span>
           </div>
 
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
             Choose Your Plan
           </h1>
           
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Unlock AI-powered job matching and exclusive opportunities to accelerate your career.
+          <p className="text-gray-600 max-w-lg mx-auto text-sm md:text-base">
+            Get better job matches and more opportunities with our premium features
           </p>
 
-          {/* User Status Display */}
+          {/* User Status */}
           {userProfile?.isPremium && (
-            <div className="inline-flex items-center space-x-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium mt-6">
-              <Check className="w-4 h-4" />
-              <span>Welcome back, {userProfile?.fullName?.split(' ')[0]}!</span>
-              <span className="bg-green-200 px-2 py-1 rounded text-xs">
-                {userProfile?.planName} Plan
-              </span>
+            <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-medium mt-4">
+              <Check className="w-3 h-3" />
+              <span>Hi {userProfile?.fullName?.split(' ')[0]}! You're on {userProfile?.planName}</span>
             </div>
           )}
         </div>
 
         {/* Billing Toggle */}
-        <div className="flex justify-center mb-12">
+        <div className="flex justify-center mb-8">
           <div className="bg-gray-100 p-1 rounded-lg inline-flex">
             <button
               onClick={() => handleBillingCycleChange('monthly')}
-              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+              className={`px-4 py-2 rounded text-sm font-medium ${
                 billingCycle === 'monthly'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
@@ -370,20 +307,20 @@ const PremiumContent = () => {
             </button>
             <button
               onClick={() => handleBillingCycleChange('yearly')}
-              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+              className={`px-4 py-2 rounded text-sm font-medium ${
                 billingCycle === 'yearly'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Yearly
-              <span className="ml-1 text-xs text-green-600 font-semibold">(Save 20%)</span>
+              <span className="ml-1 text-xs text-green-600">Save 20%</span>
             </button>
           </div>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
             <PricingCard
               key={plan.id}
@@ -397,6 +334,33 @@ const PremiumContent = () => {
           ))}
         </div>
 
+        {/* Features Comparison */}
+        <div className="mt-12 max-w-4xl mx-auto">
+          <h2 className="text-xl font-bold text-center mb-6 text-gray-900">Compare Features</h2>
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 border-b border-gray-200">
+              <div className="font-medium text-sm text-gray-900">Features</div>
+              <div className="text-center font-medium text-sm text-gray-900">Basic</div>
+              <div className="text-center font-medium text-sm text-gray-900">Standard</div>
+              <div className="text-center font-medium text-sm text-gray-900">Premium</div>
+            </div>
+            
+            {plans[0]?.features?.map((feature, index) => (
+              <div key={index} className="grid grid-cols-4 gap-4 p-4 border-b border-gray-100 last:border-b-0">
+                <div className="text-sm text-gray-700">{feature.name}</div>
+                {plans.map((plan, planIndex) => (
+                  <div key={planIndex} className="text-center">
+                    {plan.features[index]?.included ? (
+                      <Check className="w-4 h-4 text-green-500 mx-auto" />
+                    ) : (
+                      <X className="w-4 h-4 text-gray-300 mx-auto" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -410,104 +374,114 @@ const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits, us
   const originalPrice = billingCycle === 'yearly' ? plan.originalYearlyPrice : null;
   const credits = calculateCredits(plan.id);
 
+  const getPlanIcon = (iconName) => {
+    switch (iconName) {
+      case 'zap': return <Zap className="w-5 h-5 text-blue-500" />;
+      case 'building': return <Building className="w-5 h-5 text-green-500" />;
+      case 'crown': return <Crown className="w-5 h-5 text-purple-500" />;
+      default: return <Star className="w-5 h-5 text-gray-500" />;
+    }
+  };
+
   return (
-    <div className={`relative rounded-xl border p-6 transition-all duration-200 ${
+    <div className={`relative border rounded-lg p-5 ${
       isCurrentPlan
-        ? 'border-green-500 bg-green-50'
+        ? 'border-green-400 bg-green-50'
         : isPopular
-        ? 'border-blue-500 bg-blue-50'
+        ? 'border-blue-400 bg-blue-50'
         : 'border-gray-200 bg-white hover:border-gray-300'
-    }`}>
+    } transition-colors`}>
+      
       {/* Current Plan Badge */}
       {isCurrentPlan && (
-        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-          <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
+        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+          <span className="bg-green-500 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
             <Check className="w-3 h-3" />
-            <span>Current Plan</span>
+            <span>Current</span>
           </span>
         </div>
       )}
 
       {/* Popular Badge */}
       {isPopular && !isCurrentPlan && (
-        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-          <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+          <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium">
             Most Popular
           </span>
         </div>
       )}
 
       {/* Plan Header */}
-      <div className="text-center mb-6">
-        <div className="flex items-center justify-center space-x-2 mb-4">
-          {plan.icon === 'zap' && <Zap className="w-6 h-6 text-yellow-500" />}
-          {plan.icon === 'building' && <Building className="w-6 h-6 text-blue-500" />}
-          {plan.icon === 'crown' && <Crown className="w-6 h-6 text-purple-500" />}
-          <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
+      <div className="text-center mb-4">
+        <div className="flex items-center justify-center gap-2 mb-3">
+          {getPlanIcon(plan.icon)}
+          <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
         </div>
 
-        <div className="mb-4">
-          <div className="flex items-baseline justify-center space-x-1">
-            <span className="text-4xl font-bold text-gray-900">${price}</span>
-            <span className="text-gray-500">/{billingCycle === 'yearly' ? 'year' : 'month'}</span>
+        <div className="mb-3">
+          <div className="flex items-baseline justify-center gap-1">
+            <span className="text-2xl font-bold text-gray-900">${price}</span>
+            <span className="text-gray-500 text-sm">/{billingCycle === 'yearly' ? 'year' : 'month'}</span>
           </div>
           {originalPrice && (
-            <p className="text-sm text-gray-500 line-through mt-1">
+            <p className="text-gray-500 text-sm line-through">
               ${originalPrice} / year
             </p>
           )}
         </div>
 
-        <p className="text-gray-600 text-sm mb-4">{plan.description}</p>
+        <p className="text-gray-600 text-sm mb-3">{plan.description}</p>
 
         {/* Credits Display */}
         {credits > 0 && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-            <div className="flex items-center justify-center space-x-1">
-              <Gift className="w-4 h-4 text-yellow-600" />
-              <span className="text-sm font-medium text-yellow-700">
+          <div className="bg-yellow-50 border border-yellow-200 rounded p-2">
+            <div className="flex items-center justify-center gap-1">
+              <Gift className="w-3 h-3 text-yellow-600" />
+              <span className="text-xs font-medium text-yellow-700">
                 {credits.toLocaleString()} AI Credits
               </span>
-              {billingCycle === 'yearly' && (
-                <span className="text-xs text-yellow-600">(12x)</span>
-              )}
             </div>
           </div>
         )}
       </div>
 
       {/* Features List */}
-      <div className="space-y-3 mb-6">
-        {plan.features.map((feature, idx) => (
-          <div key={idx} className="flex items-center space-x-3">
+      <div className="space-y-2 mb-4">
+        {plan.features.slice(0, 4).map((feature, idx) => (
+          <div key={idx} className="flex items-center gap-2">
             {feature.included ? (
               <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
             ) : (
               <X className="w-4 h-4 text-gray-300 flex-shrink-0" />
             )}
-            <span className={`text-sm ${
+            <span className={`text-xs ${
               feature.included ? 'text-gray-700' : 'text-gray-400'
             }`}>
               {feature.name}
             </span>
           </div>
         ))}
+        {plan.features.length > 4 && (
+          <div className="text-xs text-blue-600 font-medium text-center">
+            +{plan.features.length - 4} more features
+          </div>
+        )}
       </div>
 
       {/* CTA Button */}
       <button
         onClick={() => !isCurrentPlan && onSelect(plan.id)}
         disabled={isCurrentPlan}
-        className={`w-full py-3 rounded-lg font-medium transition-colors ${
+        className={`w-full py-2 rounded-lg text-sm font-medium ${
           isCurrentPlan
             ? 'bg-green-500 text-white cursor-not-allowed'
             : isPopular
             ? 'bg-blue-500 text-white hover:bg-blue-600'
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-        }`}
+        } transition-colors`}
       >
         {isCurrentPlan ? (
-          <div className="flex items-center justify-center space-x-2">
+          <div className="flex items-center justify-center gap-1">
             <Check className="w-4 h-4" />
             <span>Current Plan</span>
           </div>
@@ -574,7 +548,7 @@ const StripeCardForm = ({ onSubmit, processing, amount, clientSecret }) => {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Card Details
         </label>
-        <div className="p-3 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent">
+        <div className="p-3 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500">
           <CardElement options={cardElementOptions} />
         </div>
         {cardError && (
@@ -582,18 +556,16 @@ const StripeCardForm = ({ onSubmit, processing, amount, clientSecret }) => {
         )}
       </div>
 
-      <motion.button
+      <button
         type="submit"
         disabled={!stripe || isProcessing || processing}
-        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        whileHover={{ scale: processing || isProcessing ? 1 : 1.02 }}
-        whileTap={{ scale: processing || isProcessing ? 1 : 0.98 }}
+        className="w-full bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <span>
           {isProcessing ? 'Processing...' : `Pay $${amount}`}
         </span>
         {!isProcessing && <ArrowRight className="w-4 h-4" />}
-      </motion.button>
+      </button>
     </form>
   );
 };
@@ -614,19 +586,18 @@ const PaymentModal = ({
   clientSecret
 }) => {
   const paymentMethods = [
-    { id: 'card', name: 'Credit/Debit Card', icon: CreditCard, description: 'Pay with Visa, Mastercard, or Amex' },
-    { id: 'mobile', name: 'Mobile Payment', icon: Smartphone, description: 'bKash, Nagad, Rocket, Upay' },
+    { id: 'card', name: 'Credit/Debit Card', icon: CreditCard, description: 'Visa, Mastercard, Amex' },
+    { id: 'mobile', name: 'Mobile Payment', icon: Smartphone, description: 'bKash, Nagad, Rocket' },
     { id: 'bank', name: 'Bank Transfer', icon: Banknote, description: 'Direct bank transfer' }
   ];
 
-  // Calculate correct price based on billing cycle
   const displayPrice = billingCycle === 'yearly' ? plan.yearlyPrice : plan.monthlyPrice;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">
               {processing ? 'Processing...' : 'Complete Payment'}
@@ -641,13 +612,12 @@ const PaymentModal = ({
             )}
           </div>
           <p className="text-gray-600 text-sm mt-1">
-            {plan.name} plan ({billingCycle === 'yearly' ? 'Yearly' : 'Monthly'})
+            {plan.name} plan • {billingCycle === 'yearly' ? 'Yearly' : 'Monthly'}
           </p>
 
-          {/* Credits Info */}
           {credits > 0 && (
-            <div className="mt-3 p-2 bg-yellow-50 rounded border border-yellow-200">
-              <div className="flex items-center space-x-1">
+            <div className="mt-2 p-2 bg-yellow-50 rounded border border-yellow-200">
+              <div className="flex items-center gap-1">
                 <Gift className="w-4 h-4 text-yellow-600" />
                 <span className="text-sm font-medium text-yellow-700">
                   {credits.toLocaleString()} AI Credits
@@ -660,23 +630,23 @@ const PaymentModal = ({
         {!processing ? (
           <>
             {/* Payment Methods */}
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-4 border-b border-gray-200">
               <h3 className="font-medium text-gray-900 mb-3">Payment Method</h3>
               <div className="space-y-2">
                 {paymentMethods.map(method => (
                   <button
                     key={method.id}
-                    onClick={() => {
-                      setPaymentMethod(method.id);
-                    }}
-                    className={`w-full p-3 border rounded-lg text-left transition-colors ${
+                    onClick={() => setPaymentMethod(method.id)}
+                    className={`w-full p-3 border rounded text-left ${
                       paymentMethod === method.id
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <method.icon className={`w-5 h-5 ${paymentMethod === method.id ? 'text-blue-600' : 'text-gray-600'}`} />
+                    <div className="flex items-center gap-3">
+                      <method.icon className={`w-5 h-5 ${
+                        paymentMethod === method.id ? 'text-blue-600' : 'text-gray-600'
+                      }`} />
                       <div className="flex-1">
                         <div className="font-medium text-gray-900 text-sm">{method.name}</div>
                         <div className="text-xs text-gray-500">{method.description}</div>
@@ -691,7 +661,7 @@ const PaymentModal = ({
             </div>
 
             {/* Payment Form */}
-            <div className="p-6">
+            <div className="p-4">
               {paymentMethod === 'card' ? (
                 <StripeCardForm
                   onSubmit={onSubmit}
@@ -701,11 +671,10 @@ const PaymentModal = ({
                 />
               ) : (
                 <form onSubmit={onSubmit}>
-                  {/* Mobile Payment Method */}
                   {paymentMethod === 'mobile' && (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           Mobile Number
                         </label>
                         <input
@@ -713,21 +682,20 @@ const PaymentModal = ({
                           placeholder="01XXXXXXXXX"
                           value={formData.mobileNumber}
                           onChange={(e) => onInputChange('mobileNumber', e.target.value)}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                           required
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          Supports bKash, Nagad, Rocket, Upay
+                          bKash, Nagad, Rocket, Upay
                         </p>
                       </div>
                     </div>
                   )}
 
-                  {/* Bank Transfer Method */}
                   {paymentMethod === 'bank' && (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           Bank Name
                         </label>
                         <input
@@ -735,12 +703,12 @@ const PaymentModal = ({
                           placeholder="Enter bank name"
                           value={formData.bankName}
                           onChange={(e) => onInputChange('bankName', e.target.value)}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           Account Number
                         </label>
                         <input
@@ -748,34 +716,29 @@ const PaymentModal = ({
                           placeholder="Enter account number"
                           value={formData.accountNumber}
                           onChange={(e) => onInputChange('accountNumber', e.target.value)}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                           required
                         />
                       </div>
                     </div>
                   )}
 
-                  {/* Security Note */}
-                  <div className="flex items-center space-x-2 mt-6 p-3 bg-blue-50 rounded-lg">
+                  <div className="flex items-center gap-2 mt-4 p-2 bg-blue-50 rounded">
                     <Lock className="w-4 h-4 text-blue-600" />
                     <span className="text-sm text-blue-700">
-                      {paymentMethod === 'card' 
-                        ? 'Your payment information is secure and encrypted with Stripe'
-                        : 'Your payment is processed securely via SSLCommerz'
-                      }
+                      Your payment is secure and encrypted
                     </span>
                   </div>
 
-                  {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={processing}
-                    className="w-full mt-4 bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full mt-3 bg-blue-500 text-white py-2 rounded font-medium hover:bg-blue-600 flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <span>
                       {paymentMethod === 'card' 
                         ? `Pay $${displayPrice}` 
-                        : `Continue to Payment - $${displayPrice}`
+                        : `Continue - $${displayPrice}`
                       }
                     </span>
                     <ArrowRight className="w-4 h-4" />
@@ -785,16 +748,15 @@ const PaymentModal = ({
             </div>
           </>
         ) : (
-          /* Processing State */
-          <div className="p-8 text-center">
-            <div className="w-12 h-12 bg-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+          <div className="p-6 text-center">
+            <div className="w-12 h-12 bg-blue-500 rounded-full mx-auto mb-3 flex items-center justify-center">
               <CreditCard className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">
               Processing Payment
             </h3>
             <p className="text-gray-600 text-sm">
-              Please wait while we complete your transaction...
+              Please wait while we process your payment...
             </p>
           </div>
         )}
@@ -807,20 +769,18 @@ const PaymentModal = ({
 const SuccessToast = ({ credits, onClose }) => {
   return (
     <div className="fixed top-4 right-4 z-50 max-w-sm w-full">
-      <div className="bg-green-500 text-white p-4 rounded-lg shadow-lg">
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0">
-            <Gift className="w-5 h-5" />
-          </div>
+      <div className="bg-green-500 text-white p-3 rounded shadow-lg">
+        <div className="flex items-start gap-2">
+          <Check className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <div className="flex-1">
             <h4 className="font-semibold text-sm mb-1">Payment Successful!</h4>
-            <p className="text-green-100 text-sm">
-              You've received {credits.toLocaleString()} AI Credits
+            <p className="text-green-100 text-xs">
+              You received {credits.toLocaleString()} AI credits
             </p>
           </div>
           <button
             onClick={onClose}
-            className="flex-shrink-0 text-green-100 hover:text-white"
+            className="text-green-100 hover:text-white flex-shrink-0"
           >
             <X className="w-4 h-4" />
           </button>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const SuggestionCard = ({ user }) => {
+const AlluserConnectionCard = ({ user }) => {
   const {
     fullName,
     email,
@@ -75,4 +75,4 @@ const SuggestionCard = ({ user }) => {
   );
 };
 
-export default SuggestionCard;
+export default AlluserConnectionCard;
