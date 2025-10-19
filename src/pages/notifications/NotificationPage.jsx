@@ -776,9 +776,9 @@ const NotificationPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [showActiveModal, setShowActiveModal] = useState(false);
 
-  const notifications = []; // replace with actual notifications
+  const notifications = [];
   const unreadCount = 0;
-  const filteredNotifications = []; // replace with filtered notifications
+  const filteredNotifications = [];
 
   const filters = [
     { id: "all", label: "All", count: 2 },
@@ -800,7 +800,6 @@ const NotificationPage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={() => setShowActiveModal(false)}
         >
           <motion.div
             className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl"
@@ -836,6 +835,7 @@ const NotificationPage = () => {
                     key={filter.id}
                     onClick={() => {
                       setActiveFilter(filter.id);
+                      setShowActiveModal(false);
                     }}
                     className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${
                       activeFilter === filter.id
