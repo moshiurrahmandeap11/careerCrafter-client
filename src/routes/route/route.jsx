@@ -39,6 +39,7 @@ import SuggetionConnectPage from "../../pages/myNetwork/MyNetoworkPage/Suggetion
 import AllUserPAge from "../../pages/myNetwork/MyNetoworkPage/AllUserPAge";
 import PrivacyPolicy from "../../components/footer-component/PrivacyPolicy";
 import TermsService from "../../components/footer-component/TermsService";
+import ErrorPage from "../../components/sharedItems/ErrorPage/ErrorPage";
 
 
 
