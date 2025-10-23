@@ -93,3 +93,57 @@
     "actions": ["view"]
   }
 ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{
+    "id": 7,
+    "type": "connection",
+    "senderName": "Emma Wilson",
+    "senderAvatar": "/avatars/emma-wilson.jpg",
+    "message": "wants to connect with you",
+    "time": "1d ago",
+    "read": true,
+    "priority": "medium",
+    "mutualConnections": 8,
+    "actions": ["accept", "ignore"]
+  },
+{
+    "id": 5,
+    "type": "job",
+    "senderName": "Google Recruiter",
+    "senderAvatar": "/avatars/google-recruiter.jpg",
+    "message": "thinks you'd be a great fit for Senior Frontend Engineer",
+    "time": "5h ago",
+    "read": false,
+    "priority": "high",
+    "actions": ["apply", "view"]
+  },
+  {
+    "id": 1,
+    "type": "connection",
+    "senderName": "Sarah Chen",
+    "senderAvatar": "/avatars/sarah-chen.jpg",
+    "message": "wants to connect with you",
+    "time": "2m ago",
+    "read": false,
+    "priority": "high",
+    "mutualConnections": 12,
+    "actions": ["accept", "ignore"]
+  },
