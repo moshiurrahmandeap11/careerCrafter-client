@@ -31,7 +31,7 @@ const fetchFavicon = async () => {
 await fetchFavicon(); // Vite allows top-level await
 
 createRoot(document.getElementById("root")).render(
-  <HelmetProvider>
+   <HelmetProvider> 
     <Provider store={store}>
       <AuthProvider>
         <ReTitleProvider defaultTitle="Career Crafter">
