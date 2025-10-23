@@ -195,6 +195,7 @@ const Navbar = () => {
       "/check-resume": "Check Resume",
       "/ai-job-match": "AI Job Match",
       "/mock-interview": "Mock Interview",
+      "/create-cv": "Create CV",
       "/business": "Business",
       "/premium": "Premium",
       "/settings": "Settings",
@@ -209,6 +210,7 @@ const Navbar = () => {
       else if (path.includes("/check-resume")) setActiveNav("Check Resume");
       else if (path.includes("/ai-job-match")) setActiveNav("AI Job Match");
       else if (path.includes("/mock-interview")) setActiveNav("Mock Interview");
+      else if (path.includes("/create-cv")) setActiveNav("Create CV");
       else if (path.includes("/profile")) setActiveNav("Profile");
       else if (path.includes("/settings")) setActiveNav("Settings");
     }
@@ -277,6 +279,7 @@ const Navbar = () => {
         "Check Resume": "/check-resume",
         "AI Job Match": "/ai-job-match",
         "Mock Interview": "/mock-interview",
+        "Create CV": "/create-cv",
         Profile: "/profile",
         Settings: "/settings",
       };
@@ -359,6 +362,7 @@ const Navbar = () => {
       { label: "Check Resume", icon: FileCheck2, path: "/check-resume" },
       { label: "AI Job Match", icon: Target, path: "/ai-job-match" },
       { label: "Mock Interview", icon: Bot, path: "/mock-interview" },
+      { label: "Create CV", icon: Bot, path: "/create-cv" },
     ],
     []
   );
