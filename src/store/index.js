@@ -8,6 +8,7 @@ import premiumReducer from '../redux-slices/premiumSlice';
 import resumeReducer from '../redux-slices/resumeSlice';
 import resumeCheckReducer from '../redux-slices/resumeCheckSlice';
 import mockInterviewReducer from '../redux-slices/mockInterviewSlice';
+import cvReducer from '../redux-slices/cvSlice';
 
 export const store = configureStore({
   reducer: {
@@ -18,7 +19,8 @@ export const store = configureStore({
     premium: premiumReducer,
     resume: resumeReducer,
     resumeCheck: resumeCheckReducer,
-    mockInterview: mockInterviewReducer
+    mockInterview: mockInterviewReducer,
+    cv: cvReducer
   },
 });
 
