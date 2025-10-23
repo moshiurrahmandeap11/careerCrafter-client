@@ -31,7 +31,6 @@
     "react-icons": "^5.5.0",
     "react-redux": "^9.2.0",
     "react-router": "^7.9.2",
-    "react-snap": "^1.13.1",
     "react-speech-recognition": "^4.0.1",
     "sharp": "^0.34.4",
     "sitemap": "^8.0.0",

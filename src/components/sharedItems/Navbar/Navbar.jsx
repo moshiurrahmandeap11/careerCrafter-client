@@ -43,6 +43,10 @@ const Navbar = () => {
   const [showAIToolsMenu, setShowAIToolsMenu] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
+  
+  // New state for message notifications
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [messageNotifications, setMessageNotifications] = useState([]);
 
   // Fallback avatar images
   const fallbackAvatars = [
@@ -81,6 +85,28 @@ const Navbar = () => {
     };
 
     fetchUserProfile();
+  }, [user?.email]);
+
+  // Fetch unread messages count
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      if (!user?.email) return;
+
+      try {
+        const response = await axiosIntense.get(`/messageUsers/unread-count/${user.email}`);
+        setUnreadMessages(response.data.unreadCount || 0);
+        setMessageNotifications(response.data.recentMessages || []);
+      } catch (error) {
+        console.error("Error fetching unread messages:", error);
+      }
+    };
+
+    fetchUnreadMessages();
+    
+    // Set up polling for new messages every 30 seconds
+    const interval = setInterval(fetchUnreadMessages, 30000);
+    
+    return () => clearInterval(interval);
   }, [user?.email]);
 
   // Get user avatar - priority: userProfile -> auth user -> fallback
@@ -169,6 +195,7 @@ const Navbar = () => {
       "/check-resume": "Check Resume",
       "/ai-job-match": "AI Job Match",
       "/mock-interview": "Mock Interview",
+      "/create-cv": "Create CV",
       "/business": "Business",
       "/premium": "Premium",
       "/settings": "Settings",
@@ -183,6 +210,7 @@ const Navbar = () => {
       else if (path.includes("/check-resume")) setActiveNav("Check Resume");
       else if (path.includes("/ai-job-match")) setActiveNav("AI Job Match");
       else if (path.includes("/mock-interview")) setActiveNav("Mock Interview");
+      else if (path.includes("/create-cv")) setActiveNav("Create CV");
       else if (path.includes("/profile")) setActiveNav("Profile");
       else if (path.includes("/settings")) setActiveNav("Settings");
     }
@@ -213,6 +241,7 @@ const Navbar = () => {
       });
     }
   }, [user, navigate]);
+
   const handleDashboard = useCallback(() => {
     if (user) {
       navigate("/dashboard/user");
@@ -250,6 +279,7 @@ const Navbar = () => {
         "Check Resume": "/check-resume",
         "AI Job Match": "/ai-job-match",
         "Mock Interview": "/mock-interview",
+        "Create CV": "/create-cv",
         Profile: "/profile",
         Settings: "/settings",
       };
@@ -298,7 +328,19 @@ const Navbar = () => {
     });
   }, [userLogOut, navigate]);
 
-  // Navigation items
+  // Mark messages as read when visiting messages page
+  const markMessagesAsRead = useCallback(async () => {
+    if (!user?.email) return;
+    
+    try {
+      await axiosIntense.post(`/messageUsers/mark-read/${user.email}`);
+      setUnreadMessages(0);
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+    }
+  }, [user?.email]);
+
+  // Navigation items with dynamic notification counts
   const mainNavItems = useMemo(
     () => [
       { label: "Home", icon: Home, path: "/" },
@@ -308,10 +350,10 @@ const Navbar = () => {
         label: "Messages",
         icon: MessageCircle,
         path: "/messages",
-        notification: 3,
+        notification: unreadMessages,
       },
     ],
-    []
+    [unreadMessages]
   );
 
   const aiToolsItems = useMemo(
@@ -320,6 +362,7 @@ const Navbar = () => {
       { label: "Check Resume", icon: FileCheck2, path: "/check-resume" },
       { label: "AI Job Match", icon: Target, path: "/ai-job-match" },
       { label: "Mock Interview", icon: Bot, path: "/mock-interview" },
+      { label: "Create CV", icon: Bot, path: "/create-cv" },
     ],
     []
   );
@@ -342,7 +385,7 @@ const Navbar = () => {
         label: "Messages",
         icon: MessageCircle,
         path: "/messages",
-        notification: 3,
+        notification: unreadMessages,
       },
       {
         label: "Notifications",
@@ -351,8 +394,14 @@ const Navbar = () => {
         notification: 5,
       },
     ],
-    []
+    [unreadMessages]
   );
+
+  // Handle messages click - mark as read
+  const handleMessagesClick = useCallback(() => {
+    markMessagesAsRead();
+    handleNavClick("Messages");
+  }, [markMessagesAsRead, handleNavClick]);
 
   if (loading || profileLoading) {
     return <Loader />;
@@ -397,7 +446,7 @@ const Navbar = () => {
                   label={item.label}
                   icon={item.icon}
                   active={activeNav === item.label}
-                  onClick={() => handleNavClick(item.label)}
+                  onClick={item.label === "Messages" ? handleMessagesClick : () => handleNavClick(item.label)}
                   notification={item.notification}
                 />
               ))}
@@ -548,6 +597,11 @@ const Navbar = () => {
                                     Credits
                                   </p>
                                 )}
+                                {unreadMessages > 0 && (
+                                  <p className="text-xs text-blue-600 font-medium mt-1">
+                                    {unreadMessages} unread message{unreadMessages !== 1 ? 's' : ''}
+                                  </p>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -647,10 +701,12 @@ const Navbar = () => {
 
               <button
                 className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                onClick={() => handleNavClick("Notifications")}
+                onClick={handleMessagesClick}
               >
-                <Bell className="w-5 h-5" />
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
+                <MessageCircle className="w-5 h-5" />
+                {unreadMessages > 0 && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
+                )}
               </button>
             </div>
           </div>
@@ -750,6 +806,11 @@ const Navbar = () => {
                           {userProfile.aiCredits.toLocaleString()} AI Credits
                         </p>
                       )}
+                      {unreadMessages > 0 && (
+                        <p className="text-xs text-blue-600 font-medium mt-1">
+                          {unreadMessages} unread message{unreadMessages !== 1 ? 's' : ''}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -791,7 +852,7 @@ const Navbar = () => {
                           key={item.label}
                           {...item}
                           active={activeNav === item.label}
-                          onClick={() => handleNavClick(item.label)}
+                          onClick={item.label === "Messages" ? handleMessagesClick : () => handleNavClick(item.label)}
                         />
                       ))}
                     </div>
@@ -875,7 +936,7 @@ const Navbar = () => {
               icon={item.icon}
               label={item.label}
               active={activeNav === item.label}
-              onClick={() => handleNavClick(item.label)}
+              onClick={item.label === "Messages" ? handleMessagesClick : () => handleNavClick(item.label)}
               notification={item.notification}
             />
           ))}
@@ -902,7 +963,7 @@ const DesktopNavItem = ({
   >
     <div className="relative">
       <Icon className="w-5 h-5" />
-      {notification && (
+      {notification > 0 && (
         <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
       )}
     </div>
@@ -943,7 +1004,7 @@ const MobileBottomNavItem = ({
   >
     <div className="relative">
       <Icon className="w-5 h-5" />
-      {notification && (
+      {notification > 0 && (
         <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
       )}
     </div>
