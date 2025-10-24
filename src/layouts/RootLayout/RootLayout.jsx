@@ -6,7 +6,6 @@ import useAuth from '../../hooks/UseAuth/useAuth';
 import Footer from '../../components/sharedItems/Footer/Footer';
 import AiChatBot from './AiChatBot/AiChatBot';
 
-
 const RootLayout = () => {
   const { user, loading } = useAuth();
   const [showPopup, setShowPopup] = useState(false);
@@ -44,17 +43,17 @@ const RootLayout = () => {
       {/* Show popup only if needed */}
       {showPopup && <PopUp onClose={handleClosePopup} />}
 
-      {/* Chat Bot Icon */}
-      <div className="fixed bottom-6 right-6 z-40">
+      {/* Chat Bot Container */}
+      <div className="fixed bottom-4 right-4 z-40 md:bottom-6 md:right-6">
         {/* Chat Bot Toggle Button */}
         <button
           onClick={toggleChatBot}
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-14 h-14 md:w-16 md:h-16 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           aria-label="Open AI Chat Bot"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
+            className="h-6 w-6 md:h-7 md:w-7"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -70,7 +69,7 @@ const RootLayout = () => {
 
         {/* Chat Bot Component */}
         {showChatBot && (
-          <div className="absolute bottom-16 right-0 w-80 h-96">
+          <div className="absolute bottom-16 right-0 w-[calc(100vw-2rem)] max-w-[400px] md:max-w-[450px] md:w-[95vw] h-[500px] md:h-[600px] lg:h-[700px]">
             <AiChatBot onClose={() => setShowChatBot(false)} />
           </div>
         )}
