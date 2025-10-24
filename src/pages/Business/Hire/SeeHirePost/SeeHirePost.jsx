@@ -44,9 +44,7 @@ const SeeHirePost = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
-      <h2 className="text-3xl font-bold mb-8 text-center text-indigo-700">
-        Job & Project Listings
-      </h2>
+      
 
       {/* --- */}
 
@@ -88,7 +86,7 @@ const SeeHirePost = () => {
             onChange={(e) => setRecent(e.target.checked)}
             className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
           />
-          **Recent (24h)**
+          Recent (24h)
         </label>
       </div>
 
@@ -114,7 +112,7 @@ const SeeHirePost = () => {
                     {post.title}
                   </h3>
                   <p className="text-sm text-gray-500 flex items-center gap-2">
-                    <FaMapMarkerAlt className="text-indigo-500" /> **Location:** {post.location}
+                    <FaMapMarkerAlt className="text-indigo-500" /> Location: {post.location}
                   </p>
                 </div>
                 {/* User Info on the right */}
@@ -142,13 +140,13 @@ const SeeHirePost = () => {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-600 mb-6">
                 <p className="flex items-center gap-2 font-medium">
-                  <FaUserTie className="text-indigo-500" /> **Type:** {post.type}
+                  <FaUserTie className="text-indigo-500" /> Type: {post.type}
                 </p>
                 <p className="flex items-center gap-2 font-medium">
-                  <FaMoneyBillWave className="text-green-500" /> **Salary:** {post.salary}
+                  <FaMoneyBillWave className="text-green-500" /> Salary: {post.salary}
                 </p>
                 <p className="col-span-2 flex items-center gap-2 font-medium">
-                  <FaLaptopCode className="text-indigo-500" /> **Skills:** {post.skills}
+                  <FaLaptopCode className="text-indigo-500" /> Skills: {post.skills}
                 </p>
               </div>
 
