@@ -41,6 +41,7 @@ import PrivacyPolicy from "../../components/footer-component/PrivacyPolicy";
 import TermsService from "../../components/footer-component/TermsService";
 import ErrorPage from "../../components/sharedItems/ErrorPage/ErrorPage";
 import CreateCV from "../../pages/create-cv/CreateCV";
+import SkillGapAnalysis from "../../pages/SkillGapAnalysis/SkillGapAnalysis";
 
 
 
@@ -156,6 +157,10 @@ export const route = createBrowserRouter([
       {
         path: '/payment/canceled',
         element: <PaymentCanceled />
+      },
+      {
+        path: '/skill-gap-analysis',
+        element: <SkillGapAnalysis />
       }
     ],
   },
