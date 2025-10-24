@@ -42,6 +42,7 @@ import TermsService from "../../components/footer-component/TermsService";
 import ErrorPage from "../../components/sharedItems/ErrorPage/ErrorPage";
 import CreateCV from "../../pages/create-cv/CreateCV";
 import SkillGapAnalysis from "../../pages/SkillGapAnalysis/SkillGapAnalysis";
+import LearningPath from "../../pages/LearningPath/LearningPath";
 
 
 
@@ -161,6 +162,10 @@ export const route = createBrowserRouter([
       {
         path: '/skill-gap-analysis',
         element: <SkillGapAnalysis />
+      },
+      {
+        path:'/learning-path',
+        element: <LearningPath />
       }
     ],
   },
