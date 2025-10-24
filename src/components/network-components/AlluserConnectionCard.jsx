@@ -19,16 +19,14 @@ const AlluserConnectionCard = ({ user }) => {
     isPremium,
     _id
   } = user;
-
   const authUser = useAuth();
   const senderEmail = authUser?.user?.email;
   const axiosPublic = useAxiosSecure();
   const dispatch = useDispatch();
-
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-const handleConnect = async (receiverEmail) => {
+const handleConnect = async (receiverEmail,id) => {
     if (!senderEmail) {
         return Swal.fire({
             icon: 'error',
@@ -50,52 +48,58 @@ const handleConnect = async (receiverEmail) => {
             showConfirmButton: false
         });
     }
-
     setIsLoading(true);
 
     try {
-        console.log('Sending connection request...', {
-            senderEmail,
-            receiverEmail
-        });
-
-        const res = await axiosPublic.post("/network/send-connect-request", {
-            senderEmail,
-            receiverEmail,
-        });
-
-        console.log('Connection request response:', res.data);
-
-        if (res.data.success) {
-            setIsConnected(true);
-            
-            // Remove user from Redux store after successful connection
-            dispatch(removeUser(email));
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'Request Sent!',
-                timer: 2000,
-                timerProgressBar: true,
-                text: `${res.data.message}`,
-                showConfirmButton: false
-            });
-        } else {
-            // Handle specific error messages
-            let errorMessage = res.data.message;
-            if (errorMessage.includes('already exists')) {
-                errorMessage = 'You have already sent a connection request to this user. Please wait for their response.';
-            }
-            
-            Swal.fire({
-                icon: 'error',
-                title: 'Request Failed',
-                timer: 3000,
-                timerProgressBar: true,
-                text: errorMessage,
-                showConfirmButton: true
-            });
+        // console.log('Sending connection request...', {
+        //     senderEmail,
+        //     receiverEmail
+        // });
+        const notificationData = {
+          userId:id,
+          type:'connect',
+          senderName:authUser?.user?.displayName,
+          senderEmail,
+          senderProfile:authUser?.user?.photoURL,
+          message : `${authUser?.user?.displayName} send you a connection request`,
+          read:false
         }
+
+        // const res = await axiosPublic.post("/network/send-connect-request", {
+        //     senderEmail,
+        //     receiverEmail,
+        // });
+        const post = await axiosPublic.post("/notifications/send-notifications",notificationData)
+        // if (res.data.success || post.data.success) {
+        //     setIsConnected(true);
+            
+        //     // Remove user from Redux store after successful connection
+        //     dispatch(removeUser(email));
+            
+        //     Swal.fire({
+        //         icon: 'success',
+        //         title: 'Request Sent!',
+        //         timer: 2000,
+        //         timerProgressBar: true,
+        //         text: `${res.data.message}`,
+        //         showConfirmButton: false
+        //     });
+        // } else {
+        //     // Handle specific error messages
+        //     let errorMessage = res.data.message;
+        //     if (errorMessage.includes('already exists')) {
+        //         errorMessage = 'You have already sent a connection request to this user. Please wait for their response.';
+        //     }
+            
+        //     Swal.fire({
+        //         icon: 'error',
+        //         title: 'Request Failed',
+        //         timer: 3000,
+        //         timerProgressBar: true,
+        //         text: errorMessage,
+        //         showConfirmButton: true
+        //     });
+        // }
     } catch (error) {
         console.error("Send connect error:", error);
         
@@ -177,7 +181,7 @@ const handleConnect = async (receiverEmail) => {
       {/* Right side buttons */}
       <div className="flex flex-row gap-2 mt-4 md:mt-0 w-full md:w-auto">
         <MainButton 
-          onClick={() => handleConnect(email)}
+          onClick={() => handleConnect(email,_id)}
           disabled={isConnected || isLoading}
           className={` ${
             isConnected 
