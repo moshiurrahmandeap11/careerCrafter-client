@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import useAuth from "../../../hooks/UseAuth/useAuth";
 import axiosIntense from "../../../hooks/AxiosIntense/axiosIntense";
 import Swal from "sweetalert2";
+import SeeHirePost from "./SeeHirePost/SeeHirePost";
 
 const Hire = () => {
   const [activeTab, setActiveTab] = useState("post"); // "post" or "view"
@@ -11,6 +12,7 @@ const Hire = () => {
 
   const { user } = useAuth();
   const axiosPublic=axiosIntense
+  
 
   // handle form submit
   const handleSubmit = (e) => {
@@ -28,11 +30,13 @@ const Hire = () => {
       ContactEmail: form.email.value,
       email:user?.email,
       name:user?.displayName,
+      photo:user?.photoURL,
       date:new Date()
+      
       
 
     };
-
+     
     axiosPublic.post('/hired-post/added-hired-post', newPost)
   .then(res => {
     if(res.data.insertedId){
@@ -188,7 +192,7 @@ const Hire = () => {
               📋 Available Hire Posts
             </h2>
 
-           
+           <SeeHirePost></SeeHirePost>
           </div>
         )}
       </div>
