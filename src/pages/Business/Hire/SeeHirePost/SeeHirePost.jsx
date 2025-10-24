@@ -159,7 +159,7 @@ const SeeHirePost = () => {
                 </p>
 
                 <div className="flex gap-3">
-                  {/* See Profile Button */}
+                  
                   <button
                     onClick={() => handleSeeProfile(post.userId)} // Assuming 'userId' exists
                     className="flex items-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition"
