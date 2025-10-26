@@ -38,8 +38,6 @@ import {
 } from "../../redux-selectors/notificationsSelectors";
 import useAuth from "../../hooks/UseAuth/useAuth";
 
-
-
 const NotificationPage = () => {
   const { user } = useAuth();
   const dispatch = useDispatch();
@@ -84,7 +82,7 @@ const NotificationPage = () => {
       filter === 'all' ? true :
       filter === 'unread' ? !notification.isRead :
       filter === 'messages' ? notification.type === 'message' :
-      filter === 'network' ? ['connection_request', 'connection_accepted'].includes(notification.type) :
+      filter === 'network' ? ['connection_request', 'connection_accepted', 'connection_removed'].includes(notification.type) :
       filter === 'jobs' ? ['job_match', 'application_update'].includes(notification.type) :
       true;
 
@@ -129,6 +127,8 @@ const NotificationPage = () => {
         window.location.href = `/messages`;
         break;
       case 'connection_request':
+      case 'connection_accepted':
+      case 'connection_removed':
         // Navigate to network page
         window.location.href = `/network`;
         break;
@@ -151,6 +151,8 @@ const NotificationPage = () => {
         return <UserPlus className="w-5 h-5 text-green-600" />;
       case 'connection_accepted':
         return <Users className="w-5 h-5 text-green-600" />;
+      case 'connection_removed':
+        return <User className="w-5 h-5 text-red-600" />;
       case 'job_match':
         return <Briefcase className="w-5 h-5 text-purple-600" />;
       case 'application_update':
@@ -171,6 +173,8 @@ const NotificationPage = () => {
         return 'bg-green-50 border-green-200';
       case 'connection_accepted':
         return 'bg-green-50 border-green-200';
+      case 'connection_removed':
+        return 'bg-red-50 border-red-200';
       case 'job_match':
         return 'bg-purple-50 border-purple-200';
       case 'application_update':
@@ -406,7 +410,7 @@ const NotificationPage = () => {
                                 <Clock className="w-3 h-3" />
                                 <span>{formatTime(notification.timestamp)}</span>
                               </div>
-                              <span className="capitalize">{notification.type.replace('_', ' ')}</span>
+                              <span className="capitalize">{notification.type.replace(/_/g, ' ')}</span>
                             </div>
                           </div>
                         </div>
