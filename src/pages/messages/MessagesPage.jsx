@@ -60,12 +60,11 @@ const MessagesPage = () => {
   const sendingMessage = useSelector(selectSendingMessage);
   const filteredConversations = useSelector(selectFilteredConversations);
   const unreadCount = useSelector(selectUnreadCount);
-
+  const [lastMessages, setLastMessages] = useState({});
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [allUser, setAllUser] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
-
   // Call States
   const [callState, setCallState] = useState({
     isCallActive: false,
@@ -111,6 +110,37 @@ const MessagesPage = () => {
       );
     }
   };
+
+  const fetchLastMessage = async (friendEmail) => {
+    if (!user?.email) return;
+
+    try {
+      const res = await axiosIntense.get("/messageUsers/last-message", {
+        params: {
+          userEmail: user.email,
+          friendEmail: friendEmail,
+        },
+      });
+
+      if (res.data.length > 0) {
+        const lastMsg = res.data[0];
+        setLastMessages((prev) => ({
+          ...prev,
+          [friendEmail]: lastMsg.message,
+        }));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!allUser) return;
+
+    allUser.forEach((userObj) => {
+      fetchLastMessage(userObj.email);
+    });
+  }, [allUser]);
 
   // Socket event handlers for calls
   useEffect(() => {
@@ -640,7 +670,10 @@ const MessagesPage = () => {
                     .map((conversation) => (
                       <ConversationItem
                         key={conversation._id}
-                        conversation={conversation}
+                        conversation={{
+                          ...conversation,
+                          lastMessage: lastMessages[conversation.email] || "",
+                        }}
                         isSelected={
                           selectedConversation?._id === conversation._id
                         }
