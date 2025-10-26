@@ -82,8 +82,7 @@ const NotificationPage = () => {
       filter === 'all' ? true :
       filter === 'unread' ? !notification.isRead :
       filter === 'messages' ? notification.type === 'message' :
-      filter === 'network' ? ['connection_request', 'connection_accepted', 'connection_removed'].includes(notification.type) :
-      filter === 'jobs' ? ['job_match', 'application_update'].includes(notification.type) :
+      filter === 'network' ? ['connection_request', 'connection_accepted', 'connection_removed'].includes(notification.type) : 
       true;
 
     return matchesSearch && matchesFilter;
@@ -131,10 +130,6 @@ const NotificationPage = () => {
       case 'connection_removed':
         // Navigate to network page
         window.location.href = `/network`;
-        break;
-      case 'job_match':
-        // Navigate to jobs page
-        window.location.href = `/jobs`;
         break;
       default:
         // Default behavior - just mark as read
@@ -338,7 +333,6 @@ const NotificationPage = () => {
                   { key: 'unread', label: 'Unread', icon: Mail },
                   { key: 'messages', label: 'Messages', icon: MessageCircle },
                   { key: 'network', label: 'Network', icon: Users },
-                  { key: 'jobs', label: 'Jobs', icon: Briefcase },
                 ].map((filterItem) => (
                   <motion.button
                     key={filterItem.key}
