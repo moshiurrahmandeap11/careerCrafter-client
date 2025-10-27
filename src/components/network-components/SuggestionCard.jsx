@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import useAuth from "../../hooks/UseAuth/useAuth";
 import Swal from "sweetalert2";
-
+import { motion, AnimatePresence } from "framer-motion";
 import { User, Crown, Mail, ExternalLink } from 'lucide-react';
 import useAxiosSecure from "../../hooks/AxiosIntense/useAxiosSecure";
 
@@ -50,7 +50,7 @@ const SuggestionCard = ({ user }) => {
     const [isConnected, setIsConnected] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [imageError, setImageError] = useState(false);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
     const handleConnect = async (receiverEmail) => {
         if (!senderEmail) {
             return Swal.fire({
@@ -112,14 +112,6 @@ const SuggestionCard = ({ user }) => {
         }
     };
 
-    const handleViewProfile = () => {
-        Swal.fire({
-            icon: 'info',
-            title: 'View Profile',
-            text: `View ${fullName}'s profile`,
-            timer: 1500
-        });
-    };
 
     return (
         <div className="bg-white shadow-sm rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200 w-full">
@@ -225,13 +217,86 @@ const SuggestionCard = ({ user }) => {
                 </button>
                 
                 <button 
-                    onClick={handleViewProfile}
+                    onClick={}
                     className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all text-sm font-medium flex items-center justify-center gap-2"
                 >
                     <ExternalLink className="w-4 h-4" />
                     <span>Profile</span>
                 </button>
             </div>
+             {/* Profile Modal */}
+      <AnimatePresence mode="wait">
+        {isModalOpen && profileViewer && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsModalOpen(false)}
+          >
+            <motion.div
+              className="bg-white rounded-2xl shadow-2xl p-6 w-[90%] max-w-md relative"
+              initial={{ opacity: 0, scale: 0.8, y: -50 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 50 }}
+              transition={{ type: "spring", stiffness: 120, damping: 15 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="absolute top-4 right-4 bg-gray-100 px-3 py-[7px] hover:bg-gray-200 duration-200 rounded-full text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+
+              <div className="flex flex-col items-center text-center">
+                <div className="w-20 h-20 rounded-full overflow-hidden mb-4 bg-gray-200">
+                  {profileViewer.profileData.profileImage ? (
+                    <img
+                      src={profileViewer.profileData.profileImage}
+                      alt={profileViewer.profileData.fullName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <FallbackAvatar
+                      name={profileViewer.profileData.fullName}
+                      className="w-20 h-20 rounded-full text-2xl"
+                    />
+                  )}
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  {profileViewer.profileData.fullName}
+                </h2>
+                <p className="text-gray-600 mb-3">
+                  {profileViewer.profileData.email}
+                </p>
+
+                {profileViewer.profileData.tags &&
+                  profileViewer.profileData.tags.length > 0 && (
+                    <div className="flex flex-wrap justify-center gap-2 mb-4">
+                      {profileViewer.profileData.tags.map((tag, i) => (
+                        <span
+                          key={i}
+                          className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                <button
+                  onClick={() => handleSendMessage(email)}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200 flex items-center space-x-2"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Message</span>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
         </div>
     );
 };

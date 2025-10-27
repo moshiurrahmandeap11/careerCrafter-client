@@ -19,7 +19,7 @@ const SuggetionConnectPage = () => {
       
       }, [dispatch,user?.email,axiosSecure]);
       
-    
+    console.log(suggestedUsers)
       if (isLoading) return <Loader></Loader>;
       if (error) return <p>Error: {error}</p>;
     return (
