@@ -44,6 +44,7 @@ import CreateCV from "../../pages/create-cv/CreateCV";
 import SkillGapAnalysis from "../../pages/SkillGapAnalysis/SkillGapAnalysis";
 import LearningPath from "../../pages/LearningPath/LearningPath";
 import CookiePolicy from "../../components/footer-component/CookiePolicy";
+import HelpCenter from "../../components/footer-component/HelpCenter";
 
 
 
@@ -77,6 +78,10 @@ export const route = createBrowserRouter([
       {
         path: "/cookies",
         element: <CookiePolicy></CookiePolicy>
+      },
+      {
+        path: "/help",
+        element: <HelpCenter></HelpCenter>
       },
       {
         path: "/network",
