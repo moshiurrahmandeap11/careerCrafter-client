@@ -126,11 +126,20 @@ const AlluserConnectionCard = ({ user }) => {
       {/* Left side */}
       <div className="flex items-center gap-4 w-full md:w-auto">
         <div className="relative">
-          <img
-            src={profileImage || "https://i.postimg.cc/85JwcYck/boy.png"}
-            alt={fullName}
-            className="w-16 h-16 rounded-xl border border-blue-300 object-cover"
-          />
+          <div className="w-20 h-20 rounded-full overflow-hidden mb-4 bg-gray-200">
+            {user.profileImage ? (
+              <img
+                src={user.profileImage}
+                alt={user.fullName}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-2xl border-2 border-white shadow-sm">
+                {user.fullName ? user.fullName.charAt(0).toUpperCase() : "?"}
+              </div>
+            )}
+          </div>
+
           {isPremium && (
             <div className="absolute -top-1 -right-1 bg-yellow-400 text-gray-900 text-xs font-bold px-2 py-0.5 rounded-md">
               {planName}
@@ -246,14 +255,6 @@ const AlluserConnectionCard = ({ user }) => {
                     ))}
                   </div>
                 )}
-                {/* 
-                <button
-                  // onClick={() => handleSendMessage(email)}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200 flex items-center space-x-2"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Message</span>
-                </button> */}
               </div>
             </motion.div>
           </motion.div>
