@@ -290,9 +290,9 @@ const MessagesPage = () => {
     const fetchUser = async () => {
       try {
         const res = await axiosIntense.get(
-          `/messageUsers/usersEmail?email=${user?.email}`
+          `/messageUsers/connected-users?email=${user?.email}`
         );
-        setAllUser(res.data);
+        setAllUser(res.data.connectedUsers);
       } catch (err) {
         console.error(err);
       }
@@ -692,12 +692,12 @@ const MessagesPage = () => {
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
                       {searchTerm
                         ? "No conversations found"
-                        : "No messages yet"}
+                        : "No connections yet"}
                     </h3>
                     <p className="text-gray-600 text-sm">
                       {searchTerm
                         ? "Try adjusting your search"
-                        : "Start a conversation with your connections"}
+                        : "Start connecting with people to begin chatting!"}
                     </p>
                   </motion.div>
                 )}

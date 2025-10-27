@@ -17,7 +17,6 @@ const MyNetwork = () => {
       dispatch(fetchAllConnectedUsers({ email: user.email, axiosSecure }));
     }
   }, [dispatch, user?.email, axiosSecure]);
-
   if (isLoading) return <Loader />;
 
   if (error) return (
