@@ -198,7 +198,7 @@ const Feed = () => {
                     <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                       {/* Company Image */}
                       <div className="flex-shrink-0">
-                        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center overflow-hidden">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center overflow-hidden">
                           {item.image ? (
                             <img
                               src={item.image}
@@ -291,7 +291,7 @@ const Feed = () => {
                   <div className="p-6">
                     {/* User Header */}
                     <div className="flex items-center space-x-3 mb-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center overflow-hidden">
+                      <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center overflow-hidden">
                         {item.user?.profileImage ? (
                           <img
                             src={item.user.profileImage}
@@ -299,7 +299,11 @@ const Feed = () => {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <User className="w-6 h-6 text-white" />
+                          <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-lg border-2 border-white shadow-sm">
+                            {item.user.fullName
+                              ? item.user.fullName.charAt(0).toUpperCase()
+                              : "?"}
+                          </div>
                         )}
                       </div>
                       <div>
