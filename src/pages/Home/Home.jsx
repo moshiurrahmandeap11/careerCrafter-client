@@ -1,16 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Hero from "./Hero/Hero";
 import { ReTitle } from "re-title";
 import HiredPost from "../../components/HiredPost/HiredPost";
 import Feed from "./Feed/Feed";
 import { Helmet } from "react-helmet-async";
-import RandomNetwork from "./RandomNetwork/RandomNetwork";
 import TopJobs from "./TopJobs/TopJobs";
 import AIMentorForHome from "./AIMentorForHome/AIMentorForHome";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const Home = () => {
+  useEffect(() => {
+    // Initialize AOS
+    AOS.init({
+      duration: 800, // Animation duration in milliseconds
+      easing: "ease-in-out", // Easing type
+      once: true, // Whether animation should happen only once
+      offset: 100, // Offset (in px) from the original trigger point
+    });
+  }, []);
+
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <Helmet>
         <title>
           Career Crafter - AI-Powered Job Portal & Professional Network
@@ -29,12 +40,54 @@ const Home = () => {
         />
       </Helmet>
       <ReTitle title="Career Crafter" />
-      <Hero></Hero>
-      <HiredPost></HiredPost>
-      <Feed></Feed>
-      <RandomNetwork></RandomNetwork>
-      <TopJobs></TopJobs>
-      <AIMentorForHome></AIMentorForHome>
+      
+      {/* Hero Section */}
+      <section className="bg-white" data-aos="fade-up">
+        <Hero />
+      </section>
+      
+      {/* Main Content Grid */}
+      <div className="max-w-7xl mx-auto px-4 lg:px-20 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column */}
+          <div className="lg:col-span-2 space-y-8">
+            <section 
+              className="bg-white rounded-2xl shadow-sm border border-gray-100"
+              data-aos="fade-up"
+              data-aos-delay="100"
+            >
+              <AIMentorForHome />
+            </section>
+            
+            <section 
+              className="bg-white rounded-2xl shadow-sm border border-gray-100"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <Feed />
+            </section>
+          </div>
+          
+          {/* Right Column */}
+          <div className="space-y-8">
+            <section 
+              className="bg-white rounded-2xl shadow-sm border border-gray-100"
+              data-aos="fade-up"
+              data-aos-delay="150"
+            >
+              <HiredPost />
+            </section>
+            
+            <section 
+              className="bg-white rounded-2xl shadow-sm border border-gray-100"
+              data-aos="fade-up"
+              data-aos-delay="250"
+            >
+              <TopJobs />
+            </section>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
