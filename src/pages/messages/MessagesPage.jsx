@@ -39,11 +39,11 @@ import {
   selectUnreadCount,
 } from "../../redux-selectors/messagesSelectors";
 import useAuth from "../../hooks/UseAuth/useAuth";
-import axiosIntense from "../../hooks/AxiosIntense/axiosIntense";
 import { io } from "socket.io-client";
 import { connectWS } from "../../hooks/connect";
 import { CallModal } from "../../components/CallModal/CallModal";
 import { useWebRTC } from "../../hooks/useWebRTC/useWebRTC";
+import useAxiosSecure from "../../hooks/AxiosIntense/useAxiosSecure";
 
 const MessagesPage = () => {
   const { user, loading: emailLoading } = useAuth();
@@ -65,6 +65,7 @@ const MessagesPage = () => {
   const [messages, setMessages] = useState([]);
   const [allUser, setAllUser] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const axiosSecure = useAxiosSecure();
   // Call States
   const [callState, setCallState] = useState({
     isCallActive: false,
@@ -95,7 +96,7 @@ const MessagesPage = () => {
         user.email
       )}&friendEmail=${encodeURIComponent(friendEmail)}`;
 
-      const res = await axiosIntense.get(url);
+      const res = await axiosSecure.get(url);
       const payload = res.data;
       const chats = Array.isArray(payload)
         ? payload
@@ -115,7 +116,7 @@ const MessagesPage = () => {
     if (!user?.email) return;
 
     try {
-      const res = await axiosIntense.get("/messageUsers/last-message", {
+      const res = await axiosSecure.get("/messageUsers/last-message", {
         params: {
           userEmail: user.email,
           friendEmail: friendEmail,
@@ -289,7 +290,7 @@ const MessagesPage = () => {
     if (!user?.email) return;
     const fetchUser = async () => {
       try {
-        const res = await axiosIntense.get(
+        const res = await axiosSecure.get(
           `/messageUsers/connected-users?email=${user?.email}`
         );
         setAllUser(res.data.connectedUsers);
@@ -452,7 +453,7 @@ const MessagesPage = () => {
         timestamp: new Date(),
       };
 
-      await axiosIntense.post("/messageUsers/messages", {
+      await axiosSecure.post("/messageUsers/messages", {
         fromEmail: msg.fromEmail,
         toEmail: msg.toEmail,
         message: text,
