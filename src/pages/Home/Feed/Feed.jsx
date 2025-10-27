@@ -501,7 +501,7 @@ const Feed = () => {
               >
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+                  className="absolute top-4 right-4 bg-gray-100 px-3 py-[7px] hover:bg-gray-200 duration-200 rounded-full text-gray-500 hover:text-gray-700"
                 >
                   ✕
                 </button>
@@ -515,7 +515,11 @@ const Feed = () => {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <User className="w-10 h-10 text-gray-500 m-auto mt-5" />
+                      <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-3xl border-2 border-white shadow-sm">
+                        {selectedProfile.fullName
+                          ? selectedProfile.fullName.charAt(0).toUpperCase()
+                          : "?"}
+                      </div>
                     )}
                   </div>
                   <h2 className="text-xl font-bold text-gray-900 mb-1">
