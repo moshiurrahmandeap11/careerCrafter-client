@@ -1,26 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import axiosIntense from '../../../../hooks/AxiosIntense/axiosIntense';
-import { FaMapMarkerAlt, FaEnvelope, FaUserTie, FaMoneyBillWave, FaLaptopCode, FaUserCircle, FaPaperPlane, FaCheckCircle } from 'react-icons/fa';
+import React, { useEffect, useState } from "react";
+import axiosIntense from "../../../../hooks/AxiosIntense/axiosIntense";
+import {
+  FaMapMarkerAlt,
+  FaEnvelope,
+  FaUserTie,
+  FaMoneyBillWave,
+  FaLaptopCode,
+  FaUserCircle,
+  FaPaperPlane,
+  FaCheckCircle,
+} from "react-icons/fa";
 
 const SeeHirePost = () => {
   const axiosPublic = axiosIntense;
   const [allPosts, setAllPosts] = useState([]);
 
-  const [search, setSearch] = useState('');
-  const [location, setLocation] = useState('');
+  const [search, setSearch] = useState("");
+  const [location, setLocation] = useState("");
   const [recent, setRecent] = useState(false);
-  const [type, setType] = useState('');
+  const [type, setType] = useState("");
 
   // Fetch posts whenever filters change
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await axiosPublic.get('/hired-post/allpost', {
+        const res = await axiosPublic.get("/hired-post/allpost", {
           params: { search, location, recent, type },
         });
         setAllPosts(res.data);
       } catch (error) {
-        console.error('Error fetching posts:', error);
+        console.error("Error fetching posts:", error);
       }
     };
     fetchPosts();
@@ -44,12 +53,6 @@ const SeeHirePost = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
-      <div>
-        <h1>
-          check the issue
-        </h1>
-      </div>
-
       {/* --- */}
 
       {/* 🔍 Filter Controls */}
@@ -116,14 +119,17 @@ const SeeHirePost = () => {
                     {post.title}
                   </h3>
                   <p className="text-sm text-gray-500 flex items-center gap-2">
-                    <FaMapMarkerAlt className="text-indigo-500" /> Location: {post.location}
+                    <FaMapMarkerAlt className="text-indigo-500" /> Location:{" "}
+                    {post.location}
                   </p>
                 </div>
                 {/* User Info on the right */}
                 <div className="text-right">
                   <div className="flex items-center justify-end gap-3">
                     <div className="text-sm">
-                      <h4 className="font-semibold text-gray-800">{post.name}</h4>
+                      <h4 className="font-semibold text-gray-800">
+                        {post.name}
+                      </h4>
                       <p className="text-xs text-gray-500 flex items-center justify-end gap-1">
                         <FaEnvelope className="text-indigo-500" /> {post.email}
                       </p>
@@ -132,6 +138,12 @@ const SeeHirePost = () => {
                       src={post.photo}
                       alt={post.name}
                       className="w-12 h-12 rounded-full border-2 border-indigo-200 object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          post.name
+                        )}&background=random`;
+                      }}
                     />
                   </div>
                 </div>
@@ -140,17 +152,21 @@ const SeeHirePost = () => {
               <hr className="my-4 border-gray-100" />
 
               {/* Post Details */}
-              <p className="text-gray-700 mb-5 leading-relaxed">{post.description}</p>
+              <p className="text-gray-700 mb-5 leading-relaxed">
+                {post.description}
+              </p>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-600 mb-6">
                 <p className="flex items-center gap-2 font-medium">
                   <FaUserTie className="text-indigo-500" /> Type: {post.type}
                 </p>
                 <p className="flex items-center gap-2 font-medium">
-                  <FaMoneyBillWave className="text-green-500" /> Salary: {post.salary}
+                  <FaMoneyBillWave className="text-green-500" /> Salary:{" "}
+                  {post.salary}
                 </p>
                 <p className="col-span-2 flex items-center gap-2 font-medium">
-                  <FaLaptopCode className="text-indigo-500" /> Skills: {post.skills}
+                  <FaLaptopCode className="text-indigo-500" /> Skills:{" "}
+                  {post.skills}
                 </p>
               </div>
 
@@ -161,7 +177,6 @@ const SeeHirePost = () => {
                 </p>
 
                 <div className="flex gap-3">
-                  
                   <button
                     onClick={() => handleSeeProfile(post.userId)} // Assuming 'userId' exists
                     className="flex items-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition"
