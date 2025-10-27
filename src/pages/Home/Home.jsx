@@ -4,6 +4,9 @@ import { ReTitle } from "re-title";
 import HiredPost from "../../components/HiredPost/HiredPost";
 import Feed from "./Feed/Feed";
 import { Helmet } from "react-helmet-async";
+import RandomNetwork from "./RandomNetwork/RandomNetwork";
+import TopJobs from "./TopJobs/TopJobs";
+import AIMentorForHome from "./AIMentorForHome/AIMentorForHome";
 
 const Home = () => {
   return (
@@ -29,6 +32,9 @@ const Home = () => {
       <Hero></Hero>
       <HiredPost></HiredPost>
       <Feed></Feed>
+      <RandomNetwork></RandomNetwork>
+      <TopJobs></TopJobs>
+      <AIMentorForHome></AIMentorForHome>
     </div>
   );
 };
