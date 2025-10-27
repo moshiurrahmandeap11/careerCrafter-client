@@ -28,7 +28,7 @@ const Feed = () => {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
-
+console.log(feedItems)
   const navigate = useNavigate();
   useEffect(() => {
     fetchFeedData();

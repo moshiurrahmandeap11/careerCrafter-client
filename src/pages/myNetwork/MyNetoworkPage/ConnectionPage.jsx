@@ -18,7 +18,6 @@ const ConnectionsPage = () => {
   const { connections, isLoading, error } = useSelector(
     (state) => state.network
   );
-
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredConnections, setFilteredConnections] = useState([]);
   useEffect(() => {
@@ -26,7 +25,6 @@ const ConnectionsPage = () => {
       dispatch(fetchUserConnections({ email: user.email, axiosSecure }));
     }
   }, [dispatch, user?.email, axiosSecure]);
-
   useEffect(() => {
     // Filter connections based on search
     let results = connections;

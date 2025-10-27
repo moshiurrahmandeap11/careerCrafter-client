@@ -14,6 +14,7 @@ import useAuth from "../../hooks/UseAuth/useAuth";
 import useAxiosSecure from "../../hooks/AxiosIntense/useAxiosSecure"; // useAxiosSecure ব্যবহার করুন
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router";
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -74,6 +75,7 @@ export const ConnectionCard = ({ connection, onRemove }) => {
   const [profileViewer, setProfileViewer] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const connectedUser = connection.connectedUser || {};
+  const navigate = useNavigate()
   const avatar =
     connectedUser.photo ||
     connectedUser.profileImage ||
@@ -218,13 +220,25 @@ export const ConnectionCard = ({ connection, onRemove }) => {
     }
   };
 
-  const handleSendMessage = () => {
-    Swal.fire({
-      icon: "info",
-      title: "Send Message",
-      text: `Message ${profileName}`,
-      timer: 1500,
-    });
+    // Handle message button click
+  const handleSendMessage = async(email) => {
+    const res = await axiosSecure.get(`network/get-profile?email=${email}`);
+    const redirect = res.data.profileData
+    const conversationData = {
+      _id: redirect._id,
+      fullName: redirect.fullName,
+      email: redirect.email,
+      profileImage: redirect.profileImage,
+      tags: redirect.tags || [],
+    };
+
+    sessionStorage.setItem(
+      "selectedConversation",
+      JSON.stringify(conversationData)
+    );
+
+    // Navigate to messages page
+    navigate("/messages");
   };
 
   const handleViewProfile = async (email) => {
@@ -232,7 +246,6 @@ export const ConnectionCard = ({ connection, onRemove }) => {
     setProfileViewer(res.data);
     setIsModalOpen(true);
   };
-  console.log(profileViewer);
   const handleMenuAction = (action) => {
     setShowMenu(false);
     switch (action) {
@@ -403,7 +416,7 @@ export const ConnectionCard = ({ connection, onRemove }) => {
       {/* Action Buttons - Mobile */}
       <div className="flex flex-col xs:flex-row gap-2 pt-3 border-t border-gray-100 sm:hidden">
         <button
-          onClick={handleSendMessage}
+          onClick={()=>handleSendMessage(email)}
           disabled={isLoading}
           className="flex-1 bg-blue-500 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
         >
@@ -435,7 +448,7 @@ export const ConnectionCard = ({ connection, onRemove }) => {
       {/* Action Buttons - Desktop */}
       <div className="hidden sm:flex space-x-2 pt-3 border-t border-gray-100">
         <button
-          onClick={handleSendMessage}
+          onClick={()=>handleSendMessage(email)}
           disabled={isLoading}
           className="flex-1 bg-blue-50 text-blue-700 py-2 px-3 rounded-lg font-medium hover:bg-blue-100 transition-all duration-200 text-sm flex items-center justify-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -514,7 +527,7 @@ export const ConnectionCard = ({ connection, onRemove }) => {
                   )}
 
                 <button
-                  // onClick={() => handleMessageClick(selectedProfile)}
+                  onClick={() => handleSendMessage(email)}
                   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200 flex items-center space-x-2"
                 >
                   <MessageCircle className="w-4 h-4" />
