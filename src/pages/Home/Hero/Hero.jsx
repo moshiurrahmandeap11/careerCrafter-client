@@ -5,12 +5,7 @@ import { useNavigate } from 'react-router';
 import MainButton from '../../../components/sharedItems/MainButton/MainButton';
 
 const Hero = () => {
-  const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
 
   // Stats data
   const stats = [
