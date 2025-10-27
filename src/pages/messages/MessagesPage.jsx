@@ -60,12 +60,11 @@ const MessagesPage = () => {
   const sendingMessage = useSelector(selectSendingMessage);
   const filteredConversations = useSelector(selectFilteredConversations);
   const unreadCount = useSelector(selectUnreadCount);
-
+  const [lastMessages, setLastMessages] = useState({});
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [allUser, setAllUser] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");  
-
+  const [errorMessage, setErrorMessage] = useState("");
   // Call States
   const [callState, setCallState] = useState({
     isCallActive: false,
@@ -74,7 +73,7 @@ const MessagesPage = () => {
     callType: null, // 'video' or 'audio'
     callerInfo: null,
     isAudioMuted: false,
-    isVideoOff: false
+    isVideoOff: false,
   });
 
   // WebRTC Hook
@@ -112,6 +111,37 @@ const MessagesPage = () => {
     }
   };
 
+  const fetchLastMessage = async (friendEmail) => {
+    if (!user?.email) return;
+
+    try {
+      const res = await axiosIntense.get("/messageUsers/last-message", {
+        params: {
+          userEmail: user.email,
+          friendEmail: friendEmail,
+        },
+      });
+
+      if (res.data.length > 0) {
+        const lastMsg = res.data[0];
+        setLastMessages((prev) => ({
+          ...prev,
+          [friendEmail]: lastMsg.message,
+        }));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!allUser) return;
+
+    allUser.forEach((userObj) => {
+      fetchLastMessage(userObj.email);
+    });
+  }, [allUser]);
+
   // Socket event handlers for calls
   useEffect(() => {
     if (!socket.current) return;
@@ -121,7 +151,7 @@ const MessagesPage = () => {
       const { from, callType, offer } = {
         from: data.callerInfo,
         callType: data.callType,
-        offer: data.offer
+        offer: data.offer,
       };
 
       setCallState({
@@ -131,7 +161,7 @@ const MessagesPage = () => {
         callType,
         callerInfo: from,
         isAudioMuted: false,
-        isVideoOff: false
+        isVideoOff: false,
       });
 
       // Initialize peer connection for incoming call
@@ -142,10 +172,10 @@ const MessagesPage = () => {
     socket.current.on("call-accepted", async (data) => {
       const { answer } = data;
       await webrtc.handleAnswer(answer);
-      setCallState(prev => ({
+      setCallState((prev) => ({
         ...prev,
         isCallActive: true,
-        isOutgoingCall: false
+        isOutgoingCall: false,
       }));
     });
 
@@ -159,7 +189,7 @@ const MessagesPage = () => {
         callType: null,
         callerInfo: null,
         isAudioMuted: false,
-        isVideoOff: false
+        isVideoOff: false,
       });
     });
 
@@ -178,7 +208,7 @@ const MessagesPage = () => {
         callType: null,
         callerInfo: null,
         isAudioMuted: false,
-        isVideoOff: false
+        isVideoOff: false,
       });
     });
 
@@ -198,12 +228,12 @@ const MessagesPage = () => {
 
   // Auto-select conversation from Feed
   useEffect(() => {
-    const storedConversation = sessionStorage.getItem('selectedConversation');
+    const storedConversation = sessionStorage.getItem("selectedConversation");
     if (storedConversation && allUser) {
       const conversationData = JSON.parse(storedConversation);
-      
-      const existingConversation = allUser?.find(user => 
-        user.email === conversationData.email
+
+      const existingConversation = allUser?.find(
+        (user) => user.email === conversationData.email
       );
 
       if (existingConversation) {
@@ -214,14 +244,14 @@ const MessagesPage = () => {
           fullName: conversationData.fullName,
           email: conversationData.email,
           profileImage: conversationData.profileImage,
-          tags: conversationData.tags || []
+          tags: conversationData.tags || [],
         };
-        
-        setAllUser(prev => [...(prev || []), newConversation]);
+
+        setAllUser((prev) => [...(prev || []), newConversation]);
         handleConversationSelect(newConversation);
       }
-      
-      sessionStorage.removeItem('selectedConversation');
+
+      sessionStorage.removeItem("selectedConversation");
     }
   }, [allUser, dispatch]);
 
@@ -233,13 +263,17 @@ const MessagesPage = () => {
       }
 
       socket.current.on("privateMessage", (msg) => {
-        if ((msg.senderEmail === user.email && msg.receiverEmail === selectedConversation?.email) ||
-            (msg.senderEmail === selectedConversation?.email && msg.receiverEmail === user.email)) {
+        if (
+          (msg.senderEmail === user.email &&
+            msg.receiverEmail === selectedConversation?.email) ||
+          (msg.senderEmail === selectedConversation?.email &&
+            msg.receiverEmail === user.email)
+        ) {
           setMessages((prev) => [...prev, msg]);
         }
       });
       socket.current.on("chatMessage", (msg) => {
-        setMessages((prev) => [...prev, msg]);  
+        setMessages((prev) => [...prev, msg]);
       });
     });
 
@@ -273,9 +307,9 @@ const MessagesPage = () => {
     try {
       webrtc.initializePeerConnection();
       await webrtc.startLocalStream(type);
-      
+
       const offer = await webrtc.createOffer();
-      
+
       setCallState({
         isCallActive: false,
         isIncomingCall: false,
@@ -283,7 +317,7 @@ const MessagesPage = () => {
         callType: type,
         callerInfo: selectedConversation,
         isAudioMuted: false,
-        isVideoOff: false
+        isVideoOff: false,
       });
 
       // Send call offer to the other user
@@ -292,15 +326,17 @@ const MessagesPage = () => {
         from: {
           email: user.email,
           fullName: user.displayName || user.email,
-          profileImage: user.photoURL || 'https://i.postimg.cc/85JwcYck/boy.png'
+          profileImage:
+            user.photoURL || "https://i.postimg.cc/85JwcYck/boy.png",
         },
         callType: type,
-        offer: offer
+        offer: offer,
       });
-
     } catch (error) {
       console.error("Error starting call:", error);
-      alert("Failed to start call. Please check your camera and microphone permissions.");
+      alert(
+        "Failed to start call. Please check your camera and microphone permissions."
+      );
     }
   };
 
@@ -308,18 +344,17 @@ const MessagesPage = () => {
     try {
       await webrtc.startLocalStream(callState.callType);
       const answer = await webrtc.createAnswer();
-      
+
       socket.current.emit("accept-call", {
         to: callState.callerInfo.email,
-        answer: answer
+        answer: answer,
       });
 
-      setCallState(prev => ({
+      setCallState((prev) => ({
         ...prev,
         isCallActive: true,
-        isIncomingCall: false
+        isIncomingCall: false,
       }));
-
     } catch (error) {
       console.error("Error accepting call:", error);
       rejectCall();
@@ -329,10 +364,10 @@ const MessagesPage = () => {
   const rejectCall = () => {
     if (callState.isIncomingCall) {
       socket.current.emit("reject-call", {
-        to: callState.callerInfo.email
+        to: callState.callerInfo.email,
       });
     }
-    
+
     webrtc.stopCall();
     setCallState({
       isCallActive: false,
@@ -341,15 +376,15 @@ const MessagesPage = () => {
       callType: null,
       callerInfo: null,
       isAudioMuted: false,
-      isVideoOff: false
+      isVideoOff: false,
     });
   };
 
   const endCall = () => {
     socket.current.emit("end-call", {
-      to: callState.callerInfo.email
+      to: callState.callerInfo.email,
     });
-    
+
     webrtc.stopCall();
     setCallState({
       isCallActive: false,
@@ -358,19 +393,19 @@ const MessagesPage = () => {
       callType: null,
       callerInfo: null,
       isAudioMuted: false,
-      isVideoOff: false
+      isVideoOff: false,
     });
   };
 
   const toggleAudio = () => {
     if (webrtc.localStream) {
       const audioTracks = webrtc.localStream.getAudioTracks();
-      audioTracks.forEach(track => {
+      audioTracks.forEach((track) => {
         track.enabled = !track.enabled;
       });
-      setCallState(prev => ({
+      setCallState((prev) => ({
         ...prev,
-        isAudioMuted: !prev.isAudioMuted
+        isAudioMuted: !prev.isAudioMuted,
       }));
     }
   };
@@ -378,12 +413,12 @@ const MessagesPage = () => {
   const toggleVideo = () => {
     if (webrtc.localStream) {
       const videoTracks = webrtc.localStream.getVideoTracks();
-      videoTracks.forEach(track => {
+      videoTracks.forEach((track) => {
         track.enabled = !track.enabled;
       });
-      setCallState(prev => ({
+      setCallState((prev) => ({
         ...prev,
-        isVideoOff: !prev.isVideoOff
+        isVideoOff: !prev.isVideoOff,
       }));
     }
   };
@@ -407,36 +442,37 @@ const MessagesPage = () => {
     const text = newMessage.trim();
     if (!text) return;
 
-    dispatch({ type: 'messages/setSendingMessage', payload: true }); 
+    dispatch({ type: "messages/setSendingMessage", payload: true });
 
     try {
       const msg = {
         fromEmail: user?.email,
         toEmail: selectedConversation?.email,
         message: text,
-        timestamp: new Date(), 
+        timestamp: new Date(),
       };
 
-      await axiosIntense.post('/messageUsers/messages', {
+      await axiosIntense.post("/messageUsers/messages", {
         fromEmail: msg.fromEmail,
         toEmail: msg.toEmail,
-        message: text,  
+        message: text,
       });
-      
+
       socket.current.emit("privateMessage", {
         senderEmail: user?.email,
         receiverEmail: selectedConversation?.email,
         text: text,
         timestamp: msg.timestamp,
       });
-      
+
       setNewMessage("");
       // setMessages((m) => [...m, msg]);
-      setErrorMessage("");  
+      setErrorMessage("");
     } catch (err) {
       if (err.response?.status === 403) {
-        const hateError = err.response.data.error || "Message blocked: Inappropriate content";
-        setErrorMessage(hateError); 
+        const hateError =
+          err.response.data.error || "Message blocked: Inappropriate content";
+        setErrorMessage(hateError);
 
         setTimeout(() => setErrorMessage(""), 5000);
       } else {
@@ -445,7 +481,7 @@ const MessagesPage = () => {
         setTimeout(() => setErrorMessage(""), 5000);
       }
     } finally {
-      dispatch({ type: 'messages/setSendingMessage', payload: false }); 
+      dispatch({ type: "messages/setSendingMessage", payload: false });
     }
   };
 
@@ -542,9 +578,11 @@ const MessagesPage = () => {
       <ReTitle
         title={`Messages${unreadCount > 0 ? ` (${unreadCount})` : ""}`}
       />
-      
+
       {/* Call Modal */}
-      {(callState.isIncomingCall || callState.isOutgoingCall || callState.isCallActive) && (
+      {(callState.isIncomingCall ||
+        callState.isOutgoingCall ||
+        callState.isCallActive) && (
         <CallModal
           callType={callState.callType}
           isIncoming={callState.isIncomingCall}
@@ -632,7 +670,10 @@ const MessagesPage = () => {
                     .map((conversation) => (
                       <ConversationItem
                         key={conversation._id}
-                        conversation={conversation}
+                        conversation={{
+                          ...conversation,
+                          lastMessage: lastMessages[conversation.email] || "",
+                        }}
                         isSelected={
                           selectedConversation?._id === conversation._id
                         }
@@ -683,28 +724,30 @@ const MessagesPage = () => {
                         <ArrowLeft className="w-5 h-5 text-gray-600" />
                       </button>
                       <div className="flex items-center space-x-3">
-                        <div className="relative">
-{selectedConversation.profileImage ? (
-  <img
-    src={selectedConversation.profileImage}
-    alt={selectedConversation.fullName}
-    className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
-  />
-) : (
-  <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-lg border-2 border-white shadow-sm">
-    {selectedConversation.fullName
-      ? selectedConversation.fullName.charAt(0).toUpperCase()
-      : "?"}
-  </div>
-)}
-
+                        <div className="relative flex-shrink-0">
+                          {selectedConversation.profileImage ? (
+                            <img
+                              src={selectedConversation.profileImage}
+                              alt={selectedConversation.fullName}
+                              className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-lg border-2 border-white shadow-sm">
+                              {selectedConversation.fullName
+                                ? selectedConversation.fullName
+                                    .charAt(0)
+                                    .toUpperCase()
+                                : "?"}
+                            </div>
+                          )}
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900">
                             {selectedConversation.fullName}
                           </h3>
                           <p className="text-sm text-gray-600 line-clamp-2">
-                            {selectedConversation.tags?.join(" | ") || "Active now"}
+                            {selectedConversation.tags?.join(" | ") ||
+                              "Active now"}
                           </p>
                         </div>
                       </div>
@@ -713,24 +756,24 @@ const MessagesPage = () => {
                     <div className="flex items-center space-x-2">
                       {/* Video Call Button */}
                       <motion.button
-                        onClick={() => startCall('video')}
+                        onClick={() => startCall("video")}
                         className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
                         whileHover={{ scale: 1.1 }}
                         title="Video Call"
                       >
                         <Video className="w-5 h-5" />
                       </motion.button>
-                      
+
                       {/* Audio Call Button */}
                       <motion.button
-                        onClick={() => startCall('audio')}
+                        onClick={() => startCall("audio")}
                         className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
                         whileHover={{ scale: 1.1 }}
                         title="Audio Call"
                       >
                         <Phone className="w-5 h-5" />
                       </motion.button>
-                      
+
                       <motion.button
                         className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
                         whileHover={{ scale: 1.1 }}
@@ -752,12 +795,17 @@ const MessagesPage = () => {
                         <MessageBubble key={index} message={message} />
                       ))}
                     </motion.div>
-                    
+
                     {messages.length === 0 && (
                       <div className="flex flex-col items-center justify-center h-full text-gray-500">
                         <MessageCircle className="w-16 h-16 mb-4 text-gray-300" />
-                        <p className="text-lg font-medium mb-2">No messages yet</p>
-                        <p className="text-sm">Start a conversation with {selectedConversation.fullName}</p>
+                        <p className="text-lg font-medium mb-2">
+                          No messages yet
+                        </p>
+                        <p className="text-sm">
+                          Start a conversation with{" "}
+                          {selectedConversation.fullName}
+                        </p>
                       </div>
                     )}
                   </div>

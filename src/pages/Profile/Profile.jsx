@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import useAuth from '../../hooks/UseAuth/useAuth';
 import Loader from '../../components/sharedItems/Loader/Loader';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import axiosIntense from '../../hooks/AxiosIntense/axiosIntense';
 
 import { 
@@ -549,18 +549,18 @@ const Profile = () => {
                                         
                                         <button className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 text-left">
                                             <BarChart3 className="w-5 h-5 text-gray-600" />
-                                            <div>
+                                            <Link to={'/learning-path'}>
                                                 <p className="font-medium text-gray-900 text-sm">Analytics</p>
-                                                <p className="text-gray-500 text-xs">View activity statistics</p>
-                                            </div>
+                                                <p className="text-gray-500 text-xs">Learning statistics</p>
+                                            </Link>
                                         </button>
                                         
                                         <button className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-200 text-left">
                                             <Target className="w-5 h-5 text-gray-600" />
-                                            <div>
-                                                <p className="font-medium text-gray-900 text-sm">Goals</p>
+                                            <Link to={'/skill-gap-analysis'}>
+                                                <p className="font-medium text-gray-900 text-sm">Skill Gap</p>
                                                 <p className="text-gray-500 text-xs">Set your objectives</p>
-                                            </div>
+                                            </Link>
                                         </button>
                                     </div>
                                 </div>

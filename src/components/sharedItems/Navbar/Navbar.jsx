@@ -43,7 +43,8 @@ const Navbar = () => {
   const [showAIToolsMenu, setShowAIToolsMenu] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
-  
+  const [notificationCount, setNotificationCount] = useState(0);
+
   // New state for message notifications
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [messageNotifications, setMessageNotifications] = useState([]);
@@ -87,6 +88,26 @@ const Navbar = () => {
     fetchUserProfile();
   }, [user?.email]);
 
+
+  useEffect(() => {
+    const fetchNotificationCount = async () => {
+      if (!user?.email) return;
+
+      try {
+        const response = await axiosIntense.get(`/notifications/user/${user.email}`);
+        setNotificationCount(response.data.unreadCount || 0);
+      } catch (error) {
+        console.error("Error fetching notification count:", error);
+      }
+    };
+
+    fetchNotificationCount();
+
+    // Set up polling for notifications
+    const interval = setInterval(fetchNotificationCount, 30000);
+    return () => clearInterval(interval);
+  }, [user?.email]);
+
   // Fetch unread messages count
   useEffect(() => {
     const fetchUnreadMessages = async () => {
@@ -102,10 +123,10 @@ const Navbar = () => {
     };
 
     fetchUnreadMessages();
-    
+
     // Set up polling for new messages every 30 seconds
     const interval = setInterval(fetchUnreadMessages, 30000);
-    
+
     return () => clearInterval(interval);
   }, [user?.email]);
 
@@ -331,7 +352,7 @@ const Navbar = () => {
   // Mark messages as read when visiting messages page
   const markMessagesAsRead = useCallback(async () => {
     if (!user?.email) return;
-    
+
     try {
       await axiosIntense.post(`/messageUsers/mark-read/${user.email}`);
       setUnreadMessages(0);
@@ -457,8 +478,8 @@ const Navbar = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className={`relative flex flex-col items-center p-2 rounded-xl min-w-16 transition-colors ${aiToolsItems.some((item) => activeNav === item.label)
-                      ? "text-purple-600 bg-purple-50"
-                      : "text-gray-600 hover:bg-gray-50"
+                    ? "text-purple-600 bg-purple-50"
+                    : "text-gray-600 hover:bg-gray-50"
                     }`}
                   onClick={() => setShowAIToolsMenu(!showAIToolsMenu)}
                 >
@@ -484,8 +505,8 @@ const Navbar = () => {
                           key={item.label}
                           onClick={() => handleAIToolClick(item.label)}
                           className={`w-full px-4 py-2 text-left text-sm flex items-center space-x-3 transition-colors ${activeNav === item.label
-                              ? "bg-purple-50 text-purple-600"
-                              : "text-gray-700 hover:bg-gray-50"
+                            ? "bg-purple-50 text-purple-600"
+                            : "text-gray-700 hover:bg-gray-50"
                             }`}
                         >
                           <item.icon className="w-4 h-4" />
@@ -523,8 +544,8 @@ const Navbar = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className={`flex items-center space-x-2 p-2 rounded-xl transition-colors ${activeNav === "Profile"
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-600 hover:bg-gray-50"
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-600 hover:bg-gray-50"
                     }`}
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                 >
@@ -975,10 +996,10 @@ const DesktopNavItem = ({
 const MobileNavItem = ({ label, icon: Icon, active, onClick, premium }) => (
   <button
     className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-colors ${active
-        ? premium
-          ? "bg-amber-50 text-amber-600"
-          : "bg-blue-50 text-blue-600"
-        : "text-gray-700 hover:bg-gray-50"
+      ? premium
+        ? "bg-amber-50 text-amber-600"
+        : "bg-blue-50 text-blue-600"
+      : "text-gray-700 hover:bg-gray-50"
       }`}
     onClick={onClick}
   >
