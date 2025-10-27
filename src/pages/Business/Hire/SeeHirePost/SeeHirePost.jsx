@@ -44,11 +44,7 @@ const SeeHirePost = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
-      <div>
-        <h1>
-          check the issue
-        </h1>
-      </div>
+      
 
       {/* --- */}
 
