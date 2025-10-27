@@ -19,7 +19,7 @@ export default function CookiePolicy() {
                         <p>
                             This Cookie Policy explains how <strong>Career Crafter</strong> ("we", "our", "us") uses cookies and similar
                             technologies when you visit our website or use our services (the "Service"). It should be read together with our
-                            <a href="/privacy-policy" className="text-blue-600 hover:underline"> Privacy Policy</a>.
+                            <a href="/privacy" className="text-blue-600 hover:underline"> Privacy Policy</a>.
                         </p>
                     </section>
 
