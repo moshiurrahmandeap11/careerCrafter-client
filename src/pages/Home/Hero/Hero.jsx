@@ -133,10 +133,9 @@ const Hero = () => {
 
               {/* Quick Actions */}
               <div className="flex flex-wrap gap-3">
-                <MainButton 
+                <MainButton onClick={() => navigate('/mock-interview')} 
                 >
-                  <Play className="w-4 h-4" />
-                  <span>Watch Demo</span>
+                  <span>Mock Interview</span>
                 </MainButton>
                 <MainButton onClick={() => navigate("/create-resume")}
                 >
