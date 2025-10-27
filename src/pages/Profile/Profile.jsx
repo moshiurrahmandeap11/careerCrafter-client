@@ -4,31 +4,32 @@ import Loader from '../../components/sharedItems/Loader/Loader';
 import { Link, useNavigate } from 'react-router';
 import axiosIntense from '../../hooks/AxiosIntense/axiosIntense';
 
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Tag, 
-  Users, 
-  Crown, 
-  Zap, 
-  Settings, 
-  BarChart3, 
-  Target,
-  LogOut,
-  Edit3,
-  Sparkles,
-  Award,
-  Briefcase,
-  Eye,
-  Trash2,
-  FileText,
-  MapPin,
-  DollarSign,
-  Building
+import {
+    User,
+    Mail,
+    Calendar,
+    Tag,
+    Users,
+    Crown,
+    Zap,
+    Settings,
+    BarChart3,
+    Target,
+    LogOut,
+    Edit3,
+    Sparkles,
+    Award,
+    Briefcase,
+    Eye,
+    Trash2,
+    FileText,
+    MapPin,
+    DollarSign,
+    Building
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import EditProfile from './EditProfile/EditProfile';
+import AppliedJobs from './AppliedJobs/AppliedJobs';
 
 const Profile = () => {
     const { user, loading, userLogOut } = useAuth();
@@ -54,7 +55,7 @@ const Profile = () => {
             setProfileLoading(true);
             setError(null);
             const response = await axiosIntense.get(`/users/email/${user?.email}`);
-            
+
             if (response.data && response.data._id) {
                 setProfile(response.data);
             } else {
@@ -89,7 +90,7 @@ const Profile = () => {
     };
 
     const getPurposeIcon = (purpose) => {
-        switch(purpose) {
+        switch (purpose) {
             case 'find_job': return '💼';
             case 'networking': return '🌐';
             case 'learning': return '📚';
@@ -127,14 +128,14 @@ const Profile = () => {
                 await axiosIntense.patch(`/users/email/${user.email}`, {
                     hiredPosts: updatedPosts
                 });
-                
+
                 Swal.fire({
                     title: 'Deleted!',
                     text: 'Your post has been deleted.',
                     icon: 'success',
                     confirmButtonText: 'OK'
                 });
-                
+
                 fetchProfile(); // Refresh profile data
             } catch (error) {
                 console.error('Error deleting post:', error);
@@ -161,7 +162,7 @@ const Profile = () => {
         }
 
         try {
-            const updatedPosts = profile.hiredPosts.map((post, index) => 
+            const updatedPosts = profile.hiredPosts.map((post, index) =>
                 index === editPostData.index ? {
                     ...editPostData,
                     index: undefined // Remove index before saving
@@ -210,7 +211,7 @@ const Profile = () => {
                     </div>
                     <h2 className="text-xl font-semibold text-gray-800 mb-2">Profile Error</h2>
                     <p className="text-gray-600 mb-6">{error}</p>
-                    <button 
+                    <button
                         onClick={fetchProfile}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-xl transition-all duration-200"
                     >
@@ -232,8 +233,8 @@ const Profile = () => {
                                 <div className="relative">
                                     <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-sm">
                                         {profile?.profileImage ? (
-                                            <img 
-                                                src={profile?.profileImage} 
+                                            <img
+                                                src={profile?.profileImage}
                                                 alt={profile?.fullName || 'User'}
                                                 className="w-full h-full object-cover rounded-xl"
                                                 onError={(e) => {
@@ -258,21 +259,21 @@ const Profile = () => {
                                 </div>
                             </div>
                             <div className="flex items-center space-x-3">
-                                <button 
+                                <button
                                     onClick={handleGetHired}
                                     className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium py-2.5 px-6 rounded-xl transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl"
                                 >
                                     <Award className="w-4 h-4" />
                                     <span>Get Hired</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setShowEditModal(true)}
                                     className="bg-white border border-gray-200 hover:border-gray-300 text-gray-700 font-medium py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center space-x-2 shadow-sm hover:shadow-md"
                                 >
                                     <Edit3 className="w-4 h-4" />
                                     <span>Edit Profile</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={handleLogOut}
                                     className="bg-white border border-gray-200 hover:border-red-200 hover:bg-red-50 text-red-600 font-medium py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center space-x-2 shadow-sm hover:shadow-md"
                                 >
@@ -296,8 +297,8 @@ const Profile = () => {
                                         <div className="relative">
                                             <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
                                                 {profile.profileImage ? (
-                                                    <img 
-                                                        src={profile.profileImage} 
+                                                    <img
+                                                        src={profile.profileImage}
                                                         alt={profile.fullName || 'User'}
                                                         className="w-full h-full object-cover"
                                                         onError={(e) => {
@@ -316,7 +317,7 @@ const Profile = () => {
                                                 </div>
                                             )}
                                         </div>
-                                        
+
                                         <div className="flex-1 min-w-0">
                                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
                                                 <div>
@@ -330,11 +331,10 @@ const Profile = () => {
                                                 </div>
                                                 <div className="flex flex-wrap gap-2">
                                                     {profile.role && (
-                                                        <span className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center space-x-1 ${
-                                                            profile.role === 'premium user' 
+                                                        <span className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center space-x-1 ${profile.role === 'premium user'
                                                                 ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
                                                                 : 'bg-blue-100 text-blue-700'
-                                                        }`}>
+                                                            }`}>
                                                             <Crown className="w-3 h-3" />
                                                             <span>{profile.role}</span>
                                                         </span>
@@ -351,6 +351,10 @@ const Profile = () => {
                                     </div>
                                 </div>
 
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                                    <AppliedJobs />
+                                </div>
+
                                 {/* Posts Table Section */}
                                 {profile.hiredPosts && profile.hiredPosts.length > 0 && (
                                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -360,7 +364,7 @@ const Profile = () => {
                                                 {profile.hiredPosts.length} Posts
                                             </span>
                                         </div>
-                                        
+
                                         <div className="overflow-x-auto">
                                             <table className="w-full">
                                                 <thead>
@@ -389,25 +393,24 @@ const Profile = () => {
                                                                     </p>
                                                                 </td>
                                                                 <td className="py-4 px-4">
-                                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                                        post.includeProfile 
-                                                                            ? 'bg-green-100 text-green-800' 
+                                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${post.includeProfile
+                                                                            ? 'bg-green-100 text-green-800'
                                                                             : 'bg-gray-100 text-gray-800'
-                                                                    }`}>
+                                                                        }`}>
                                                                         {post.includeProfile ? 'Included' : 'Not Included'}
                                                                     </span>
                                                                 </td>
                                                                 <td className="py-4 px-4">
                                                                     <div className="flex items-center space-x-2">
                                                                         <button
-                                                                            onClick={() => handleViewPost({...post, index: originalIndex})}
+                                                                            onClick={() => handleViewPost({ ...post, index: originalIndex })}
                                                                             className="w-8 h-8 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center transition-colors duration-200"
                                                                             title="View Post"
                                                                         >
                                                                             <Eye className="w-4 h-4" />
                                                                         </button>
                                                                         <button
-                                                                            onClick={() => handleEditPost({...post, index: originalIndex})}
+                                                                            onClick={() => handleEditPost({ ...post, index: originalIndex })}
                                                                             className="w-8 h-8 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg flex items-center justify-center transition-colors duration-200"
                                                                             title="Edit Post"
                                                                         >
@@ -446,7 +449,7 @@ const Profile = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
                                         <div className="flex items-center space-x-3">
                                             <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
@@ -460,7 +463,7 @@ const Profile = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
                                         <div className="flex items-center space-x-3">
                                             <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
@@ -485,7 +488,7 @@ const Profile = () => {
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {profile.tags.map((tag, index) => (
-                                                <span 
+                                                <span
                                                     key={index}
                                                     className="bg-gray-50 text-gray-700 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 hover:bg-gray-100 transition-all duration-200"
                                                 >
@@ -505,7 +508,7 @@ const Profile = () => {
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             {profile.sources.map((source, index) => (
-                                                <div 
+                                                <div
                                                     key={index}
                                                     className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-all duration-200"
                                                 >
@@ -528,7 +531,7 @@ const Profile = () => {
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                                     <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
                                     <div className="space-y-3">
-                                        <button 
+                                        <button
                                             onClick={handleGetHired}
                                             className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all duration-200 text-left"
                                         >
@@ -546,7 +549,7 @@ const Profile = () => {
                                                 <p className="text-gray-500 text-xs">Account preferences</p>
                                             </div>
                                         </button>
-                                        
+
                                         <button className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 text-left">
                                             <BarChart3 className="w-5 h-5 text-gray-600" />
                                             <Link to={'/learning-path'}>
@@ -554,7 +557,7 @@ const Profile = () => {
                                                 <p className="text-gray-500 text-xs">Learning statistics</p>
                                             </Link>
                                         </button>
-                                        
+
                                         <button className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-200 text-left">
                                             <Target className="w-5 h-5 text-gray-600" />
                                             <Link to={'/skill-gap-analysis'}>
@@ -619,7 +622,7 @@ const Profile = () => {
                             </div>
                             <h2 className="text-xl font-semibold text-gray-800 mb-2">No Profile Found</h2>
                             <p className="text-gray-600 mb-6">We couldn't find your profile information</p>
-                            <button 
+                            <button
                                 onClick={fetchProfile}
                                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-xl transition-all duration-200"
                             >
@@ -636,7 +639,7 @@ const Profile = () => {
                     <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
                             <h2 className="text-lg font-semibold text-gray-800">Edit Profile</h2>
-                            <button 
+                            <button
                                 onClick={() => setShowEditModal(false)}
                                 className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-all duration-200"
                             >
@@ -646,8 +649,8 @@ const Profile = () => {
                             </button>
                         </div>
                         <div className="p-6">
-                            <EditProfile 
-                                profile={profile} 
+                            <EditProfile
+                                profile={profile}
                                 onClose={() => setShowEditModal(false)}
                                 onUpdate={fetchProfile}
                             />
@@ -664,7 +667,7 @@ const Profile = () => {
                             <h2 className="text-lg font-semibold text-gray-800">
                                 {editPostData ? 'Edit Post' : 'View Post'}
                             </h2>
-                            <button 
+                            <button
                                 onClick={() => {
                                     setShowPostModal(false);
                                     setEditPostData(null);
@@ -687,7 +690,7 @@ const Profile = () => {
                                         </label>
                                         <textarea
                                             value={editPostData.content}
-                                            onChange={(e) => setEditPostData({...editPostData, content: e.target.value})}
+                                            onChange={(e) => setEditPostData({ ...editPostData, content: e.target.value })}
                                             rows={6}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
                                             placeholder="Share your job search journey..."
@@ -721,7 +724,7 @@ const Profile = () => {
                                             {selectedPost?.content}
                                         </p>
                                     </div>
-                                    
+
                                     <div className="flex items-center space-x-2 text-sm text-gray-600">
                                         <Calendar className="w-4 h-4" />
                                         <span>Posted on {formatDate(selectedPost?.timestamp)}</span>

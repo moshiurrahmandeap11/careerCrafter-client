@@ -58,8 +58,8 @@ const Footer = () => {
                 { name: 'Help Center', path: '/help' },
                 { name: 'Community', path: '/community' },
                 { name: 'Blog', path: '/blog' },
-                { name: 'Resume Builder', path: '/ai-resume' },
-                { name: 'Career Coach', path: '/ai-coach' }
+                { name: 'Resume Builder', path: '/create-resume' },
+                { name: 'Career Coach', path: '/cc/learn' }
               ].map((link) => (
                 <li key={link.name}>
                   <Link 
