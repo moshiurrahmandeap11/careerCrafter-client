@@ -134,7 +134,7 @@ const AlluserConnectionCard = ({ user }) => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-2xl border-2 border-white shadow-sm">
+              <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-3xl border-2 border-white shadow-sm">
                 {user.fullName ? user.fullName.charAt(0).toUpperCase() : "?"}
               </div>
             )}
