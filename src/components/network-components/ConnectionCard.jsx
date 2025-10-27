@@ -56,7 +56,7 @@ const FallbackAvatar = ({ name, className }) => {
     <div
       className={`${className} ${getColor(
         name
-      )} rounded-xl flex items-center justify-center text-white font-semibold border-2 border-white shadow-sm`}
+      )}  flex items-center justify-center text-white font-semibold border-2 border-white shadow-sm`}
     >
       {getInitials(name)}
     </div>
@@ -479,20 +479,17 @@ export const ConnectionCard = ({ connection, onRemove }) => {
 
               <div className="flex flex-col items-center text-center">
                 <div className="w-20 h-20 rounded-full overflow-hidden mb-4 bg-gray-200">
-                  {profileViewer.profileData ? (
+                  {profileViewer.profileData.profileImage ? (
                     <img
                       src={profileViewer.profileData.profileImage}
                       alt={profileViewer.profileData.fullName}
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-3xl border-2 border-white shadow-sm">
-                      {profileViewer.profileData.fullName
-                        ? profileViewer.profileData.fullName
-                            .charAt(0)
-                            .toUpperCase()
-                        : "?"}
-                    </div>
+                    <FallbackAvatar
+                      name={profileViewer.profileData.fullName}
+                      className="w-20 h-20 rounded-full text-2xl"
+                    />
                   )}
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-1">
