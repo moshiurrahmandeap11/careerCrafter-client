@@ -30,7 +30,6 @@ const Feed = () => {
   const [selectedProfile, setSelectedProfile] = useState(null);
 
   const navigate = useNavigate();
-  console.log(feedItems);
   useEffect(() => {
     fetchFeedData();
   }, []);
