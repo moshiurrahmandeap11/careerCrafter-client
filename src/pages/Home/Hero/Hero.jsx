@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Search, Play, Star, Users, Award, TrendingUp, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router';
 import MainButton from '../../../components/sharedItems/MainButton/MainButton';
+import axiosIntense from '../../../hooks/AxiosIntense/axiosIntense';
+import { AuthContext } from '../../../contexts/AuthContexts/AuthContexts';
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -57,6 +59,35 @@ const Hero = () => {
       }
     }
   };
+
+  const {setSearchResult,setSearchTopic}=useContext(AuthContext)
+  const searchNavigate=useNavigate()
+  const [searchValue, setSearchValue] = useState("");
+
+  const handleSubmit = async (e) => {
+  e.preventDefault(); // prevent reload
+  const query = e.target.search.value.trim();
+  if (!query) return;
+
+  try {
+    const res = await axiosIntense.get(`/top-search/search?query=${encodeURIComponent(query)}`);
+    const { type, results } = res.data;
+
+    setSearchTopic(query);
+    setSearchResult(results);
+
+    if (type === 'job') {
+      searchNavigate('/searchJob');
+    } else if (type === 'user') {
+      searchNavigate('/searchUser');
+    } else {
+      searchNavigate('/noSearchResult');
+    }
+  } catch (error) {
+    console.error("Search error:", error);
+  }
+};
+
 
   return (
     <div className="relative w-full min-h-screen overflow-hidden bg-white">
@@ -116,10 +147,13 @@ const Hero = () => {
 
             {/* Search Bar */}
             <motion.div className="space-y-4" variants={itemVariants}>
-              <div className="relative max-w-xl">
+              <form onSubmit={handleSubmit} className="relative max-w-xl">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
+                  name='search'
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
                   placeholder="Search for jobs, companies, or skills..."
                   className="w-full pl-12 pr-32 py-4 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
                 />
@@ -129,7 +163,7 @@ const Hero = () => {
                   <span>Search</span>
                   <ArrowRight className="w-4 h-4" />
                 </MainButton>
-              </div>
+              </form>
 
               {/* Quick Actions */}
               <div className="flex flex-wrap gap-3">

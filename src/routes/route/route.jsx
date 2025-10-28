@@ -45,6 +45,9 @@ import SkillGapAnalysis from "../../pages/SkillGapAnalysis/SkillGapAnalysis";
 import LearningPath from "../../pages/LearningPath/LearningPath";
 import CookiePolicy from "../../components/footer-component/CookiePolicy";
 import HelpCenter from "../../components/footer-component/HelpCenter";
+import SearchJob from "../../pages/TopSearch/SearchJob";
+import SearchUser from "../../pages/TopSearch/SearchUser";
+import NoResultFound from "../../pages/TopSearch/NoResultFound";
 
 
 
@@ -83,6 +86,9 @@ export const route = createBrowserRouter([
         path: "/help",
         element: <HelpCenter></HelpCenter>
       },
+      {path:'/searchJob', Component:SearchJob},
+      {path:'/searchUser', Component:SearchUser},
+      {path:'/noSearchResult', Component:NoResultFound},
       {
         path: "/network",
         element: <MyNetwork />,
