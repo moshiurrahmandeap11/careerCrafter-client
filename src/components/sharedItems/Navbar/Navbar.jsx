@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useNavigate, useLocation } from "react-router";
+import React, { useState, useEffect, useCallback, useMemo, useContext } from "react";
+import { useNavigate, useLocation, Navigate,} from "react-router";
 import {
   Search,
   Home,
@@ -28,6 +28,7 @@ import Loader from "../Loader/Loader";
 import useAuth from "../../../hooks/UseAuth/useAuth";
 import Swal from "sweetalert2";
 import axiosIntense from "../../../hooks/AxiosIntense/axiosIntense";
+import { AuthContext } from "../../../contexts/AuthContexts/AuthContexts";
 
 const Navbar = () => {
   const { user, loading, userLogOut } = useAuth();
@@ -44,10 +45,36 @@ const Navbar = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [notificationCount, setNotificationCount] = useState(0);
+  
 
   // New state for message notifications
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [messageNotifications, setMessageNotifications] = useState([]);
+
+   const searchNavigate=useNavigate()
+
+   const {setSearchResult}=useContext(AuthContext)
+  
+  const handleSearch=async ()=>{
+           if (!searchValue.trim()) return; // empty search
+
+  try {
+    const res = await axiosIntense.get(
+      `/top-search/search?query=${encodeURIComponent(searchValue)}`
+    );
+
+    const { type } = res.data;
+    if(type=='job'){
+      searchNavigate('/jobs')
+      setSearchResult(searchValue)
+      
+    }
+
+    console.log(type)
+  } catch (error) {
+    console.error("Search error:", error);
+  }
+  }
 
   // Fallback avatar images
   const fallbackAvatars = [
@@ -318,16 +345,7 @@ const Navbar = () => {
     [handleNavClick]
   );
 
-  const handleSearch = useCallback(
-    (e) => {
-      if (e.key === "Enter" && searchValue.trim()) {
-        navigate(`/search?q=${encodeURIComponent(searchValue)}`);
-        setShowSearch(false);
-        setSearchValue("");
-      }
-    },
-    [searchValue, navigate]
-  );
+  
 
   const handleLogout = useCallback(() => {
     Swal.fire({
