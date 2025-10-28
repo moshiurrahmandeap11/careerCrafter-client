@@ -160,7 +160,7 @@ export const route = createBrowserRouter([
       {
         path: '/payment/success',
         element: <PaymentSuccess />
-      },
+    },
       {
         path: '/payment/failed',
         element: <PaymentFailed />

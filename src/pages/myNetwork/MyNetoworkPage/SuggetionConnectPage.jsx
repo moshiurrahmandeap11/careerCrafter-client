@@ -19,7 +19,6 @@ const SuggetionConnectPage = () => {
       
       }, [dispatch,user?.email,axiosSecure]);
       
-    
       if (isLoading) return <Loader></Loader>;
       if (error) return <p>Error: {error}</p>;
     return (
