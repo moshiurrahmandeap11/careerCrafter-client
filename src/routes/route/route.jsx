@@ -49,6 +49,7 @@ import NoResultFound from "../../pages/TopSearch/NoResultFound";
 import ConnectionsPage from "../../components/network-components/ConnectionsPage";
 import SuggestionCard from "../../components/network-components/SuggestionCard";
 import SuggetionConnectPage from "../../pages/myNetwork/MyNetoworkPage/SuggetionConnectPage";
+import VideoInterview from "../../pages/mock-interview/VideoInterview/VideoInterview";
 
 
 
@@ -159,6 +160,10 @@ export const route = createBrowserRouter([
       {
         path: '/mock-interview',
         element: <MockInterview />
+      },
+      {
+        path: "/live-interview",
+        element: <VideoInterview></VideoInterview>
       },
       {
         path: "/create-cv",

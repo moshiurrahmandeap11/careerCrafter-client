@@ -36,6 +36,7 @@ import {
   selectCorrectAnswers,
   selectIsEvaluating
 } from '../../redux-selectors/mockInterviewSelectors';
+import { Link } from 'react-router';
 
 const MockInterview = () => {
   const { user } = useAuth();
@@ -440,6 +441,9 @@ const MockInterview = () => {
                   </button>
                 </div>
               </form>
+              <div>
+                <h1>wanna live interview? <Link to={"/live-interview"}>Live Interview</Link></h1>
+              </div>
             </div>
           )}
 
