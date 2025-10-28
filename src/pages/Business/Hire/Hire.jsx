@@ -73,7 +73,7 @@ const Hire = () => {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <div>
+              <div className="md:flex hidden md:flex-col">
                 <h1 className="text-lg font-bold text-gray-900">
                   Career Crafter
                 </h1>
@@ -82,10 +82,10 @@ const Hire = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-4">
+            <div className="ml-2 md:ml-0 flex gap-4">
               <button
                 onClick={() => setActiveTab("post")}
-                className={`px-4 py-2 rounded-md text-sm font-medium ${
+                className={`md:px-4 px-2 py-2 rounded-md md:text-sm text-xs font-normal md:font-medium ${
                   activeTab === "post"
                     ? "bg-blue-600 text-white"
                     : "bg-gray-200 text-gray-700"
@@ -95,7 +95,7 @@ const Hire = () => {
               </button>
               <button
                 onClick={() => setActiveTab("view")}
-                className={`px-4 py-2 rounded-md text-sm font-medium ${
+                className={`md:px-4 px-2 py-2 rounded-md md:text-sm text-xs font-normal md:font-medium ${
                   activeTab === "view"
                     ? "bg-blue-600 text-white"
                     : "bg-gray-200 text-gray-700"
