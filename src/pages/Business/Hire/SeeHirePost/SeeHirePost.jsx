@@ -52,7 +52,7 @@ const SeeHirePost = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
+    <div className="md:max-w-4xl w-full mx-auto  py-8 md:px-4">
       {/* --- */}
 
       {/* 🔍 Filter Controls */}
@@ -113,7 +113,7 @@ const SeeHirePost = () => {
               className="border border-gray-200 shadow-lg rounded-xl p-6 bg-white hover:shadow-xl transition duration-300 ease-in-out"
             >
               {/* Post Header and User Info */}
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex md:flex-row flex-col justify-between items-start mb-4">
                 <div>
                   <h3 className="text-2xl font-bold text-indigo-600 mb-1">
                     {post.title}
@@ -124,8 +124,8 @@ const SeeHirePost = () => {
                   </p>
                 </div>
                 {/* User Info on the right */}
-                <div className="text-right">
-                  <div className="flex items-center justify-end gap-3">
+                <div className="md:text-right text-start">
+                  <div className="flex flex-col md:flex-row md:items-center items-start justify-end gap-3">
                     <div className="text-sm">
                       <h4 className="font-semibold text-gray-800">
                         {post.name}
@@ -171,12 +171,12 @@ const SeeHirePost = () => {
               </div>
 
               {/* 3 Action Buttons */}
-              <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+              <div className="flex md:flex-row flex-col items-start gap-4 justify-between md:items-center pt-4 border-t border-gray-100">
                 <p className="text-xs text-gray-400">
                   🕓 Posted on: {new Date(post.date).toLocaleString()}
                 </p>
 
-                <div className="flex gap-3">
+                <div className="flex md:flex-row flex-col gap-3 ">
                   <button
                     onClick={() => handleSeeProfile(post.userId)} // Assuming 'userId' exists
                     className="flex items-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition"
