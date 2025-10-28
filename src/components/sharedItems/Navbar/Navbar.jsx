@@ -53,7 +53,7 @@ const Navbar = () => {
 
    const searchNavigate=useNavigate()
 
-   const {setSearchResult}=useContext(AuthContext)
+   const {setSearchResult,setSearchTopic}=useContext(AuthContext)
   
   const handleSearch=async ()=>{
            if (!searchValue.trim()) return; // empty search
@@ -62,12 +62,23 @@ const Navbar = () => {
     const res = await axiosIntense.get(
       `/top-search/search?query=${encodeURIComponent(searchValue)}`
     );
+    console.log(res.data)
 
-    const { type } = res.data;
+    const { type,results } = res.data;
     if(type=='job'){
-      searchNavigate('/jobs')
-      setSearchResult(searchValue)
+      searchNavigate('/searchJob')
+      setSearchResult(results)
+      setSearchTopic(searchValue)
       
+    }else if(type=='user'){
+      searchNavigate('/searchUser')
+      setSearchResult(results)
+      setSearchTopic(searchValue)
+      
+    }else{
+      searchNavigate('/noSearchResult')
+      
+      setSearchTopic(searchValue)
     }
 
     console.log(type)

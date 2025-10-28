@@ -22,7 +22,8 @@ const githubProvider = new GithubAuthProvider();
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [searchResult,setSearchResult]=useState('')
+  const [searchResult,setSearchResult]=useState([])
+  const [searchTopic,setSearchTopic]=useState('')
 
   // google
   const googleLogin = () => {
@@ -80,7 +81,9 @@ const AuthProvider = ({ children }) => {
     userLogin,
     userLogOut,
     searchResult,
-    setSearchResult
+    setSearchResult,
+    searchTopic,
+    setSearchTopic
   };
   return (
     <AuthContext.Provider value={userInfo}>{children}</AuthContext.Provider>
