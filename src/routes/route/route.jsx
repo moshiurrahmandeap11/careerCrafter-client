@@ -33,9 +33,7 @@ import MockInterview from "../../pages/mock-interview/MockInterview";
 import PaymentSuccess from "../../pages/premium/PaymentSuccess";
 import PaymentFailed from "../../pages/premium/PaymentFailed";
 import PaymentCanceled from "../../pages/premium/PaymentCanceled";
-import ConnectionPage from "../../pages/myNetwork/MyNetoworkPage/ConnectionPage";
 import PendingConnectPage from "../../pages/myNetwork/MyNetoworkPage/PendingConnectPage";
-import SuggetionConnectPage from "../../pages/myNetwork/MyNetoworkPage/SuggetionConnectPage";
 import AllUserPAge from "../../pages/myNetwork/MyNetoworkPage/AllUserPAge";
 import PrivacyPolicy from "../../components/footer-component/PrivacyPolicy";
 import TermsService from "../../components/footer-component/TermsService";
@@ -48,6 +46,9 @@ import HelpCenter from "../../components/footer-component/HelpCenter";
 import SearchJob from "../../pages/TopSearch/SearchJob";
 import SearchUser from "../../pages/TopSearch/SearchUser";
 import NoResultFound from "../../pages/TopSearch/NoResultFound";
+import ConnectionsPage from "../../components/network-components/ConnectionsPage";
+import SuggestionCard from "../../components/network-components/SuggestionCard";
+import SuggetionConnectPage from "../../pages/myNetwork/MyNetoworkPage/SuggetionConnectPage";
 
 
 
@@ -95,15 +96,15 @@ export const route = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <ConnectionPage></ConnectionPage>
+            element: <ConnectionsPage />
           },
           {
             path: 'pending-connection',
             element: <PendingConnectPage></PendingConnectPage>
           },
           {
-            path: 'suggetion-connection',
-            element: <SuggetionConnectPage></SuggetionConnectPage>
+            path: 'suggestion-connection',
+            element: <SuggetionConnectPage />
           },
           {
             path: 'all-user',
