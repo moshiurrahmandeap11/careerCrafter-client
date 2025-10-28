@@ -1,37 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router';
-import NetworkNavbar from '../../components/sharedItems/NetworkNavbar/NetworkNavbar';
+import NetworkSidebar from '../../components/network-components/NetworkSidebar';
+import NetworkMobileHeader from '../../components/network-components/NetworkMobileHeader';
 
-const MyNetwork = ({children}) => {
+const MyNetwork = () => {
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
   return (
-    <div className='min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-20'>
-      <div className='w-11/12 mx-auto'>
-           
-        {/* nework heading */}
-
-        <div className="">
-          <h1 className='text-4xl font-bold'>My Network</h1>
-          <p className='text-gray-600 text-sm mt-2'> Grow and manage your professional connections</p>
-        </div>
-
-      <div className='flex gap-8 mt-20'>
-        <div className=''>
-         <NetworkNavbar></NetworkNavbar>
-      </div>
-
-      <div>
-          <Outlet>
-             {
-              children
-             }
-          </Outlet>
-      </div>
-      </div>
-
-      </div>
+    <div className="min-h-screen bg-gray-50 max-w-7xl mx-auto lg:px-18 ">
+      {/* Mobile Header with Tabs */}
+      <NetworkMobileHeader onMenuClick={() => setMobileSidebarOpen(true)} />
       
+      <div className="flex lg:pt-0"> {/* Increased padding for mobile to accommodate tabs */}
+        {/* Sidebar - Hidden on mobile, visible on desktop */}
+        <div className="hidden lg:block lg:w-1/4 xl:w-1/5 min-h-screen bg-white border-r border-gray-200">
+          <NetworkSidebar />
+        </div>
+        
+        {/* Main Content */}
+        <div className="flex-1 min-h-screen">
+          <div className="p-4 lg:p-6">
+            <Outlet />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {mobileSidebarOpen && (
+        <div className="lg:hidden">
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+          <div className="fixed top-0 left-0 h-full w-64 bg-white z-50 transform transition-transform">
+            <NetworkSidebar onClose={() => setMobileSidebarOpen(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default MyNetwork;
