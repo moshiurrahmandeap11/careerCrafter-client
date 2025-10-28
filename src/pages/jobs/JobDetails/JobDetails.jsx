@@ -159,7 +159,6 @@ const JobDetails = () => {
                 userId: user.uid,
                 userEmail: user.email,
                 userName: user.displayName,
-                userEmail: user.email,
                 jobTitle: job.title,
                 company: job.company || 'Unknown Company',
                 status: 'pending',
