@@ -37,6 +37,7 @@ import {
   selectIsEvaluating
 } from '../../redux-selectors/mockInterviewSelectors';
 import { Link } from 'react-router';
+import LiveInterviewBanner from './VideoInterview/LiveInterviewBanner/LiveInterviewBanner';
 
 const MockInterview = () => {
   const { user } = useAuth();
@@ -442,7 +443,7 @@ const MockInterview = () => {
                 </div>
               </form>
               <div>
-                <h1>wanna live interview? <Link to={"/live-interview"}>Live Interview</Link></h1>
+                <LiveInterviewBanner></LiveInterviewBanner>
               </div>
             </div>
           )}
