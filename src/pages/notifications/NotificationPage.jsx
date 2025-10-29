@@ -327,12 +327,10 @@ const NotificationPage = () => {
               </div>
 
               {/* Filter Buttons */}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap  gap-2">
                 {[
                   { key: 'all', label: 'All', icon: Bell },
                   { key: 'unread', label: 'Unread', icon: Mail },
-                  { key: 'messages', label: 'Messages', icon: MessageCircle },
-                  { key: 'network', label: 'Network', icon: Users },
                 ].map((filterItem) => (
                   <motion.button
                     key={filterItem.key}
