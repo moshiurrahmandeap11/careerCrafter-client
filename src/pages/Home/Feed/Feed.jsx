@@ -182,7 +182,7 @@ const Feed = () => {
                 <button
                   key={filter.key}
                   onClick={() => setActiveFilter(filter.key)}
-                  className={`px-6 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
+                  className={`px-3 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
                     activeFilter === filter.key
                       ? 'bg-blue-600 text-white shadow-lg'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'

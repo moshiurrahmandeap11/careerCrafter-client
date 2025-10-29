@@ -344,7 +344,7 @@ const JobsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white max-w-6xl mx-auto lg:px-3">
       <Helmet>
         <title>Browse Jobs - Career Crafter</title>
         <meta
@@ -365,39 +365,13 @@ const JobsPage = () => {
             </p>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-            <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 text-center">
-              <Briefcase className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-              <div className="text-lg font-bold text-gray-900">{jobStats.totalJobs}</div>
-              <div className="text-xs text-gray-600">Total Jobs</div>
-            </div>
-
-            <div className="bg-purple-50 p-3 rounded-lg border border-purple-100 text-center">
-              <Star className="w-5 h-5 text-purple-600 mx-auto mb-1" />
-              <div className="text-lg font-bold text-gray-900">{jobStats.featuredJobs}</div>
-              <div className="text-xs text-gray-600">Featured</div>
-            </div>
-
-            <div className="bg-green-50 p-3 rounded-lg border border-green-100 text-center">
-              <MapPin className="w-5 h-5 text-green-600 mx-auto mb-1" />
-              <div className="text-lg font-bold text-gray-900">{jobStats.remoteJobs}</div>
-              <div className="text-xs text-gray-600">Remote</div>
-            </div>
-
-            <div className="bg-orange-50 p-3 rounded-lg border border-orange-100 text-center">
-              <DollarSign className="w-5 h-5 text-orange-600 mx-auto mb-1" />
-              <div className="text-lg font-bold text-gray-900">{jobStats.highSalaryJobs}</div>
-              <div className="text-xs text-gray-600">High Paying</div>
-            </div>
-          </div>
         </div>
 
         {/* Search and Filters */}
         <div className="bg-white rounded-lg p-4 border border-gray-300 mb-6">
           <div className="space-y-4">
             {/* Search Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
               <div className="lg:col-span-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -888,7 +862,7 @@ const JobsPage = () => {
                   Browse Jobs
                 </button>
               ) : (
-                <>
+                <div className="flex gap-3 justify-center flex-col md:flex-row px-3">
                   <button
                     onClick={clearFilters}
                     className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
@@ -901,7 +875,7 @@ const JobsPage = () => {
                   >
                     Adjust Filters
                   </button>
-                </>
+                </div>
               )}
             </div>
           </div>

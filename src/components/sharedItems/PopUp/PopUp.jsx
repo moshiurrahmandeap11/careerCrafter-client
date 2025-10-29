@@ -44,7 +44,7 @@ const PopUp = () => {
         </div>
 
         {/* Right Section - Video */}
-        <div className="flex-1 relative min-h-[300px] md:min-h-[400px]">
+        <div className="flex-1 relative min-h-[300px]">
           <video
             className="w-full h-full object-cover"
             autoPlay
