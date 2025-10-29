@@ -10,15 +10,22 @@ import {
   FaPaperPlane,
   FaCheckCircle,
 } from "react-icons/fa";
+import useAxiosSecure from "../../../../hooks/AxiosIntense/useAxiosSecure";
+import { useNavigate } from "react-router";
+import HireButton from "../../../../components/HireButton/HireButton";
 
 const SeeHirePost = () => {
   const axiosPublic = axiosIntense;
   const [allPosts, setAllPosts] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [recent, setRecent] = useState(false);
   const [type, setType] = useState("");
+  const axiosSecure = useAxiosSecure();
+  const navigate = useNavigate();
 
   // Fetch posts whenever filters change
   useEffect(() => {
@@ -36,14 +43,38 @@ const SeeHirePost = () => {
   }, [axiosPublic, search, location, recent, type]);
 
   // Placeholder functions for button actions
-  const handleSeeProfile = (userId) => {
-    console.log(`Navigating to user profile ID: ${userId}`);
-    // In a real app, this would be a navigation: navigate(`/profile/${userId}`);
+  const handleSeeProfile = async (email) => {
+    try {
+      const res = await axiosSecure.get(
+        `/hired-post/get-profile?email=${email}`
+      );
+      const userData = res.data.profileData;
+      setSelectedUser(userData);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
   };
 
-  const handleMessage = (email) => {
-    console.log(`Opening chat/message with: ${email}`);
-    // In a real app, this would open a chat interface
+  const handleSendMessage = async (email) => {
+    try {
+      const res = await axiosSecure.get(`network/get-profile?email=${email}`);
+      const redirect = res.data.profileData;
+      const conversationData = {
+        _id: redirect._id,
+        fullName: redirect.fullName,
+        email: redirect.email,
+        profileImage: redirect.profileImage,
+        tags: redirect.tags || [],
+      };
+      sessionStorage.setItem(
+        "selectedConversation",
+        JSON.stringify(conversationData)
+      );
+      navigate("/messages");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
   const handleHired = (postId) => {
@@ -55,7 +86,7 @@ const SeeHirePost = () => {
     <div className="md:max-w-4xl w-full mx-auto  py-8 md:px-4">
       {/* --- */}
 
-      {/* 🔍 Filter Controls */}
+      {/*  Filter Controls */}
       <div className="flex flex-col md:flex-row gap-3 mb-10 items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm">
         <input
           type="text"
@@ -99,7 +130,7 @@ const SeeHirePost = () => {
 
       {/* --- */}
 
-      {/* 📋 Post List (One-Column) */}
+      {/*  Post List (One-Column) */}
       {allPosts.length === 0 ? (
         <p className="text-center text-lg text-gray-500 mt-12">
           No posts match your current filters. Try broadening your search!
@@ -178,7 +209,7 @@ const SeeHirePost = () => {
 
                 <div className="flex md:flex-row flex-col gap-3 ">
                   <button
-                    onClick={() => handleSeeProfile(post.userId)} // Assuming 'userId' exists
+                    onClick={() => handleSeeProfile(post.email)}
                     className="flex items-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition"
                   >
                     <FaUserCircle /> See Profile
@@ -186,23 +217,208 @@ const SeeHirePost = () => {
 
                   {/* Message Button */}
                   <button
-                    onClick={() => handleMessage(post.email)}
+                    onClick={() => handleSendMessage(post.email)}
                     className="flex items-center gap-2 bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-600 transition"
                   >
                     <FaPaperPlane /> Message
                   </button>
 
                   {/* Hired Button (Conditional/Admin/Poster Only) */}
-                  <button
-                    onClick={() => handleHired(post._id)}
-                    className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition"
-                  >
-                    <FaCheckCircle /> Hired
-                  </button>
+                  <HireButton
+                    email={post.email}
+                    name={post.name}
+                  ></HireButton>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* --- Profile Modal --- */}
+      {isModalOpen && selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white w-11/12 md:w-2/3 rounded-2xl shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto">
+            {/* Close Button */}
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-xl"
+            >
+              ✕
+            </button>
+
+            {/* Profile Header */}
+            <div className="flex flex-col items-center text-center space-y-4">
+              <img
+                src={
+                  selectedUser.profileImage ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    selectedUser.fullName
+                  )}`
+                }
+                alt={selectedUser.fullName}
+                className="w-24 h-24 rounded-full border-4 border-indigo-100 object-cover shadow-md"
+              />
+
+              <h2 className="text-2xl font-bold text-indigo-600">
+                {selectedUser.fullName}
+              </h2>
+              <p className="text-gray-500 flex items-center gap-2 text-sm">
+                <FaEnvelope className="text-indigo-500" /> {selectedUser.email}
+              </p>
+
+              {selectedUser.isPremium ? (
+                <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                  🌟 Premium Member ({selectedUser.currentPlan})
+                </span>
+              ) : (
+                <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm">
+                  Free User
+                </span>
+              )}
+            </div>
+
+            {/* Divider */}
+            <hr className="my-6 border-gray-200" />
+
+            {/* Basic Info Section */}
+            <div className="grid md:grid-cols-2 gap-4 text-gray-700 mb-6">
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <h3 className="text-lg font-semibold text-indigo-600 mb-2">
+                  Basic Information
+                </h3>
+                <p>
+                  <strong>Role:</strong> {selectedUser.role || "N/A"}
+                </p>
+                <p>
+                  <strong>Purpose:</strong>{" "}
+                  {selectedUser.purpose?.replace("_", " ") || "N/A"}
+                </p>
+                <p>
+                  <strong>Joined:</strong>{" "}
+                  {new Date(selectedUser.createdAt).toLocaleDateString()}
+                </p>
+                <p>
+                  <strong>Connections:</strong>{" "}
+                  {selectedUser.connectionsCount || 0}
+                </p>
+                <p>
+                  <strong>Source:</strong>{" "}
+                  {selectedUser.sources?.join(", ") || "N/A"}
+                </p>
+              </div>
+
+              {/* Skills & Tags */}
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <h3 className="text-lg font-semibold text-indigo-600 mb-2">
+                  Expertise & Tags
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedUser.tags?.length ? (
+                    selectedUser.tags.map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs font-medium"
+                      >
+                        {tag}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">No tags available</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Premium Section */}
+            {selectedUser.isPremium && (
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl p-4 mb-6">
+                <h3 className="text-lg font-semibold text-indigo-600 mb-3">
+                  💎 Subscription Details
+                </h3>
+                <div className="grid md:grid-cols-2 gap-3 text-sm text-gray-700">
+                  <p>
+                    <strong>Current Plan:</strong> {selectedUser.planName}
+                  </p>
+                  <p>
+                    <strong>Billing Cycle:</strong> {selectedUser.billingCycle}
+                  </p>
+                  <p>
+                    <strong>Credits:</strong>{" "}
+                    {selectedUser.aiCredits?.toLocaleString()} AI credits
+                  </p>
+                  <p>
+                    <strong>Status:</strong>{" "}
+                    <span
+                      className={`${
+                        selectedUser.subscriptionStatus === "active"
+                          ? "text-green-600"
+                          : "text-red-500"
+                      } font-medium`}
+                    >
+                      {selectedUser.subscriptionStatus}
+                    </span>
+                  </p>
+                  <p>
+                    <strong>Premium Since:</strong>{" "}
+                    {new Date(selectedUser.premiumSince).toLocaleString()}
+                  </p>
+                  <p>
+                    <strong>Last Payment:</strong>{" "}
+                    {new Date(selectedUser.lastPaymentDate).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Payment History */}
+            {selectedUser.payments?.length > 0 && (
+              <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+                <h3 className="text-lg font-semibold text-indigo-600 mb-3">
+                  💳 Payment History
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm text-gray-700">
+                    <thead>
+                      <tr className="bg-gray-100 text-gray-600 text-left">
+                        <th className="px-3 py-2">Transaction ID</th>
+                        <th className="px-3 py-2">Amount ($)</th>
+                        <th className="px-3 py-2">Plan</th>
+                        <th className="px-3 py-2">Status</th>
+                        <th className="px-3 py-2">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedUser.payments.map((pay, i) => (
+                        <tr
+                          key={i}
+                          className="border-b border-gray-100 hover:bg-gray-50 transition"
+                        >
+                          <td className="px-3 py-2 font-mono">
+                            {pay.transactionId}
+                          </td>
+                          <td className="px-3 py-2">{pay.amount}</td>
+                          <td className="px-3 py-2">{pay.planName}</td>
+                          <td
+                            className={`px-3 py-2 font-medium ${
+                              pay.status === "completed"
+                                ? "text-green-600"
+                                : "text-red-500"
+                            }`}
+                          >
+                            {pay.status}
+                          </td>
+                          <td className="px-3 py-2">
+                            {new Date(pay.createdAt).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
