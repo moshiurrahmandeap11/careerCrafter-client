@@ -154,7 +154,7 @@ const Hero = () => {
                   name='search'
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
-                  placeholder="Search for jobs, companies, or skills..."
+                  placeholder="Search here...."
                   className="w-full pl-12 pr-32 py-4 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
                 />
                 <MainButton 

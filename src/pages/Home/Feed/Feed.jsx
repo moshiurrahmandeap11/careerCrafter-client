@@ -175,7 +175,7 @@ const Feed = () => {
           <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-200">
             <div className="flex space-x-1">
               {[
-                { key: 'all', label: 'All Opportunities', count: feedItems.length },
+                { key: 'all', label: 'All', count: feedItems.length },
                 { key: 'jobs', label: 'Jobs', count: feedItems.filter(item => item.type === 'job_post').length },
                 { key: 'people', label: 'People', count: feedItems.filter(item => item.type === 'hired_post').length }
               ].map((filter) => (
@@ -208,7 +208,7 @@ const Feed = () => {
               </h2>
               <p className="text-gray-600 mb-6">
                 {activeFilter === 'all' 
-                  ? "Be the first to share a job opportunity or your professional journey"
+                  ? "Be the first to share a job opportunity"
                   : `No ${activeFilter} found matching your criteria`
                 }
               </p>
