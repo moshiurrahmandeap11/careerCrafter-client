@@ -340,21 +340,22 @@ What career challenge can I help you with today?`
                 <p className="font-semibold text-xl">{userName || "Career Seeker"}</p>
               </div>
             </div>
+            <div className="flex justify-center item-center">
+              <div className="text-6xl mb-6 animate-pulse">
+                {motivationalMessages[currentMessage].emoji}
+              </div>
 
-            <div className="text-6xl mb-6 animate-pulse">
-              {motivationalMessages[currentMessage].emoji}
-            </div>
-
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                <CurrentIcon className="w-8 h-8 text-white" />
+              <div className="flex justify-center mb-6">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                  <CurrentIcon className="w-8 h-8 text-white" />
+                </div>
               </div>
             </div>
 
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 leading-tight">
               {motivationalMessages[currentMessage].title}
             </h2>
-            <p className="text-xl md:text-2xl mb-8 opacity-95 leading-relaxed">
+            <p className="text-md md:text-lg mb-8 opacity-95 leading-relaxed">
               {motivationalMessages[currentMessage].description}
             </p>
 
@@ -362,9 +363,7 @@ What career challenge can I help you with today?`
               onClick={handleYesClick}
               className={`bg-gradient-to-r ${motivationalMessages[currentMessage].buttonColor} text-white px-12 py-6 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center gap-4 mx-auto group`}
             >
-              <Rocket className="w-6 h-6 group-hover:animate-bounce" />
-              <span>Yes, I Need Career Help!</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <span className="text-xs md:text-sm">Yes, I Need Career Help!</span>
             </button>
 
             {/* Progress dots */}
@@ -442,8 +441,8 @@ What career challenge can I help you with today?`
             >
               <div
                 className={`max-w-[85%] rounded-3xl px-5 py-4 backdrop-blur-sm ${msg.role === "user"
-                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
-                    : "bg-white/90 text-gray-800 border border-white/50 shadow-lg"
+                  ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
+                  : "bg-white/90 text-gray-800 border border-white/50 shadow-lg"
                   }`}
               >
                 <p className="whitespace-pre-wrap text-sm md:text-base leading-relaxed">

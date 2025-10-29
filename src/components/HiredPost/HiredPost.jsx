@@ -233,7 +233,7 @@ const HiredPost = () => {
                                         onChange={(e) => setPostData({ ...postData, content: e.target.value })}
                                         placeholder="Share your job search progress, career achievements, skills you're learning, or opportunities you're seeking..."
                                         rows={6}
-                                        className="w-full px-4 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-3 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 resize-none text-lg shadow-sm"
+                                        className="w-full px-4 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-3 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 resize-none text-sm shadow-sm"
                                     />
                                     <div className="flex justify-between items-center mt-2 text-sm text-gray-500">
                                         <span>This will be visible to employers and your network</span>
@@ -315,18 +315,18 @@ const HiredPost = () => {
                                 </div>
 
                                 {/* Submit Button */}
-                                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                                <div className="flex items-center justify-center pt-4 border-t gap-5 border-gray-200">
                                     <button
                                         type="button"
                                         onClick={() => setShowModal(false)}
-                                        className="px-8 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
+                                        className="px-5 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
                                     >
                                         Cancel
                                     </button>
                                     <MainButton
                                         type="submit"
                                         disabled={loading || !postData.content.trim()}
-                                        className="px-8 py-3 rounded-xl font-medium flex items-center space-x-3 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="px-8 py-3 rounded-xl font-medium flex items-center shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {loading ? (
                                             <>
@@ -335,8 +335,8 @@ const HiredPost = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <Send className="w-5 h-5" />
-                                                <span>Publish Update</span>
+                                                <Send className="w-5 h-5 mr-2" />
+                                                <span>Publish</span>
                                             </>
                                         )}
                                     </MainButton>
@@ -349,7 +349,7 @@ const HiredPost = () => {
 
             {/* Empty State */}
             {(!profile?.hiredPosts || profile.hiredPosts.length === 0) && (
-                <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
+                <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-100 py-10 px-3 ">
                     <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                         <Edit3 className="w-10 h-10 text-white" />
                     </div>
@@ -359,10 +359,10 @@ const HiredPost = () => {
                     </p>
                     <MainButton
                         onClick={handleInputClick}
-                        className="px-8 py-4 rounded-2xl font-medium flex items-center space-x-3 mx-auto shadow-lg hover:shadow-xl transition-all duration-300"
+                        className="rounded-2xl font-medium  flex items-center mx-auto shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                         <Plus className="w-5 h-5" />
-                        <span className="text-lg">Create Your First Update</span>
+                        <span className="text-xs">Create Your First Update</span>
                     </MainButton>
                 </div>
             )}
