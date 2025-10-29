@@ -371,8 +371,8 @@ const JobsPage = () => {
         <div className="bg-white rounded-lg p-4 border border-gray-300 mb-6">
           <div className="space-y-4">
             {/* Search Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
-              <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 lg:grid-cols-6 gap-3">
+              <div className="lg:col-span-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
@@ -432,7 +432,7 @@ const JobsPage = () => {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-gray-200"
+                  className="grid grid-cols-2  lg:grid-cols-4 gap-3 pt-4 border-t border-gray-200"
                 >
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
