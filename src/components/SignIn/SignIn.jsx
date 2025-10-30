@@ -10,11 +10,23 @@ import {
 import useAuth from "../../hooks/UseAuth/useAuth";
 import Swal from "sweetalert2";
 import axiosIntense from "../../hooks/AxiosIntense/axiosIntense";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SignIn = () => {
-  const { user, loading, googleLogin, facebookLogin, githubLogin, userLogin } = useAuth();
+  const {
+    user,
+    loading,
+    googleLogin,
+    facebookLogin,
+    resetPassword,
+    githubLogin,
+    userLogin,
+  } = useAuth();
+
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -23,7 +35,7 @@ const SignIn = () => {
 
   useEffect(() => {
     if (user && !loading) {
-      navigate(-1); // Redirect to previous page if user is logged in
+      navigate(-1);
     }
   }, [user, loading, navigate]);
 
@@ -35,51 +47,50 @@ const SignIn = () => {
     );
   }
 
-    const handleSocialLogin = async (loginFn, providerName) => {
-  try {
-    const userCredential = await loginFn();
-    const currentUser = userCredential.user;
-    const fullName =
-      currentUser.displayName || currentUser.email.split("@")[0] || "User";
-
+  // 🔹 Handle Social Logins
+  const handleSocialLogin = async (loginFn, providerName) => {
     try {
-      // Try to create user in DB
-      await axiosIntense.post("/users", {
-        fullName,
-        email: currentUser.email,
-        role: "free user",
-        createdAt: new Date().toISOString(),
-        creationDate: new Date().toLocaleDateString(),
-      });
-    } catch (error) {
-      // If already exists, it's fine
-      if (error.response?.status !== 400) {
-        throw error;
-      }
-    }
+      const userCredential = await loginFn();
+      const currentUser = userCredential.user;
+      const fullName =
+        currentUser.displayName || currentUser.email.split("@")[0] || "User";
 
-    Swal.fire({
-      icon: "success",
-      title: `Signed in with ${providerName}`,
-      timer: 2000,
-      timerProgressBar: true,
-      showConfirmButton: false,
-    }).then(() => navigate("/auth/where-listen"));
-  } catch (error) {
-    console.error(`${providerName} login failed:`, error);
-    Swal.fire({
-      icon: "error",
-      title: "Oops...",
-      text: `${providerName} login failed. Try again!`,
-      confirmButtonColor: "#dc2626",
-    });
-  }
-};
+      try {
+        await axiosIntense.post("/users", {
+          fullName,
+          email: currentUser.email,
+          role: "free user",
+          createdAt: new Date().toISOString(),
+          creationDate: new Date().toLocaleDateString(),
+        });
+      } catch (error) {
+        if (error.response?.status !== 400) throw error;
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: `Signed in with ${providerName}`,
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => navigate("/auth/where-listen"));
+    } catch (error) {
+      console.error(`${providerName} login failed:`, error);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: `${providerName} login failed. Try again!`,
+        confirmButtonColor: "#dc2626",
+      });
+    }
+  };
 
   const handleGoogleLogin = () => handleSocialLogin(googleLogin, "Google");
-  const handleFacebookLogin = () => handleSocialLogin(facebookLogin, "Facebook");
+  const handleFacebookLogin = () =>
+    handleSocialLogin(facebookLogin, "Facebook");
   const handleGithubLogin = () => handleSocialLogin(githubLogin, "GitHub");
 
+  // 🔹 Handle Input
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -88,56 +99,96 @@ const SignIn = () => {
     }));
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  // 🔹 Handle Submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (!formData.email || !formData.password) {
-    Swal.fire({
-      icon: "warning",
-      title: "Missing fields",
-      text: "Please enter email & password",
-      confirmButtonColor: "#dc2626",
-    });
-    return;
-  }
+    if (!formData.email || !formData.password) {
+      Swal.fire({
+        icon: "warning",
+        title: "Missing fields",
+        text: "Please enter email & password",
+        confirmButtonColor: "#dc2626",
+      });
+      return;
+    }
 
-  try {
-    // Firebase login via useAuth
-    await userLogin(formData.email, formData.password);
+    try {
+      await userLogin(formData.email, formData.password);
 
-    Swal.fire({
-      icon: "success",
-      title: "Signed in successfully!",
-      timer: 1000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-    });
+      Swal.fire({
+        icon: "success",
+        title: "Signed in successfully!",
+        timer: 1000,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
 
-    // Redirect to home
-    navigate("/");
-  } catch (error) {
-    console.error("Sign in failed:", error);
-    Swal.fire({
-      icon: "error",
-      title: "Sign in failed",
-      text: error.message || "Invalid credentials or network error",
-      confirmButtonColor: "#dc2626",
-    });
-  }
-};
+      navigate("/");
+    } catch (error) {
+      console.error("Sign in failed:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Sign in failed",
+        text: error.message || "Invalid credentials or network error",
+        confirmButtonColor: "#dc2626",
+      });
+    }
+  };
+
+  // 🔹 Handle Password Reset
+  const handleResetPassword = async () => {
+    if (!resetEmail) {
+      Swal.fire({
+        icon: "warning",
+        title: "Enter your email",
+        text: "Please provide your email address",
+      });
+      return;
+    }
+
+    try {
+      await resetPassword(resetEmail);
+      Swal.fire({
+        icon: "success",
+        title: "Password reset email sent!",
+        text: "Check your inbox for the reset link.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      setShowModal(false);
+      setResetEmail("");
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Reset failed",
+        text: error.message,
+      });
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-6 px-4 sm:px-6 lg:px-8 relative">
+      {/* ===== Sign In Card ===== */}
       <div className="w-full max-w-md space-y-8 bg-white p-6 sm:p-8 rounded-xl shadow-2xl">
         {/* Social Login */}
         <div className="flex justify-center space-x-4">
-          <button onClick={handleGoogleLogin} className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors">
+          <button
+            onClick={handleGoogleLogin}
+            className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors"
+          >
             <FaGoogle className="w-6 h-6" />
           </button>
-          <button onClick={handleFacebookLogin} className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors">
+          <button
+            onClick={handleFacebookLogin}
+            className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors"
+          >
             <FaFacebook className="w-6 h-6" />
           </button>
-          <button onClick={handleGithubLogin} className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors">
+          <button
+            onClick={handleGithubLogin}
+            className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors"
+          >
             <FaGithub className="w-6 h-6" />
           </button>
         </div>
@@ -191,7 +242,6 @@ const handleSubmit = async (e) => {
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent transition-colors"
                 required
               />
-
               <button
                 type="button"
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
@@ -224,12 +274,13 @@ const handleSubmit = async (e) => {
               </label>
             </div>
             <div className="text-sm">
-              <a
-                href="/forget-password"
+              <button
+                type="button"
+                onClick={() => setShowModal(true)}
                 className="text-red-700 hover:underline"
               >
                 Forget Password?
-              </a>
+              </button>
             </div>
           </div>
 
@@ -248,6 +299,53 @@ const handleSubmit = async (e) => {
           </p>
         </form>
       </div>
+
+      {/* ===== Forget Password Modal ===== */}
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            key="overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm z-50"
+          >
+            <motion.div
+              key="modal"
+              initial={{ scale: 0.8, opacity: 0, y: -30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 30 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="bg-white rounded-lg p-6 w-80 shadow-xl"
+            >
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+                Reset Password
+              </h2>
+              <input
+                type="email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-red-700"
+              />
+              <div className="flex justify-between">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-3 py-2 rounded-md bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleResetPassword}
+                  className="px-3 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
+                >
+                  Submit
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
