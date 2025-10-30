@@ -231,7 +231,7 @@ const Profile = () => {
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div className="flex items-center space-x-4">
                                 <div className="relative">
-                                    <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-sm">
+                                    <div className="w-12 h-12  rounded-xl flex items-center justify-center shadow-sm">
                                         {profile?.profileImage ? (
                                             <img
                                                 src={profile?.profileImage}
