@@ -129,13 +129,13 @@ const SignUp = () => {
       <div className="w-full max-w-md space-y-8 bg-white p-6 sm:p-8 rounded-xl shadow-2xl">
         {/* Social Buttons */}
         <div className="flex justify-center space-x-4">
-          <button onClick={handleGoogleLogin} className="p-2 bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors">
+          <button onClick={handleGoogleLogin} className="p-2 bg-blue-600 text-white rounded-full hover:bg-red-800 transition-colors">
             <FaGoogle className="w-6 h-6" />
           </button>
-          <button onClick={handleFacebookLogin} className="p-2 bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors">
+          <button onClick={handleFacebookLogin} className="p-2 bg-blue-600 text-white rounded-full hover:bg-red-800 transition-colors">
             <FaFacebook className="w-6 h-6" />
           </button>
-          <button onClick={handleGithubLogin} className="p-2 bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors">
+          <button onClick={handleGithubLogin} className="p-2 bg-blue-600 text-white rounded-full hover:bg-red-800 transition-colors">
             <FaGithub className="w-6 h-6" />
           </button>
         </div>
@@ -219,16 +219,16 @@ const SignUp = () => {
           </div>
 
           <div className="flex items-center">
-            <input type="checkbox" id="terms" name="terms" checked={formData.terms} onChange={handleChange} className="h-4 w-4 cursor-pointer text-red-700 border-gray-300 rounded focus:ring-2 focus:ring-red-700" required />
+            <input type="checkbox" id="terms" name="terms" checked={formData.terms} onChange={handleChange} className="h-4 w-4 cursor-pointer text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-red-700" required />
             <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-              I agree to the <a href="/terms" className="text-red-700 hover:underline">Terms and Conditions</a> and <a href="/privacy" className="text-red-700 hover:underline">Privacy Policy</a>
+              I agree to the <a href="/terms" className="text-blue-600 hover:underline">Terms and Conditions</a> and <a href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</a>
             </label>
           </div>
 
-          <button type="submit" className="w-full px-4 py-2 bg-red-700 text-white rounded-md hover:bg-red-800 transition-colors">Submit</button>
+          <button type="submit" className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-red-800 transition-colors">Submit</button>
 
           <p className="text-center text-sm text-gray-600">
-            Already have an account? <Link to="/auth/signin" className="text-red-700 hover:underline">Sign In</Link>
+            Already have an account? <Link to="/auth/signin" className="text-blue-600 hover:underline">Sign In</Link>
           </p>
         </form>
       </div>

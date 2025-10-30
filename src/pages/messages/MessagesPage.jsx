@@ -467,7 +467,7 @@ const MessagesPage = () => {
       });
 
       setNewMessage("");
-      // setMessages((m) => [...m, msg]);
+      setMessages((m) => [...m, msg]);
       setErrorMessage("");
     } catch (err) {
       if (err.response?.status === 403) {
