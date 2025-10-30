@@ -69,7 +69,7 @@ const SiteSettings = () => {
               className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all duration-200 text-left group border border-slate-200 hover:border-blue-400"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
                   <Icon className="w-6 h-6 text-white" />
                 </div>
                 <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors" />

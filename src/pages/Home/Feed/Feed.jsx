@@ -228,7 +228,7 @@ const Feed = () => {
                     <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                       {/* Company Image */}
                       <div className="flex-shrink-0">
-                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center overflow-hidden shadow-lg">
+                        <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center overflow-hidden shadow-lg">
                           {item.image ? (
                             <img
                               src={item.image}
@@ -550,7 +550,7 @@ const Feed = () => {
                 </button>
 
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden mb-4 bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden mb-4 bg-blue-600 shadow-lg">
                     {selectedProfile.profileImage ? (
                       <img
                         src={selectedProfile.profileImage}
@@ -558,7 +558,7 @@ const Feed = () => {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-3xl border-4 border-white shadow-lg">
+                      <div className="w-24 h-24 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-semibold text-3xl border-4 border-white shadow-lg">
                         {selectedProfile.fullName
                           ? selectedProfile.fullName.charAt(0).toUpperCase()
                           : "?"}
