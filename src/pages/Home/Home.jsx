@@ -49,9 +49,7 @@ const Home = () => {
       <section className="bg-white" data-aos="fade-up">
         <Hero />
       </section>
-      <section className="bg-white" data-aos="fade-up">
-        <ReviewSection />
-      </section>
+      
 
       {/* Main Content Grid */}
       <div className="w-11/12 mx-auto px-4 py-12">
@@ -102,6 +100,10 @@ const Home = () => {
 
       <section className="bg-white" data-aos="fade-up">
         <Founder />
+      </section>
+
+      <section className="bg-white" data-aos="fade-up">
+        <ReviewSection />
       </section>
 
       <section className="bg-white mt-3" data-aos="fade-up">
