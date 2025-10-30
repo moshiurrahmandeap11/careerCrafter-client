@@ -175,19 +175,19 @@ const SignIn = () => {
         <div className="flex justify-center space-x-4">
           <button
             onClick={handleGoogleLogin}
-            className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors"
+            className="p-2 cursor-pointer bg-blue-600 text-white rounded-full hover:bg-blue-700 duration-200 transition-colors"
           >
             <FaGoogle className="w-6 h-6" />
           </button>
           <button
             onClick={handleFacebookLogin}
-            className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors"
+            className="p-2 cursor-pointer bg-blue-600 text-white rounded-full hover:bg-blue-700 duration-200 transition-colors"
           >
             <FaFacebook className="w-6 h-6" />
           </button>
           <button
             onClick={handleGithubLogin}
-            className="p-2 cursor-pointer bg-red-700 text-white rounded-full hover:bg-red-800 transition-colors"
+            className="p-2 cursor-pointer bg-blue-600 text-white rounded-full hover:bg-blue-700 duration-200 transition-colors"
           >
             <FaGithub className="w-6 h-6" />
           </button>
@@ -277,7 +277,7 @@ const SignIn = () => {
               <button
                 type="button"
                 onClick={() => setShowModal(true)}
-                className="text-red-700 hover:underline"
+                className="text-blue-600 hover:underline"
               >
                 Forget Password?
               </button>
@@ -286,14 +286,14 @@ const SignIn = () => {
 
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-red-700 text-white rounded-md hover:bg-red-800 focus:ring-4 focus:ring-red-300 transition-colors duration-200 text-sm font-medium"
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-4 focus:ring-red-300 transition-colors duration-200 text-sm font-medium"
           >
             Sign In
           </button>
 
           <p className="text-center text-sm text-gray-600">
             Don’t have an account?{" "}
-            <Link to="/auth/signup" className="text-red-700 hover:underline">
+            <Link to="/auth/signup" className="text-blue-600 hover:underline">
               Sign Up
             </Link>
           </p>
