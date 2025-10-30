@@ -8,6 +8,8 @@ import TopJobs from "./TopJobs/TopJobs";
 import AIMentorForHome from "./AIMentorForHome/AIMentorForHome";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import ReviewSection from "./ReviewSection/ReviewSection";
+import SuccessStories from "./SuccessStories/SuccessStories";
 
 const Home = () => {
   useEffect(() => {
@@ -40,26 +42,29 @@ const Home = () => {
         />
       </Helmet>
       <ReTitle title="Career Crafter" />
-      
+
       {/* Hero Section */}
       <section className="bg-white" data-aos="fade-up">
         <Hero />
       </section>
-      
+      <section className="bg-white" data-aos="fade-up">
+        <ReviewSection />
+      </section>
+
       {/* Main Content Grid */}
       <div className="w-11/12 mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
-            <section 
+            <section
               className="bg-white rounded-2xl shadow-sm border border-gray-100"
               data-aos="fade-up"
               data-aos-delay="100"
             >
               <AIMentorForHome />
             </section>
-            
-            <section 
+
+            <section
               className="bg-white rounded-2xl shadow-sm border border-gray-100"
               data-aos="fade-up"
               data-aos-delay="200"
@@ -67,18 +72,18 @@ const Home = () => {
               <Feed />
             </section>
           </div>
-          
+
           {/* Right Column */}
           <div className="space-y-8">
-            <section 
+            <section
               className="bg-white rounded-2xl shadow-sm border border-gray-100"
               data-aos="fade-up"
               data-aos-delay="150"
             >
               <HiredPost />
             </section>
-            
-            <section 
+
+            <section
               className="bg-white rounded-2xl shadow-sm border border-gray-100"
               data-aos="fade-up"
               data-aos-delay="250"
@@ -88,6 +93,13 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+      
+      <section className="bg-white" data-aos="fade-up">
+        <SuccessStories />
+      </section>
+
+
     </div>
   );
 };
