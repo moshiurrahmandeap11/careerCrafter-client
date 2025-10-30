@@ -169,7 +169,7 @@ const ProfileHired = () => {
                     </button>
                     
                     <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-                        <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                             <Target className="w-10 h-10 text-white" />
                         </div>
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">Get Hired</h1>

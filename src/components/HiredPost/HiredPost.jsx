@@ -204,7 +204,7 @@ const HiredPost = () => {
                             <form onSubmit={handlePostSubmit}>
                                 {/* User Info */}
                                 <div className="flex items-center space-x-4 mb-6 p-4 bg-gray-50 rounded-2xl">
-                                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
                                         {profile?.profileImage ? (
                                             <img
                                                 src={profile.profileImage}

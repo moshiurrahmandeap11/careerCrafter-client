@@ -224,14 +224,14 @@ const Profile = () => {
 
     return (
         <>
-            <div className="min-h-screen bg-gray-50/60">
+            <div className="bg-gray-50/60">
                 {/* Header */}
                 <div className="bg-white border-b border-gray-100">
-                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <div className="w-11/12 mx-auto px-3 py-6">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div className="flex items-center space-x-4">
                                 <div className="relative">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-sm">
+                                    <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-sm">
                                         {profile?.profileImage ? (
                                             <img
                                                 src={profile?.profileImage}
@@ -286,7 +286,7 @@ const Profile = () => {
                 </div>
 
                 {/* Main Content */}
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="w-11/12 mx-auto px-3 py-8">
                     {profile ? (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             {/* Left Column - Profile Info */}
@@ -295,7 +295,7 @@ const Profile = () => {
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
                                         <div className="relative">
-                                            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
+                                            <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
                                                 {profile.profileImage ? (
                                                     <img
                                                         src={profile.profileImage}
@@ -332,8 +332,8 @@ const Profile = () => {
                                                 <div className="flex flex-wrap gap-2">
                                                     {profile.role && (
                                                         <span className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center space-x-1 ${profile.role === 'premium user'
-                                                                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
-                                                                : 'bg-blue-100 text-blue-700'
+                                                            ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
+                                                            : 'bg-blue-100 text-blue-700'
                                                             }`}>
                                                             <Crown className="w-3 h-3" />
                                                             <span>{profile.role}</span>
@@ -394,8 +394,8 @@ const Profile = () => {
                                                                 </td>
                                                                 <td className="py-4 px-4">
                                                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${post.includeProfile
-                                                                            ? 'bg-green-100 text-green-800'
-                                                                            : 'bg-gray-100 text-gray-800'
+                                                                        ? 'bg-green-100 text-green-800'
+                                                                        : 'bg-gray-100 text-gray-800'
                                                                         }`}>
                                                                         {post.includeProfile ? 'Included' : 'Not Included'}
                                                                     </span>
@@ -479,54 +479,31 @@ const Profile = () => {
                                     </div>
                                 </div>
 
-                                {/* Skills Section */}
-                                {profile.tags && profile.tags.length > 0 && (
-                                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                                        <div className="flex items-center space-x-2 mb-4">
-                                            <Tag className="w-5 h-5 text-gray-700" />
-                                            <h3 className="font-semibold text-gray-900">Skills & Expertise</h3>
-                                        </div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {profile.tags.map((tag, index) => (
-                                                <span
-                                                    key={index}
-                                                    className="bg-gray-50 text-gray-700 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 hover:bg-gray-100 transition-all duration-200"
-                                                >
-                                                    {tag}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
 
-                                {/* Sources Section */}
-                                {profile.sources && profile.sources.length > 0 && (
-                                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                                        <div className="flex items-center space-x-2 mb-4">
-                                            <Users className="w-5 h-5 text-gray-700" />
-                                            <h3 className="font-semibold text-gray-900">Connected Sources</h3>
-                                        </div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            {profile.sources.map((source, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-all duration-200"
-                                                >
-                                                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                                        <span className="text-white font-medium text-xs">
-                                                            {source[0]?.toUpperCase()}
-                                                        </span>
-                                                    </div>
-                                                    <span className="font-medium text-gray-800 text-sm">{source}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+
                             </div>
 
                             {/* Right Column - Actions */}
                             <div className="space-y-6">
+
+                                {/* AI Credits */}
+                                <div className="bg-blue-600 rounded-2xl shadow-lg p-6 text-white">
+                                    <div className="flex items-center space-x-2 mb-3">
+                                        <Sparkles className="w-5 h-5" />
+                                        <h3 className="font-semibold">AI Credits</h3>
+                                    </div>
+                                    <p className="text-blue-100 text-sm mb-4">
+                                        Use your credits to access powerful AI features across the platform.
+                                    </p>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-2xl font-bold">
+                                            {profile.aiCredits ? profile.aiCredits.toLocaleString() : '0'}
+                                        </span>
+                                        <Link to={'/premium'} className="bg-white text-blue-600 px-4 py-2 rounded-xl font-medium text-sm hover:bg-blue-50 transition-colors duration-200">
+                                            Get More
+                                        </Link>
+                                    </div>
+                                </div>
                                 {/* Quick Actions */}
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                                     <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
@@ -539,14 +516,6 @@ const Profile = () => {
                                             <div>
                                                 <p className="font-medium text-gray-900 text-sm">Get Hired</p>
                                                 <p className="text-gray-500 text-xs">Find your dream job</p>
-                                            </div>
-                                        </button>
-
-                                        <button className="w-full flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-left">
-                                            <Settings className="w-5 h-5 text-gray-600" />
-                                            <div>
-                                                <p className="font-medium text-gray-900 text-sm">Settings</p>
-                                                <p className="text-gray-500 text-xs">Account preferences</p>
                                             </div>
                                         </button>
 
@@ -595,24 +564,51 @@ const Profile = () => {
                                     </div>
                                 )}
 
-                                {/* AI Credits */}
-                                <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white">
-                                    <div className="flex items-center space-x-2 mb-3">
-                                        <Sparkles className="w-5 h-5" />
-                                        <h3 className="font-semibold">AI Credits</h3>
+
+                                {/* Skills Section */}
+                                {profile.tags && profile.tags.length > 0 && (
+                                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                                        <div className="flex items-center space-x-2 mb-4">
+                                            <Tag className="w-5 h-5 text-gray-700" />
+                                            <h3 className="font-semibold text-gray-900">Skills & Expertise</h3>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {profile.tags.map((tag, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="bg-gray-50 text-gray-700 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 hover:bg-gray-100 transition-all duration-200"
+                                                >
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
-                                    <p className="text-blue-100 text-sm mb-4">
-                                        Use your credits to access powerful AI features across the platform.
-                                    </p>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-2xl font-bold">
-                                            {profile.aiCredits ? profile.aiCredits.toLocaleString() : '0'}
-                                        </span>
-                                        <button className="bg-white text-blue-600 px-4 py-2 rounded-xl font-medium text-sm hover:bg-blue-50 transition-colors duration-200">
-                                            Get More
-                                        </button>
+                                )}
+
+                                {/* Sources Section */}
+                                {profile.sources && profile.sources.length > 0 && (
+                                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                                        <div className="flex items-center space-x-2 mb-4">
+                                            <Users className="w-5 h-5 text-gray-700" />
+                                            <h3 className="font-semibold text-gray-900">Connected Sources</h3>
+                                        </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            {profile.sources.map((source, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-all duration-200"
+                                                >
+                                                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                                        <span className="text-white font-medium text-xs">
+                                                            {source[0]?.toUpperCase()}
+                                                        </span>
+                                                    </div>
+                                                    <span className="font-medium text-gray-800 text-sm">{source}</span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </div>
                     ) : (
