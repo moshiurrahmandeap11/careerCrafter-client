@@ -326,10 +326,10 @@ What career challenge can I help you with today?`
     const CurrentIcon = motivationalMessages[currentMessage].icon;
 
     return (
-      <div className="w-full max-w-4xl mx-auto p-6">
+      <div className="p-3">
         {/* Motivational Section */}
         <div className={`bg-gradient-to-br ${motivationalMessages[currentMessage].bgColor} rounded-3xl p-8 md:p-12 text-white shadow-2xl transition-all duration-700 ease-in-out transform`}>
-          <div className="text-center max-w-2xl mx-auto">
+          <div className="text-center w-full mx-auto">
             {/* Welcome with user name */}
             <div className="flex items-center justify-center gap-4 mb-8">
               <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
@@ -391,10 +391,10 @@ What career challenge can I help you with today?`
   }
 
   return (
-    <div className={`w-full mx-auto bg-white rounded-3xl shadow-2xl border border-gray-100 transition-all duration-500 ease-out ${isExpanded ? 'fixed inset-6 z-50' : 'max-w-4xl'
+    <div className={`w-full mx-auto bg-white rounded-3xl shadow-2xl border border-gray-100 transition-all duration-500 ease-out ${isExpanded ? 'fixed inset-6 z-50' : 'w-full p-3'
       }`}>
       {/* Chat Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-700 p-6 text-white rounded-t-3xl">
+      <div className="bg-blue-500 p-6 text-white rounded-t-3xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm shadow-lg">
@@ -515,7 +515,7 @@ What career challenge can I help you with today?`
             <button
               onClick={handleSendMessage}
               disabled={isLoading || !inputMessage.trim()}
-              className="px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3 font-medium shadow-lg hover:shadow-xl hover:scale-105 disabled:hover:shadow-lg"
+              className="px-6 py-4 bg-blue-400 text-white rounded-2xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3 font-medium shadow-lg hover:shadow-xl hover:scale-105 disabled:hover:shadow-lg"
             >
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

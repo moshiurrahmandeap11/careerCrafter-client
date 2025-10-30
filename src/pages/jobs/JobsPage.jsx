@@ -344,7 +344,7 @@ const JobsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white max-w-6xl mx-auto lg:px-3">
+    <div className="min-h-screen bg-white w-11/12 mx-auto px-4">
       <Helmet>
         <title>Browse Jobs - Career Crafter</title>
         <meta
@@ -353,7 +353,7 @@ const JobsPage = () => {
         />
       </Helmet>
 
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-6">
+      <div className="= py-6">
         {/* Header */}
         <div className="mb-6">
           <div className="text-center mb-6">
@@ -371,8 +371,8 @@ const JobsPage = () => {
         <div className="bg-white rounded-lg p-4 border border-gray-300 mb-6">
           <div className="space-y-4">
             {/* Search Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-6 gap-3">
-              <div className="lg:col-span-3">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
+              <div className="lg:col-span-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input

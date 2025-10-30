@@ -143,7 +143,7 @@ const HiredPost = () => {
             {/* Create Post Section */}
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-100 p-6 mb-8 hover:shadow-xl transition-all duration-300">
                 <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
                         {profile?.profileImage ? (
                             <img
                                 src={profile.profileImage}
@@ -350,9 +350,6 @@ const HiredPost = () => {
             {/* Empty State */}
             {(!profile?.hiredPosts || profile.hiredPosts.length === 0) && (
                 <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-100 py-10 px-3 ">
-                    <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                        <Edit3 className="w-10 h-10 text-white" />
-                    </div>
                     <h3 className="text-2xl font-semibold text-gray-800 mb-3">Share Your Journey</h3>
                     <p className="text-gray-600 mb-8 text-lg max-w-md mx-auto leading-relaxed">
                         Start building your professional presence by sharing your career updates, achievements, and what you're looking for.
