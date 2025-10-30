@@ -1,5 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo, useContext } from "react";
-import { useNavigate, useLocation, Navigate,} from "react-router";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useContext,
+} from "react";
+import { useNavigate, useLocation, Navigate } from "react-router";
 import {
   Search,
   Home,
@@ -20,6 +26,7 @@ import {
   ChevronDown,
   Settings,
   LogOut,
+  LogIn,
   Star,
   FileCheck2,
 } from "lucide-react";
@@ -45,47 +52,61 @@ const Navbar = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [notificationCount, setNotificationCount] = useState(0);
-  
+
+  // Generate initials from full name
+  const getInitials = (name) => {
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  // Generate deterministic background color based on name
+  const stringToColor = (str) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const color = `hsl(${hash % 360}, 70%, 50%)`; // nice color variation
+    return color;
+  };
 
   // New state for message notifications
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [messageNotifications, setMessageNotifications] = useState([]);
 
-   const searchNavigate=useNavigate()
+  const searchNavigate = useNavigate();
 
-   const {setSearchResult,setSearchTopic}=useContext(AuthContext)
-  
-  const handleSearch=async ()=>{
-           if (!searchValue.trim()) return; // empty search
+  const { setSearchResult, setSearchTopic } = useContext(AuthContext);
 
-  try {
-    const res = await axiosIntense.get(
-      `/top-search/search?query=${encodeURIComponent(searchValue)}`
-    );
-    console.log(res.data)
+  const handleSearch = async () => {
+    if (!searchValue.trim()) return; // empty search
 
-    const { type,results } = res.data;
-    if(type=='job'){
-      searchNavigate('/searchJob')
-      setSearchResult(results)
-      setSearchTopic(searchValue)
-      
-    }else if(type=='user'){
-      searchNavigate('/searchUser')
-      setSearchResult(results)
-      setSearchTopic(searchValue)
-      
-    }else{
-      searchNavigate('/noSearchResult')
-      
-      setSearchTopic(searchValue)
+    try {
+      const res = await axiosIntense.get(
+        `/top-search/search?query=${encodeURIComponent(searchValue)}`
+      );
+      console.log(res.data);
+
+      const { type, results } = res.data;
+      if (type == "job") {
+        searchNavigate("/searchJob");
+        setSearchResult(results);
+        setSearchTopic(searchValue);
+      } else if (type == "user") {
+        searchNavigate("/searchUser");
+        setSearchResult(results);
+        setSearchTopic(searchValue);
+      } else {
+        searchNavigate("/noSearchResult");
+
+        setSearchTopic(searchValue);
+      }
+
+      console.log(type);
+    } catch (error) {
+      console.error("Search error:", error);
     }
-
-    console.log(type)
-  } catch (error) {
-    console.error("Search error:", error);
-  }
-  }
+  };
 
   // Fallback avatar images
   const fallbackAvatars = [
@@ -126,13 +147,14 @@ const Navbar = () => {
     fetchUserProfile();
   }, [user?.email]);
 
-
   useEffect(() => {
     const fetchNotificationCount = async () => {
       if (!user?.email) return;
 
       try {
-        const response = await axiosIntense.get(`/notifications/user/${user.email}`);
+        const response = await axiosIntense.get(
+          `/notifications/user/${user.email}`
+        );
         setNotificationCount(response.data.unreadCount || 0);
       } catch (error) {
         console.error("Error fetching notification count:", error);
@@ -152,7 +174,9 @@ const Navbar = () => {
       if (!user?.email) return;
 
       try {
-        const response = await axiosIntense.get(`/messageUsers/unread-count/${user.email}`);
+        const response = await axiosIntense.get(
+          `/messageUsers/unread-count/${user.email}`
+        );
         setUnreadMessages(response.data.unreadCount || 0);
         setMessageNotifications(response.data.recentMessages || []);
       } catch (error) {
@@ -356,8 +380,6 @@ const Navbar = () => {
     [handleNavClick]
   );
 
-  
-
   const handleLogout = useCallback(() => {
     Swal.fire({
       title: "Are you sure?",
@@ -493,7 +515,11 @@ const Navbar = () => {
                   label={item.label}
                   icon={item.icon}
                   active={activeNav === item.label}
-                  onClick={item.label === "Messages" ? handleMessagesClick : () => handleNavClick(item.label)}
+                  onClick={
+                    item.label === "Messages"
+                      ? handleMessagesClick
+                      : () => handleNavClick(item.label)
+                  }
                   notification={item.notification}
                 />
               ))}
@@ -503,10 +529,11 @@ const Navbar = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`relative flex flex-col items-center p-2 rounded-xl min-w-16 transition-colors ${aiToolsItems.some((item) => activeNav === item.label)
-                    ? "text-purple-600 bg-purple-50"
-                    : "text-gray-600 hover:bg-gray-50"
-                    }`}
+                  className={`relative flex flex-col items-center p-2 rounded-xl min-w-16 transition-colors ${
+                    aiToolsItems.some((item) => activeNav === item.label)
+                      ? "text-purple-600 bg-purple-50"
+                      : "text-gray-600 hover:bg-gray-50"
+                  }`}
                   onClick={() => setShowAIToolsMenu(!showAIToolsMenu)}
                 >
                   <div className="relative">
@@ -530,10 +557,11 @@ const Navbar = () => {
                         <button
                           key={item.label}
                           onClick={() => handleAIToolClick(item.label)}
-                          className={`w-full px-4 py-2 text-left text-sm flex items-center space-x-3 transition-colors ${activeNav === item.label
-                            ? "bg-purple-50 text-purple-600"
-                            : "text-gray-700 hover:bg-gray-50"
-                            }`}
+                          className={`w-full px-4 py-2 text-left text-sm flex items-center space-x-3 transition-colors ${
+                            activeNav === item.label
+                              ? "bg-purple-50 text-purple-600"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
                         >
                           <item.icon className="w-4 h-4" />
                           <span>{item.label}</span>
@@ -566,94 +594,110 @@ const Navbar = () => {
 
               {/* Profile Menu */}
               <div className="relative">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`flex items-center space-x-2 p-2 rounded-xl transition-colors ${activeNav === "Profile"
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-600 hover:bg-gray-50"
-                    }`}
-                  onClick={() => setShowProfileMenu(!showProfileMenu)}
-                >
-                  <div className="relative">
-                    <img
-                      src={userProfile?.profileImage || userAvatar}
-                      alt={userDisplayName}
-                      className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = getFallbackAvatar();
-                      }}
-                    />
-                    {isPremiumUser && (
-                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border-2 border-white flex items-center justify-center">
-                        <Star className="w-2 h-2 text-white fill-current" />
-                      </div>
-                    )}
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </motion.button>
-
-                <AnimatePresence>
-                  {showProfileMenu && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50"
+                {user ? (
+                  // ✅ If user is logged in → Show profile icon dropdown
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`flex items-center space-x-2 p-2 rounded-xl transition-colors ${
+                        activeNav === "Profile"
+                          ? "bg-blue-50 text-blue-600"
+                          : "text-gray-600 hover:bg-gray-50"
+                      }`}
+                      onClick={() => setShowProfileMenu(!showProfileMenu)}
                     >
-                      {/* User Info */}
-                      {user ? (
-                        <>
+                      <div className="relative w-8 h-8">
+                        {userProfile?.profileImage ? (
+                          <img
+                            src={userProfile.profileImage}
+                            alt={userDisplayName}
+                            className="w-8 h-8 rounded-full object-cover "
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = getFallbackAvatar();
+                            }}
+                          />
+                        ) : (
+                          // Generate avatar from name initials
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold "
+                            style={{
+                              backgroundColor: stringToColor(
+                                userDisplayName || "User"
+                              ),
+                            }}
+                          >
+                            {getInitials(userDisplayName || "U")}
+                          </div>
+                        )}
+
+                        {/* Premium badge */}
+                        {isPremiumUser && (
+                          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border-2 border-white flex items-center justify-center">
+                            <Star className="w-2 h-2 text-white fill-current" />
+                          </div>
+                        )}
+                      </div>
+                      <ChevronDown className="w-4 h-4" />
+                    </motion.button>
+
+                    {/* Profile dropdown */}
+                    <AnimatePresence>
+                      {showProfileMenu && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50"
+                        >
                           <div className="px-4 py-3 border-b border-gray-100">
                             <div className="flex items-center space-x-3">
-                              <div className="relative">
-                                <img
-                                  src={userProfile?.profileImage || userAvatar}
-                                  alt={userDisplayName}
-                                  className="w-12 h-12 rounded-full object-cover border border-gray-200"
-                                  onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = getFallbackAvatar();
-                                  }}
-                                />
+                              {/* Avatar display (image or initials) */}
+                              <div className="relative w-8 h-8">
+                                {userProfile?.profileImage ? (
+                                  <img
+                                    src={userProfile.profileImage}
+                                    alt={userDisplayName}
+                                    className="w-8 h-8 rounded-full object-cover "
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = getFallbackAvatar();
+                                    }}
+                                  />
+                                ) : (
+                                  // Generate avatar from name initials
+                                  <div
+                                    className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold "
+                                    style={{
+                                      backgroundColor: stringToColor(
+                                        userDisplayName || "User"
+                                      ),
+                                    }}
+                                  >
+                                    {getInitials(userDisplayName || "U")}
+                                  </div>
+                                )}
+
+                                {/* Premium badge */}
                                 {isPremiumUser && (
-                                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 rounded-full border-2 border-white flex items-center justify-center">
-                                    <Crown className="w-2 h-2 text-white fill-current" />
+                                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border-2 border-white flex items-center justify-center">
+                                    <Star className="w-2 h-2 text-white fill-current" />
                                   </div>
                                 )}
                               </div>
+
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center space-x-2">
-                                  <p className="font-semibold text-gray-900 truncate">
-                                    {userDisplayName}
-                                  </p>
-                                  {isPremiumUser && (
-                                    <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full font-medium flex items-center space-x-1">
-                                      <Crown className="w-3 h-3" />
-                                      <span>Premium</span>
-                                    </span>
-                                  )}
-                                </div>
+                                <p className="font-semibold text-gray-900 truncate">
+                                  {userDisplayName}
+                                </p>
                                 <p className="text-sm text-gray-600 truncate">
                                   {userEmail}
                                 </p>
-                                {userProfile?.aiCredits && (
-                                  <p className="text-xs text-green-600 font-medium mt-1">
-                                    {userProfile.aiCredits.toLocaleString()} AI
-                                    Credits
-                                  </p>
-                                )}
-                                {unreadMessages > 0 && (
-                                  <p className="text-xs text-blue-600 font-medium mt-1">
-                                    {unreadMessages} unread message{unreadMessages !== 1 ? 's' : ''}
-                                  </p>
-                                )}
                               </div>
                             </div>
                           </div>
 
-                          {/* Menu Items for logged in users */}
                           <div className="py-1">
                             <button
                               onClick={() => handleNavClick("Profile")}
@@ -678,7 +722,6 @@ const Navbar = () => {
                             </button>
                           </div>
 
-                          {/* Logout */}
                           <div className="border-t border-gray-100 my-1" />
                           <button
                             onClick={handleLogout}
@@ -687,25 +730,25 @@ const Navbar = () => {
                             <LogOut className="w-4 h-4" />
                             <span>Sign Out</span>
                           </button>
-                        </>
-                      ) : (
-                        /* Show only Sign In button for non-logged in users */
-                        <div className="p-4">
-                          <h1 className="text-sm mb-2 text-center font-medium">
-                            You need to sign to access
-                          </h1>
-                          <button
-                            onClick={() => navigate("/auth/signin")}
-                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
-                          >
-                            <User className="w-4 h-4" />
-                            <span>Sign In</span>
-                          </button>
-                        </div>
+                        </motion.div>
                       )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    </AnimatePresence>
+                  </>
+                ) : (
+                  // if user not found
+                  <div className="w-full">
+                   <button
+  onClick={() => navigate("/auth/signin")}
+  className="flex items-center justify-center gap-2 w-full px-3 py-2.5 
+             bg-blue-600 text-white text-sm font-medium rounded-lg 
+             shadow-md hover:bg-blue-700 hover:shadow-lg 
+             active:scale-95 transition-all duration-300"
+>
+  <LogIn className="w-4 h-4" />
+  <span>Sign In</span>
+</button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -855,7 +898,8 @@ const Navbar = () => {
                       )}
                       {unreadMessages > 0 && (
                         <p className="text-xs text-blue-600 font-medium mt-1">
-                          {unreadMessages} unread message{unreadMessages !== 1 ? 's' : ''}
+                          {unreadMessages} unread message
+                          {unreadMessages !== 1 ? "s" : ""}
                         </p>
                       )}
                     </div>
@@ -899,7 +943,11 @@ const Navbar = () => {
                           key={item.label}
                           {...item}
                           active={activeNav === item.label}
-                          onClick={item.label === "Messages" ? handleMessagesClick : () => handleNavClick(item.label)}
+                          onClick={
+                            item.label === "Messages"
+                              ? handleMessagesClick
+                              : () => handleNavClick(item.label)
+                          }
                         />
                       ))}
                     </div>
@@ -983,7 +1031,11 @@ const Navbar = () => {
               icon={item.icon}
               label={item.label}
               active={activeNav === item.label}
-              onClick={item.label === "Messages" ? handleMessagesClick : () => handleNavClick(item.label)}
+              onClick={
+                item.label === "Messages"
+                  ? handleMessagesClick
+                  : () => handleNavClick(item.label)
+              }
               notification={item.notification}
             />
           ))}
@@ -1004,8 +1056,9 @@ const DesktopNavItem = ({
   <motion.button
     whileHover={{ scale: 1.05 }}
     whileTap={{ scale: 0.95 }}
-    className={`relative flex flex-col items-center p-2 rounded-xl min-w-16 transition-colors ${active ? "text-blue-600 bg-blue-50" : "text-gray-600 hover:bg-gray-50"
-      }`}
+    className={`relative flex flex-col items-center p-2 rounded-xl min-w-16 transition-colors ${
+      active ? "text-blue-600 bg-blue-50" : "text-gray-600 hover:bg-gray-50"
+    }`}
     onClick={onClick}
   >
     <div className="relative">
@@ -1021,12 +1074,13 @@ const DesktopNavItem = ({
 // Mobile Nav Item Component
 const MobileNavItem = ({ label, icon: Icon, active, onClick, premium }) => (
   <button
-    className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-colors ${active
-      ? premium
-        ? "bg-amber-50 text-amber-600"
-        : "bg-blue-50 text-blue-600"
-      : "text-gray-700 hover:bg-gray-50"
-      }`}
+    className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-colors ${
+      active
+        ? premium
+          ? "bg-amber-50 text-amber-600"
+          : "bg-blue-50 text-blue-600"
+        : "text-gray-700 hover:bg-gray-50"
+    }`}
     onClick={onClick}
   >
     <Icon className="w-5 h-5" />
@@ -1045,8 +1099,9 @@ const MobileBottomNavItem = ({
 }) => (
   <motion.button
     whileTap={{ scale: 0.95 }}
-    className={`relative flex flex-col items-center p-2 rounded-xl flex-1 transition-colors ${active ? "text-blue-600" : "text-gray-600"
-      }`}
+    className={`relative flex flex-col items-center p-2 rounded-xl flex-1 transition-colors ${
+      active ? "text-blue-600" : "text-gray-600"
+    }`}
     onClick={onClick}
   >
     <div className="relative">
