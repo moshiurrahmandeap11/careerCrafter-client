@@ -9,7 +9,9 @@ import AIMentorForHome from "./AIMentorForHome/AIMentorForHome";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import ReviewSection from "./ReviewSection/ReviewSection";
-import SuccessStories from "./SuccessStories/SuccessStories";
+import BuildFor from "./BuildFor/BuildFor";
+import Founder from "./Founder/Founder";
+import Launch from "./Launch/Launch";
 
 const Home = () => {
   useEffect(() => {
@@ -94,12 +96,17 @@ const Home = () => {
         </div>
       </div>
 
-      
       <section className="bg-white" data-aos="fade-up">
-        <SuccessStories />
+        <BuildFor />
       </section>
 
+      <section className="bg-white" data-aos="fade-up">
+        <Founder />
+      </section>
 
+      <section className="bg-white" data-aos="fade-up">
+        <Launch />
+      </section>
     </div>
   );
 };

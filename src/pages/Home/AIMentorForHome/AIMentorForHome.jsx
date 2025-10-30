@@ -54,7 +54,7 @@ const AIMentorForHome = () => {
     {
       title: "If You're Jobless Right Now",
       description: "Don't worry! Every successful career starts with a single step. Let's build your path together.",
-      emoji: "💼",
+      emoji: "",
       bgColor: "from-slate-600 to-slate-700",
       buttonColor: "from-emerald-500 to-emerald-600",
       icon: Briefcase
@@ -62,7 +62,7 @@ const AIMentorForHome = () => {
     {
       title: "If You're Seeking Jobs Right Now",
       description: "The perfect opportunity is waiting for you. Let me help you stand out from the crowd.",
-      emoji: "🎯",
+      emoji: "",
       bgColor: "from-blue-600 to-indigo-700",
       buttonColor: "from-amber-500 to-amber-600",
       icon: Target
@@ -70,7 +70,7 @@ const AIMentorForHome = () => {
     {
       title: "Can't Get Your Appropriate Job?",
       description: "Many face this challenge. With the right guidance, you'll find what you truly deserve.",
-      emoji: "🚀",
+      emoji: "",
       bgColor: "from-violet-600 to-purple-700",
       buttonColor: "from-cyan-500 to-cyan-600",
       icon: Rocket
@@ -78,7 +78,7 @@ const AIMentorForHome = () => {
     {
       title: "Feeling Stuck in Your Career?",
       description: "It's time for a change. Let's discover new opportunities that match your skills.",
-      emoji: "🌟",
+      emoji: "",
       bgColor: "from-rose-600 to-pink-700",
       buttonColor: "from-lime-500 to-lime-600",
       icon: TrendingUp
@@ -86,7 +86,7 @@ const AIMentorForHome = () => {
     {
       title: "Ready for Career Growth?",
       description: "Level up your career with personalized advice and actionable steps.",
-      emoji: "📈",
+      emoji: "",
       bgColor: "from-teal-600 to-cyan-700",
       buttonColor: "from-orange-500 to-orange-600",
       icon: Zap
