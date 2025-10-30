@@ -160,8 +160,8 @@ const Feed = () => {
   }
 
   return (
-    <div className="min-h-screen bg-transparent">
-      <div className="max-w-4xl mx-auto p-6">
+    <div className="bg-transparent ">
+      <div className=" p-6">
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-3">Opportunity Feed</h1>
@@ -199,7 +199,7 @@ const Feed = () => {
         {/* Feed Items */}
         <div className="space-y-6">
           {filteredItems.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+            <div className="bg-gray-50 rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
               <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Users className="w-10 h-10 text-gray-400" />
               </div>

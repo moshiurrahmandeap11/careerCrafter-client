@@ -7,13 +7,13 @@ const MyNetwork = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 max-w-7xl mx-auto lg:px-18 ">
+    <div className="min-h-screen w-11/12 mx-auto px-4 ">
       {/* Mobile Header with Tabs */}
       <NetworkMobileHeader onMenuClick={() => setMobileSidebarOpen(true)} />
       
       <div className="flex lg:pt-0"> {/* Increased padding for mobile to accommodate tabs */}
         {/* Sidebar - Hidden on mobile, visible on desktop */}
-        <div className="hidden lg:block lg:w-1/4 xl:w-1/5 min-h-screen bg-white border-r border-gray-200">
+        <div className="hidden lg:block lg:w-1/4 bg-white border-x border-gray-200">
           <NetworkSidebar />
         </div>
         

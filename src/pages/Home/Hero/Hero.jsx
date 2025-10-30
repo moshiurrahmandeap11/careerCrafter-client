@@ -92,7 +92,7 @@ const Hero = () => {
   return (
     <div className="relative w-full min-h-screen overflow-hidden bg-white">
       {/* Main Content */}
-      <div className="relative z-10 w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-10 w-11/12 mx-auto px-4  py-8">
         <motion.div 
           className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center"
           variants={containerVariants}
@@ -240,7 +240,7 @@ const Hero = () => {
 
       {/* Sponsors Section */}
       <div className="bg-gray-50 border-t border-gray-200 py-8 lg:py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-11/12 mx-auto px-4 ">
           <motion.div 
             className="text-center mb-6 lg:mb-8"
             initial={{ opacity: 0 }}
