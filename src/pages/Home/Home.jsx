@@ -104,7 +104,7 @@ const Home = () => {
         <Founder />
       </section>
 
-      <section className="bg-white" data-aos="fade-up">
+      <section className="bg-white mt-3" data-aos="fade-up">
         <Launch />
       </section>
     </div>
