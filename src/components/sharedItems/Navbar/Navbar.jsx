@@ -706,13 +706,13 @@ const Navbar = () => {
                               <User className="w-4 h-4" />
                               <span>Your Profile</span>
                             </button>
-                            <button
+                            {/* <button
                               onClick={() => handleDashboard("dashboard")}
                               className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
                             >
                               <User className="w-4 h-4" />
                               <span>Dashboard</span>
-                            </button>
+                            </button> */}
                           </div>
 
                           <div className="border-t border-gray-100 my-1" />

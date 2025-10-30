@@ -37,6 +37,15 @@ const VideoInterview = () => {
 
   // Initialize on component mount
   useEffect(() => {
+    // Check browser compatibility
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setErrors(prev => ({
+        ...prev,
+        general: 'Your browser does not support video recording. Please use Chrome, Firefox, or Edge.'
+      }));
+      return;
+    }
+
     checkPermissions();
     initializeVideo();
     
@@ -48,21 +57,23 @@ const VideoInterview = () => {
   // Check camera and microphone permissions
   const checkPermissions = async () => {
     try {
-      const cameraPermission = await navigator.permissions.query({ name: 'camera' });
-      const microphonePermission = await navigator.permissions.query({ name: 'microphone' });
-      
-      setPermissions({
-        camera: cameraPermission.state === 'granted',
-        microphone: microphonePermission.state === 'granted'
-      });
+      if (navigator.permissions && navigator.permissions.query) {
+        const cameraPermission = await navigator.permissions.query({ name: 'camera' });
+        const microphonePermission = await navigator.permissions.query({ name: 'microphone' });
+        
+        setPermissions({
+          camera: cameraPermission.state === 'granted',
+          microphone: microphonePermission.state === 'granted'
+        });
 
-      cameraPermission.onchange = () => {
-        setPermissions(prev => ({ ...prev, camera: cameraPermission.state === 'granted' }));
-      };
+        cameraPermission.onchange = () => {
+          setPermissions(prev => ({ ...prev, camera: cameraPermission.state === 'granted' }));
+        };
 
-      microphonePermission.onchange = () => {
-        setPermissions(prev => ({ ...prev, microphone: microphonePermission.state === 'granted' }));
-      };
+        microphonePermission.onchange = () => {
+          setPermissions(prev => ({ ...prev, microphone: microphonePermission.state === 'granted' }));
+        };
+      }
     } catch (error) {
       console.warn('Permission API not supported:', error);
     }
@@ -71,21 +82,42 @@ const VideoInterview = () => {
   // Initialize video stream with error handling
   const initializeVideo = async () => {
     try {
-      setErrors(prev => ({ ...prev, camera: '', microphone: '' }));
+      setErrors(prev => ({ ...prev, camera: '', microphone: '', general: '' }));
       
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      // Stop existing stream if any
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+
+      const constraints = {
         video: { 
-          width: 1280, 
-          height: 720,
-          frameRate: 30 
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30 }
         }, 
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
+          autoGainControl: true,
           sampleRate: 44100
         }
-      });
+      };
+
+      console.log('Requesting media with constraints:', constraints);
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       
+      // Check if we actually got tracks
+      const videoTracks = stream.getVideoTracks();
+      const audioTracks = stream.getAudioTracks();
+      
+      console.log('Media stream obtained:', {
+        videoTracks: videoTracks.length,
+        audioTracks: audioTracks.length,
+        videoReady: videoTracks[0]?.readyState,
+        audioReady: audioTracks[0]?.readyState
+      });
+
       streamRef.current = stream;
       
       if (videoRef.current) {
@@ -93,9 +125,6 @@ const VideoInterview = () => {
       }
 
       // Update permissions state
-      const videoTracks = stream.getVideoTracks();
-      const audioTracks = stream.getAudioTracks();
-      
       setPermissions({
         camera: videoTracks.length > 0 && videoTracks[0].readyState === 'live',
         microphone: audioTracks.length > 0 && audioTracks[0].readyState === 'live'
@@ -236,36 +265,56 @@ const VideoInterview = () => {
     try {
       audioChunksRef.current = [];
       
-      const options = {
-        audioBitsPerSecond: 128000,
-        videoBitsPerSecond: 2500000,
-        mimeType: 'audio/webm;codecs=opus'
-      };
+      // Supported MIME types এর লিস্ট
+      const mimeTypes = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/ogg;codecs=opus',
+        'audio/wav'
+      ];
 
-      // Find supported mimeType
-      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options.mimeType = 'audio/webm';
+      let selectedMimeType = '';
+      
+      // প্রথম supported MIME type select করুন
+      for (const mimeType of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(mimeType)) {
+          selectedMimeType = mimeType;
+          break;
+        }
       }
+
+      // যদি কোন supported MIME type না থাকে, default options ব্যবহার করুন
+      const options = selectedMimeType ? { mimeType: selectedMimeType } : {};
+
+      console.log('Using MIME type:', selectedMimeType || 'default');
 
       mediaRecorderRef.current = new MediaRecorder(streamRef.current, options);
 
       mediaRecorderRef.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
+        if (event.data && event.data.size > 0) {
           audioChunksRef.current.push(event.data);
         }
       };
 
       mediaRecorderRef.current.onstop = processAudioResponse;
+      
       mediaRecorderRef.current.onerror = (event) => {
         console.error('MediaRecorder error:', event);
-        setErrors(prev => ({ ...prev, general: 'Recording failed. Please try again.' }));
+        setErrors(prev => ({ 
+          ...prev, 
+          general: `Recording failed: ${event.error?.message || 'Unknown error'}` 
+        }));
         setIsRecording(false);
       };
 
-      mediaRecorderRef.current.start(1000); // Collect data every second
+      // Start recording with timeslice
+      mediaRecorderRef.current.start(1000);
       setIsRecording(true);
       
-      // Auto-stop after 2 minutes to prevent very long recordings
+      console.log('Recording started successfully');
+
+      // Auto-stop after 2 minutes
       silenceTimerRef.current = setTimeout(() => {
         if (isRecording) {
           stopRecording();
@@ -274,7 +323,19 @@ const VideoInterview = () => {
 
     } catch (error) {
       console.error('Error starting recording:', error);
-      setErrors(prev => ({ ...prev, general: 'Failed to start recording' }));
+      
+      let errorMessage = 'Failed to start recording';
+      if (error.name === 'NotSupportedError') {
+        errorMessage = 'Your browser does not support audio recording. Please try Chrome, Firefox, or Edge.';
+      } else if (error.name === 'InvalidStateError') {
+        errorMessage = 'Media stream is not ready. Please refresh and try again.';
+      }
+      
+      setErrors(prev => ({ 
+        ...prev, 
+        general: errorMessage 
+      }));
+      setIsRecording(false);
     }
   };
 
@@ -306,7 +367,6 @@ const VideoInterview = () => {
       const duration = Math.round(audioBlob.size / 16000); // Approximate duration
 
       // For now, we'll use a simulated transcription
-      // In production, integrate with speech-to-text API like Google Speech-to-Text, AWS Transcribe, etc.
       const simulatedResponse = await simulateSpeechToText(audioBlob);
       
       await sendTextResponse(simulatedResponse, duration, audioUrl);
@@ -326,20 +386,6 @@ const VideoInterview = () => {
   const simulateSpeechToText = async (audioBlob) => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // In real implementation, you would:
-    // 1. Send audioBlob to your speech-to-text service
-    // 2. Return the transcribed text
-    // Example with Google Speech-to-Text:
-    /*
-    const response = await fetch('/api/speech-to-text', {
-      method: 'POST',
-      body: audioBlob,
-      headers: { 'Content-Type': 'audio/webm' }
-    });
-    const data = await response.json();
-    return data.transcript;
-    */
     
     return "This is a simulated transcription of your audio response. In a real implementation, this would be the actual text from speech-to-text service.";
   };
