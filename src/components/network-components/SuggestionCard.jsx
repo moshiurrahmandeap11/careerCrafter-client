@@ -127,19 +127,6 @@ const SuggestionCard = ({ user }) => {
       <div className="flex flex-col sm:flex-row items-start gap-4 mb-4">
         {/* Avatar Section */}
         <div className="flex justify-center sm:justify-start relative">
-          {profileImage && !imageError ? (
-            <img
-              src={profileImage}
-              alt={fullName}
-              className="w-16 h-16 rounded-xl object-cover border border-blue-200"
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            <FallbackAvatar
-              name={fullName}
-              className="w-16 h-16 rounded-xl text-lg"
-            />
-          )}
 
           {isPremium && (
             <div className="absolute -top-2 -right-2 bg-yellow-400 text-gray-900 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
@@ -150,8 +137,8 @@ const SuggestionCard = ({ user }) => {
         </div>
 
         {/* User Details */}
-        <div className="flex-1 text-center sm:text-left">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+        <div className="flex-1 text-left">
+          <div className="flex md:flex-col flex-row  gap-2 mb-2">
             <h2 className="text-lg font-semibold text-gray-800 flex items-center justify-center sm:justify-start gap-2">
               <User className="w-4 h-4 text-gray-500" />
               {fullName}
@@ -159,7 +146,7 @@ const SuggestionCard = ({ user }) => {
           </div>
 
           <div className="space-y-1 mb-3">
-            <p className="text-gray-500 text-sm flex items-center justify-center sm:justify-start gap-2">
+            <p className="text-gray-500 text-xs md:text-sm flex items-center sm:justify-start gap-2">
               <Mail className="w-3 h-3" />
               {email}
             </p>
@@ -170,7 +157,7 @@ const SuggestionCard = ({ user }) => {
 
           {/* Tags */}
           {tags && tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 justify-center sm:justify-start">
+            <div className="flex flex-wrap gap-1 justify-start ">
               {tags.slice(0, 3).map((tag, index) => (
                 <span
                   key={index}

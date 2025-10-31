@@ -72,11 +72,11 @@ const ConnectionsPage = () => {
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <h1 className="text-xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
                 <Users className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
                 My Connections
               </h1>
-              <p className="text-gray-600 mt-2">
+              <p className="text-gray-600 mt-2 text-sm">
                 Manage your professional network
               </p>
             </div>

@@ -35,7 +35,7 @@ const NetworkMobileHeader = ({ onMenuClick }) => {
       id: 'all-users',
       path: '/network/all-user',
       icon: UsersRound,
-      label: 'All Users',
+      label: 'All',
       count: users.length
     }
   ];
