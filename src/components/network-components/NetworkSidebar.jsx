@@ -47,7 +47,7 @@ const NetworkSidebar = ({ onClose }) => {
     ];
 
     return (
-        <div className="sticky top-16 h-[calc(100vh-4rem)] flex flex-col overflow-y-auto bg-white border-r border-gray-200">
+        <div className="sticky top-16 h-[calc(100vh-4rem)] flex flex-col overflow-y-auto bg-white border-l border-gray-200">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <div>

@@ -112,6 +112,10 @@ const MessagesPage = () => {
     }
   };
 
+    useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const fetchLastMessage = async (friendEmail) => {
     if (!user?.email) return;
 

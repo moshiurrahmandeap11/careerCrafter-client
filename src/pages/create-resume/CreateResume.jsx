@@ -1002,13 +1002,13 @@ const CreateResume = () => {
                   )}
                 </button>
 
-                <button
+                {/* <button
                   onClick={() => dispatch(setShowPreview(!showPreview))}
                   className="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 hover:border-blue-500 hover:text-blue-600"
                 >
                   <Eye className="w-4 h-4" />
                   <span>{showPreview ? "Hide Preview" : "Show Preview"}</span>
-                </button>
+                </button> */}
 
                 {showPreview && (
                   <button

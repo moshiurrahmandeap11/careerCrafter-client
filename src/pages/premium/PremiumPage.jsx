@@ -79,7 +79,11 @@ const PremiumContent = () => {
       setUserProfile(response.data);
     }
     fetchUser();
-  },[email])
+  }, [email])
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Select data from Redux store
   const plans = useSelector(selectPlans);
@@ -129,11 +133,11 @@ const PremiumContent = () => {
 
   const handlePlanSelect = async (planId) => {
     dispatch(selectPlan(planId));
-    
+
     const selectedPlan = plans.find(p => p.id === planId);
     if (selectedPlan) {
       const amount = billingCycle === 'yearly' ? selectedPlan.yearlyPrice : selectedPlan.monthlyPrice;
-      
+
       await dispatch(createStripePaymentIntent({
         planId,
         amount,
@@ -141,7 +145,7 @@ const PremiumContent = () => {
         userEmail: user?.email
       }));
     }
-    
+
     setShowPaymentModal(true);
   };
 
@@ -278,7 +282,7 @@ const PremiumContent = () => {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
             Choose Your Plan
           </h1>
-          
+
           <p className="text-gray-600 max-w-lg mx-auto text-sm md:text-base">
             Get better job matches and more opportunities with our premium features
           </p>
@@ -297,21 +301,19 @@ const PremiumContent = () => {
           <div className="bg-gray-100 p-1 rounded-lg inline-flex">
             <button
               onClick={() => handleBillingCycleChange('monthly')}
-              className={`px-4 py-2 rounded text-sm font-medium ${
-                billingCycle === 'monthly'
+              className={`px-4 py-2 rounded text-sm font-medium ${billingCycle === 'monthly'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
-              }`}
+                }`}
             >
               Monthly
             </button>
             <button
               onClick={() => handleBillingCycleChange('yearly')}
-              className={`px-4 py-2 rounded text-sm font-medium ${
-                billingCycle === 'yearly'
+              className={`px-4 py-2 rounded text-sm font-medium ${billingCycle === 'yearly'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
-              }`}
+                }`}
             >
               Yearly
               <span className="ml-1 text-xs text-green-600">Save 20%</span>
@@ -344,7 +346,7 @@ const PremiumContent = () => {
               <div className="text-center font-medium text-sm text-gray-900">Standard</div>
               <div className="text-center font-medium text-sm text-gray-900">Premium</div>
             </div>
-            
+
             {plans[0]?.features?.map((feature, index) => (
               <div key={index} className="grid grid-cols-4 gap-4 p-4 border-b border-gray-100 last:border-b-0">
                 <div className="text-sm text-gray-700">{feature.name}</div>
@@ -384,14 +386,13 @@ const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits, us
   };
 
   return (
-    <div className={`relative border rounded-lg p-5 ${
-      isCurrentPlan
+    <div className={`relative border rounded-lg p-5 ${isCurrentPlan
         ? 'border-green-400 bg-green-50'
         : isPopular
-        ? 'border-blue-400 bg-blue-50'
-        : 'border-gray-200 bg-white hover:border-gray-300'
-    } transition-colors`}>
-      
+          ? 'border-blue-400 bg-blue-50'
+          : 'border-gray-200 bg-white hover:border-gray-300'
+      } transition-colors`}>
+
       {/* Current Plan Badge */}
       {isCurrentPlan && (
         <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
@@ -454,9 +455,8 @@ const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits, us
             ) : (
               <X className="w-4 h-4 text-gray-300 flex-shrink-0" />
             )}
-            <span className={`text-xs ${
-              feature.included ? 'text-gray-700' : 'text-gray-400'
-            }`}>
+            <span className={`text-xs ${feature.included ? 'text-gray-700' : 'text-gray-400'
+              }`}>
               {feature.name}
             </span>
           </div>
@@ -472,13 +472,12 @@ const PricingCard = ({ plan, billingCycle, index, onSelect, calculateCredits, us
       <button
         onClick={() => !isCurrentPlan && onSelect(plan.id)}
         disabled={isCurrentPlan}
-        className={`w-full py-2 rounded-lg text-sm font-medium ${
-          isCurrentPlan
+        className={`w-full py-2 rounded-lg text-sm font-medium ${isCurrentPlan
             ? 'bg-green-500 text-white cursor-not-allowed'
             : isPopular
-            ? 'bg-blue-500 text-white hover:bg-blue-600'
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-        } transition-colors`}
+              ? 'bg-blue-500 text-white hover:bg-blue-600'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          } transition-colors`}
       >
         {isCurrentPlan ? (
           <div className="flex items-center justify-center gap-1">
@@ -502,7 +501,7 @@ const StripeCardForm = ({ onSubmit, processing, amount, clientSecret }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!stripe || !elements) {
       return;
     }
@@ -637,16 +636,14 @@ const PaymentModal = ({
                   <button
                     key={method.id}
                     onClick={() => setPaymentMethod(method.id)}
-                    className={`w-full p-3 border rounded text-left ${
-                      paymentMethod === method.id
+                    className={`w-full p-3 border rounded text-left ${paymentMethod === method.id
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-3">
-                      <method.icon className={`w-5 h-5 ${
-                        paymentMethod === method.id ? 'text-blue-600' : 'text-gray-600'
-                      }`} />
+                      <method.icon className={`w-5 h-5 ${paymentMethod === method.id ? 'text-blue-600' : 'text-gray-600'
+                        }`} />
                       <div className="flex-1">
                         <div className="font-medium text-gray-900 text-sm">{method.name}</div>
                         <div className="text-xs text-gray-500">{method.description}</div>
@@ -736,8 +733,8 @@ const PaymentModal = ({
                     className="w-full mt-3 bg-blue-500 text-white py-2 rounded font-medium hover:bg-blue-600 flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <span>
-                      {paymentMethod === 'card' 
-                        ? `Pay $${displayPrice}` 
+                      {paymentMethod === 'card'
+                        ? `Pay $${displayPrice}`
                         : `Continue - $${displayPrice}`
                       }
                     </span>
