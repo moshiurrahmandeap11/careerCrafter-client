@@ -215,7 +215,7 @@ const NotificationPage = () => {
               rotate: { duration: 2, repeat: Infinity, ease: "linear" },
               scale: { duration: 1, repeat: Infinity },
             }}
-            className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center"
+            className="w-16 h-16 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center"
           >
             <Bell className="w-8 h-8 text-white" />
           </motion.div>

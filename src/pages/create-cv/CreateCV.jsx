@@ -100,6 +100,10 @@ const CreateCV = () => {
     }
   }, [toast.show, dispatch]);
 
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   // Event handlers
   const handleInputChange = (field, value) => {
     dispatch(updatePersonalInfo({ field, value }));
@@ -193,11 +197,10 @@ const CreateCV = () => {
         {/* Toast Notification */}
         {toast.show && (
           <div
-            className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-4 py-2 rounded-lg text-sm ${
-              toast.type === "error"
+            className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-4 py-2 rounded-lg text-sm ${toast.type === "error"
                 ? "bg-red-500 text-white"
                 : "bg-green-500 text-white"
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2">
               {toast.type === "error" ? (
@@ -265,11 +268,10 @@ const CreateCV = () => {
                           <button
                             key={tab.id}
                             onClick={() => dispatch(setActiveTab(tab.id))}
-                            className={`flex items-center gap-4 w-full px-4 py-3 text-left rounded-xl mb-2 transition-all ${
-                              isActive
+                            className={`flex items-center gap-4 w-full px-4 py-3 text-left rounded-xl mb-2 transition-all ${isActive
                                 ? "bg-blue-50 text-blue-600 border-2 border-blue-200 shadow-sm"
                                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                            }`}
+                              }`}
                           >
                             <Icon className="w-5 h-5" />
                             <span className="font-medium">{tab.label}</span>
@@ -290,11 +292,10 @@ const CreateCV = () => {
                       <button
                         key={tab.id}
                         onClick={() => dispatch(setActiveTab(tab.id))}
-                        className={`flex items-center gap-3 px-6 py-4 font-medium border-b-2 whitespace-nowrap transition-all ${
-                          activeTab === tab.id
+                        className={`flex items-center gap-3 px-6 py-4 font-medium border-b-2 whitespace-nowrap transition-all ${activeTab === tab.id
                             ? "border-blue-500 text-blue-600 bg-white rounded-t-lg"
                             : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-white hover:rounded-t-lg"
-                        }`}
+                          }`}
                       >
                         <Icon className="w-5 h-5" />
                         <span>{tab.label}</span>
@@ -1714,10 +1715,9 @@ const CreateCV = () => {
                             <p className="text-gray-500 text-xs">
                               {edu.startDate}{" "}
                               {edu.endDate &&
-                                ` - ${
-                                  edu.currentlyStudying
-                                    ? "Present"
-                                    : edu.endDate
+                                ` - ${edu.currentlyStudying
+                                  ? "Present"
+                                  : edu.endDate
                                 }`}
                               {edu.location && ` | ${edu.location}`}
                             </p>
@@ -1740,8 +1740,7 @@ const CreateCV = () => {
                             <p className="text-gray-500 text-xs">
                               {exp.startDate}{" "}
                               {exp.endDate &&
-                                ` - ${
-                                  exp.currentlyWorking ? "Present" : exp.endDate
+                                ` - ${exp.currentlyWorking ? "Present" : exp.endDate
                                 }`}
                               {exp.location && ` | ${exp.location}`}
                             </p>

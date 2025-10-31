@@ -195,7 +195,7 @@ const AiChatBot = ({ onClose }) => {
     if (chatLoading) {
         return (
             <div className="fixed inset-0 md:absolute md:bottom-20 md:right-0 md:top-auto md:left-auto w-full h-full md:w-[95vw] md:max-w-[450px] md:h-[600px] lg:h-[700px] bg-white md:rounded-2xl shadow-2xl flex flex-col border border-gray-200 z-50">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 md:p-5 md:rounded-t-2xl flex justify-between items-center">
+                <div className="bg-blue-600 p-4 md:p-5 md:rounded-t-2xl flex justify-between items-center">
                     <h3 className="text-white font-semibold text-lg md:text-xl">CareerCrafter AI Assistant</h3>
                     <button 
                         onClick={onClose} 
@@ -217,7 +217,7 @@ const AiChatBot = ({ onClose }) => {
     return (
         <div className="fixed inset-0 md:absolute md:bottom-20 md:right-0 md:top-auto md:left-auto w-full h-full md:w-[95vw] md:max-w-[450px] md:h-[600px] lg:h-[700px] bg-white md:rounded-2xl shadow-2xl flex flex-col border border-gray-200 z-50">
             {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 md:p-5 md:rounded-t-2xl flex justify-between items-center flex-shrink-0">
+            <div className="bg-blue-600 p-4 md:p-5 md:rounded-t-2xl flex justify-between items-center flex-shrink-0">
                 <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
                         <span className="text-blue-600 font-bold text-base md:text-lg">AI</span>

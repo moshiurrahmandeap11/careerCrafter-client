@@ -59,6 +59,10 @@ const AiJobMatch = () => {
     loadData();
   }, [email, fetchUserProfile, fetchJobs]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Handle job matching
   const handleJobMatch = async () => {
     if (!userProfile?._id) {
@@ -92,7 +96,7 @@ const AiJobMatch = () => {
       console.error("Job matching error:", err);
       setError(
         err.response?.data?.message ||
-          "Failed to perform job matching. Please try again."
+        "Failed to perform job matching. Please try again."
       );
     } finally {
       setLoading(false);
@@ -328,12 +332,12 @@ const AiJobMatch = () => {
                 <TabButton
                   active={activeTab === "profile"}
                   onClick={() => setActiveTab("profile")}
-                  label="Profile Overview"
+                  label="Overview"
                 />
                 <TabButton
                   active={activeTab === "results"}
                   onClick={() => setActiveTab("results")}
-                  label="Job Matches"
+                  label="Matches"
                   badge={matchedJobs.length > 0 ? matchedJobs.length : null}
                 />
               </div>
@@ -377,18 +381,16 @@ const ProfileItem = ({ label, value }) => (
 const TabButton = ({ active, onClick, label, badge }) => (
   <button
     onClick={onClick}
-    className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-colors flex items-center justify-center gap-2 ${
-      active
+    className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-colors flex items-center justify-center gap-2 ${active
         ? "text-blue-600 bg-white border-b-2 border-blue-600"
         : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-    }`}
+      }`}
   >
     <span>{label}</span>
     {badge !== null && (
       <span
-        className={`px-2 py-0.5 rounded-full text-xs ${
-          active ? "bg-blue-100 text-blue-600" : "bg-gray-200 text-gray-600"
-        }`}
+        className={`px-2 py-0.5 rounded-full text-xs ${active ? "bg-blue-100 text-blue-600" : "bg-gray-200 text-gray-600"
+          }`}
       >
         {badge}
       </span>
@@ -503,7 +505,7 @@ const ResultsTab = ({
                       {job.company.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-1 hover:text-blue-600 transition-colors cursor-pointer">
+                      <h3 className="font-bold text-gray-900 mb-1 hover:text-blue-600 transition-colors cursor-pointer">
                         {job.title}
                       </h3>
                       <p className="text-blue-600 font-medium text-sm">
@@ -567,7 +569,7 @@ const ResultsTab = ({
               )}
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+              <div className="flex flex-col md:flex-row gap-2 pt-4 border-t border-gray-200">
                 <button
                   onClick={() => handleApply(job._id)}
                   className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"

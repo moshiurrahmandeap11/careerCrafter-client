@@ -87,43 +87,6 @@ const About = () => {
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        {/* Hero Section */}
-        <section className="py-20 px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl font-bold text-gray-900 mb-6">
-              About Career Crafter
-            </h1>
-            <p className="text-xl text-gray-600 mb-8">
-              We're on a mission to revolutionize how professionals discover opportunities, 
-              build their careers, and connect with the right people using the power of AI.
-            </p>
-            <div className="w-24 h-1 bg-blue-600 mx-auto rounded-full"></div>
-          </div>
-        </section>
-
-        {/* Stats Section */}
-        <section className="py-16 px-4 bg-white">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {stats.map((stat, index) => {
-                const Icon = stat.icon;
-                return (
-                  <div key={index} className="text-center">
-                    <div className="flex justify-center mb-4">
-                      <div className="p-4 bg-blue-100 rounded-full">
-                        <Icon className="w-8 h-8 text-blue-600" />
-                      </div>
-                    </div>
-                    <div className="text-3xl font-bold text-gray-900 mb-2">
-                      {stat.value}
-                    </div>
-                    <div className="text-gray-600">{stat.label}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
 
         {/* Story Section */}
         <section className="py-20 px-4">
@@ -154,7 +117,7 @@ const About = () => {
         </section>
 
         {/* Values Section */}
-        <section className="py-20 px-4 bg-gradient-to-r from-blue-600 to-purple-600">
+        <section className="py-20 px-4 bg-blue-600">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-4xl font-bold text-white mb-12 text-center">
               What Drives Us

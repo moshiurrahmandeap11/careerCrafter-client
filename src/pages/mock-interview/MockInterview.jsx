@@ -91,6 +91,10 @@ const MockInterview = () => {
     }
   }, [browserSupportsSpeechRecognition]);
 
+    useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Fixed: Sync transcript with currentAnswer in real-time without duplication
   useEffect(() => {
     if (

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Briefcase, GraduationCap, FilePlus2 } from "lucide-react";
 
@@ -25,6 +25,10 @@ const Business = () => {
       route: "/cc/post",
     },
   ];
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">

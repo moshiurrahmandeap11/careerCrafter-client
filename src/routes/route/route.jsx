@@ -51,6 +51,8 @@ import SuggestionCard from "../../components/network-components/SuggestionCard";
 import SuggetionConnectPage from "../../pages/myNetwork/MyNetoworkPage/SuggetionConnectPage";
 import VideoInterview from "../../pages/mock-interview/VideoInterview/VideoInterview";
 import Companies from "../../pages/Companies/Companies";
+import SuccessStories from "../../pages/SuccessStories/SuccessStories";
+import BlogPage from "../../pages/BlogPage/BlogPage";
 
 
 
@@ -113,6 +115,10 @@ export const route = createBrowserRouter([
             element: <AllUserPAge></AllUserPAge>
           }
         ]
+      },
+      {
+        path: '/blog',
+        Component: BlogPage,
       },
       {
         path: "/messages",
@@ -193,6 +199,10 @@ export const route = createBrowserRouter([
       {
         path: '/companies',
         Component: Companies,
+      },
+      {
+        path: '/success-stories',
+        Component: SuccessStories
       }
     ],
   },

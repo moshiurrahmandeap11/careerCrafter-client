@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { 
-  Briefcase, 
-  Building, 
-  MapPin, 
-  Calendar, 
+import {
+  Briefcase,
+  Building,
+  MapPin,
+  Calendar,
   Clock,
   CheckCircle,
   XCircle,
@@ -36,7 +36,7 @@ const AppliedJobs = () => {
     try {
       setLoading(true);
       const response = await axiosIntense.get(`/applications/user/${user.uid}`);
-      
+
       if (response.data.success) {
         // Fetch job details for each application
         const applicationsWithDetails = await Promise.all(
@@ -56,7 +56,7 @@ const AppliedJobs = () => {
             }
           })
         );
-        
+
         setApplications(applicationsWithDetails);
       }
     } catch (error) {
@@ -124,10 +124,10 @@ const AppliedJobs = () => {
   // Filter applications based on search term and status
   const filteredApplications = applications.filter(application => {
     const matchesSearch = application.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         application.company?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+      application.company?.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesStatus = statusFilter === 'all' || application.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -149,7 +149,7 @@ const AppliedJobs = () => {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
         <div className="flex items-center space-x-3 mb-4 lg:mb-0">
@@ -175,16 +175,14 @@ const AppliedJobs = () => {
             <button
               key={key}
               onClick={() => setStatusFilter(key)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-1 ${
-                statusFilter === key
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-1 ${statusFilter === key
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <span>{label}</span>
-              <span className={`px-1.5 py-0.5 rounded text-xs ${
-                statusFilter === key ? 'bg-blue-500' : 'bg-gray-300'
-              }`}>
+              <span className={`px-1.5 py-0.5 rounded text-xs ${statusFilter === key ? 'bg-blue-500' : 'bg-gray-300'
+                }`}>
                 {count}
               </span>
             </button>
@@ -217,7 +215,7 @@ const AppliedJobs = () => {
               {applications.length === 0 ? 'No Applications Yet' : 'No Matching Applications'}
             </h3>
             <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              {applications.length === 0 
+              {applications.length === 0
                 ? "You haven't applied to any jobs yet. Start browsing opportunities and apply to your dream jobs!"
                 : "No applications match your current search criteria. Try adjusting your filters."
               }
@@ -312,7 +310,7 @@ const AppliedJobs = () => {
                     <Eye className="w-4 h-4" />
                     View Job
                   </Link>
-                  
+
                   {application.jobDetails && (
                     <div className="text-xs text-gray-500 text-center">
                       {application.jobDetails.views || 0} views • {application.jobDetails.applications || 0} applicants

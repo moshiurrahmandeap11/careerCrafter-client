@@ -133,7 +133,7 @@ const AdminDashboard = () => {
                       e.target.nextSibling.style.display = 'flex';
                     }}
                   />
-                  <div className="w-full h-full bg-gradient-to-br from-green-400 to-blue-500 hidden items-center justify-center font-bold text-white">
+                  <div className="w-full h-full bg-blue-500 hidden items-center justify-center font-bold text-white">
                     <User className="w-5 h-5" />
                   </div>
                 </div>
@@ -155,7 +155,7 @@ const AdminDashboard = () => {
                             e.target.nextSibling.style.display = 'flex';
                           }}
                         />
-                        <div className="w-full h-full bg-gradient-to-br from-green-400 to-blue-500 hidden items-center justify-center font-bold text-white">
+                        <div className="w-full h-full bg-blue-500 hidden items-center justify-center font-bold text-white">
                           <User className="w-6 h-6" />
                         </div>
                       </div>
