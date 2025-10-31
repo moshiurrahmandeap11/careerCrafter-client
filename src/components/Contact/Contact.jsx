@@ -124,7 +124,7 @@ const Contact = () => {
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         {/* Hero Section */}
-        <section className="py-20 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <section className="py-20 px-4 bg-blue-600 text-white">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-5xl font-bold mb-6">
               Get in Touch
@@ -298,7 +298,7 @@ const Contact = () => {
                 ))}
               </div>
 
-              <div className="mt-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white">
+              <div className="mt-8 bg-blue-600 rounded-xl p-8 text-white">
                 <h3 className="text-2xl font-bold mb-4">
                   Need Immediate Help?
                 </h3>

@@ -75,6 +75,10 @@ const ResumeCheck = () => {
     }
   }, [toast.show, dispatch]);
 
+    useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {

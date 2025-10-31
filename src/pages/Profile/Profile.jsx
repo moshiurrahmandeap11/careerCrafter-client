@@ -50,6 +50,10 @@ const Profile = () => {
         }
     }, [user?.email]);
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     const fetchProfile = async () => {
         try {
             setProfileLoading(true);
@@ -258,7 +262,7 @@ const Profile = () => {
                                     <p className="text-gray-500 text-sm">Manage your account settings</p>
                                 </div>
                             </div>
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center flex-wrap gap-3">
                                 <button
                                     onClick={handleGetHired}
                                     className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium py-2.5 px-6 rounded-xl transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl"
@@ -351,7 +355,7 @@ const Profile = () => {
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
                                     <AppliedJobs />
                                 </div>
 

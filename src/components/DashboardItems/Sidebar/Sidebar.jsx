@@ -107,7 +107,7 @@ const Sidebar = ({ isOpen, toggleSidebar, activeRoute, setActiveRoute }) => {
                     w-full flex items-center gap-3 px-4 py-3 rounded-lg
                     transition-all duration-200 group
                     ${isActive 
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg' 
+                      ? 'bg-blue-600 shadow-lg' 
                       : 'hover:bg-slate-700/50'
                     }
                   `}

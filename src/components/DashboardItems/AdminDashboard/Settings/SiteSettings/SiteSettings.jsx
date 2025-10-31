@@ -221,7 +221,7 @@ const LogoSettings = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
+            className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
           >
             {loading ? 'Updating...' : 'Update Logo'}
           </button>
@@ -311,7 +311,7 @@ const FaviconSettings = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
+            className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
           >
             {loading ? 'Updating...' : 'Update Favicon'}
           </button>
@@ -356,7 +356,7 @@ const SitemapSettings = () => {
         <button
           onClick={generateSitemap}
           disabled={loading}
-          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
+          className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
         >
           {loading ? 'Generating...' : 'Generate Sitemap'}
         </button>
@@ -452,7 +452,7 @@ const GeneralSettings = () => {
           <button
             type="submit"
             disabled={loading}
-            className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
+            className="mt-6 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
           >
             {loading ? 'Saving...' : 'Save Settings'}
           </button>
@@ -549,7 +549,7 @@ const SeoSettings = () => {
           <button
             type="submit"
             disabled={loading}
-            className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
+            className="mt-6 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
           >
             {loading ? 'Saving...' : 'Save SEO Settings'}
           </button>

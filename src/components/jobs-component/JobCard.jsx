@@ -130,7 +130,7 @@ export const JobCard = ({ job, onToggleSave }) => (
                     <Share2 className="w-4 h-4" />
                 </motion.button>
                 <motion.button
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 text-sm"
+                    className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 text-sm"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                 >
