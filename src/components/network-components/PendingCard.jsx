@@ -228,28 +228,14 @@ export const PendingCard = ({ invitation, onUpdate }) => {
             initial="hidden"
             animate="visible"
             whileHover="hover"
-            className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300"
+            className="bg-white rounded-xl p-3 md:p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300"
         >
-            <div className="flex items-start space-x-3 mb-4">
-                <img
-                    src={avatar}
-                    alt={name}
-                    className="w-12 h-12 rounded-xl object-cover border-2 border-white shadow-sm"
-                />
-                <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900">{name}</h3>
+            <div className="flex items-start mb-4 flex-col md:flex-row md:justify-between">
+                <div className="">
+                    <h3 className="font-semibold text-xs text-gray-900">{name}</h3>
                     <p className="text-gray-600 text-sm">
                         {title}{company && ` · ${company}`}
                     </p>
-                    <p className="text-gray-500 text-xs mt-1">
-                        {senderDetails.location || ''}
-                    </p>
-                    {invitation.mutualConnections > 0 && (
-                        <div className="flex items-center space-x-2 mt-1 text-xs text-blue-600">
-                            <Users className="w-3 h-3" />
-                            <span>{invitation.mutualConnections} mutual connections</span>
-                        </div>
-                    )}
                 </div>
                 <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-lg">
                     {getTimeAgo(invitation.createdAt)}

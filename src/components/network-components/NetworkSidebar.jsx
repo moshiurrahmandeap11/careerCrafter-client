@@ -47,7 +47,7 @@ const NetworkSidebar = ({ onClose }) => {
     ];
 
     return (
-        <div className="h-full flex flex-col">
+        <div className="sticky top-16 h-[calc(100vh-4rem)] flex flex-col overflow-y-auto bg-white border-l border-gray-200">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <div>
@@ -80,18 +80,17 @@ const NetworkSidebar = ({ onClose }) => {
                                     end={item.end}
                                     onClick={onClose}
                                     className={`
-                    flex items-center justify-between p-3 rounded-xl transition-all duration-200
-                    ${isActive
+                                        flex items-center justify-between p-3 rounded-xl transition-all duration-200
+                                        ${isActive
                                             ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                                        }
-                  `}
+                                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}
+                                    `}
                                 >
                                     <div className="flex items-center gap-2">
                                         <div className={`
-                      p-2 rounded-lg
-                      ${isActive ? 'bg-blue-100' : 'bg-gray-100'}
-                    `}>
+                                            p-2 rounded-lg
+                                            ${isActive ? 'bg-blue-100' : 'bg-gray-100'}
+                                        `}>
                                             <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-gray-600'}`} />
                                         </div>
                                         <div className="text-left">
@@ -100,18 +99,18 @@ const NetworkSidebar = ({ onClose }) => {
                                         </div>
                                     </div>
                                     <span className={`
-                    px-2 py-1 rounded-full text-xs font-semibold min-w-8 text-center
-                    ${isActive
+                                        px-2 py-1 rounded-full text-xs font-semibold min-w-8 text-center
+                                        ${isActive
                                             ? 'bg-blue-100 text-blue-700'
-                                            : 'bg-gray-200 text-gray-700'
-                                        }
-                  `}>
+                                            : 'bg-gray-200 text-gray-700'}
+                                    `}>
                                         {item.count}
                                     </span>
                                 </NavLink>
                             </li>
                         );
                     })}
+
                     {/* Footer Stats */}
                     <div className="p-4 border-t border-gray-200">
                         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4">

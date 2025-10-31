@@ -58,6 +58,10 @@ const NotificationPage = () => {
     }
   }, [dispatch, user?.email]);
 
+    useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Real-time updates - poll every 30 seconds
   useEffect(() => {
     if (!user?.email) return;

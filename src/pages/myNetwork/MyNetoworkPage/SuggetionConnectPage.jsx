@@ -7,23 +7,23 @@ import SuggestionCard from '../../../components/network-components/SuggestionCar
 import Loader from '../../../components/sharedItems/Loader/Loader'
 
 const SuggetionConnectPage = () => {
-    const { user } = useAuth()
-      const dispatch = useDispatch();
-      const axiosSecure=useAxiosSecure()
-      const { isLoading, suggestedUsers, error } = useSelector((state) => state.network);
-    
-      useEffect(() => {
-         if (user?.email) {
-          dispatch(fetchSuggestedUsers({email:user.email,axiosSecure}));
-        }
-      
-      }, [dispatch,user?.email,axiosSecure]);
-      
-      if (isLoading) return <Loader></Loader>;
-      if (error) return <p>Error: {error}</p>;
-    return (
-        <div className="p-4">
-      <h1 className="text-xl font-bold mb-3">People you may know</h1>
+  const { user } = useAuth()
+  const dispatch = useDispatch();
+  const axiosSecure = useAxiosSecure()
+  const { isLoading, suggestedUsers, error } = useSelector((state) => state.network);
+
+  useEffect(() => {
+    if (user?.email) {
+      dispatch(fetchSuggestedUsers({ email: user.email, axiosSecure }));
+    }
+
+  }, [dispatch, user?.email, axiosSecure]);
+
+  if (isLoading) return <Loader></Loader>;
+  if (error) return <p>Error: {error}</p>;
+  return (
+    <div className="">
+      <h1 className="text-xl md:text-3xl font-bold mb-3">People you may know</h1>
       {suggestedUsers.length === 0 ? (
         <p>No connected users found.</p>
       ) : (
@@ -34,7 +34,7 @@ const SuggetionConnectPage = () => {
         </ul>
       )}
     </div>
-    );
+  );
 };
 
 export default SuggetionConnectPage;

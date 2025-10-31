@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router';
 import NetworkSidebar from '../../components/network-components/NetworkSidebar';
 import NetworkMobileHeader from '../../components/network-components/NetworkMobileHeader';
 
 const MyNetwork = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+    useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
-    <div className="min-h-screen w-11/12 mx-auto px-4 ">
+    <div className="min-h-screen md:w-11/12 mx-auto md:px-4 w-full">
       {/* Mobile Header with Tabs */}
       <NetworkMobileHeader onMenuClick={() => setMobileSidebarOpen(true)} />
       
       <div className="flex lg:pt-0"> {/* Increased padding for mobile to accommodate tabs */}
         {/* Sidebar - Hidden on mobile, visible on desktop */}
-        <div className="hidden lg:block lg:w-1/4 bg-white border-x border-gray-200">
+        <div className="hidden  lg:block lg:w-1/4 bg-white">
           <NetworkSidebar />
         </div>
         

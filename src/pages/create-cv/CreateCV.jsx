@@ -1583,13 +1583,13 @@ const CreateCV = () => {
                   )}
                 </button>
 
-                <button
+                {/* <button
                   onClick={() => dispatch(setShowPreview(!showPreview))}
                   className="w-full border-2 border-gray-300 text-gray-700 py-4 px-6 rounded-xl font-semibold flex items-center justify-center gap-3 hover:border-blue-500 hover:text-blue-600 transition-colors"
                 >
                   <Eye className="w-5 h-5" />
                   <span>{showPreview ? "Hide Preview" : "Show Preview"}</span>
-                </button>
+                </button> */}
 
                 {showPreview && (
                   <button

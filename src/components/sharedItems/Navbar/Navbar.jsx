@@ -786,10 +786,6 @@ const Navbar = () => {
                 className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
                 onClick={handleMessagesClick}
               >
-                <MessageCircle className="w-5 h-5" />
-                {unreadMessages > 0 && (
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
-                )}
               </button>
             </div>
           </div>

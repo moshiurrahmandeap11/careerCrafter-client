@@ -147,7 +147,7 @@ const PendingConnectPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-6 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-11/12 mx-auto ">
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -156,17 +156,17 @@ const PendingConnectPage = () => {
         >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <h1 className="text-xl md:text-3xl  font-bold text-gray-900 flex items-center gap-3">
                 <Mail className="w-8 h-8 text-blue-600" />
                 Connection Requests
               </h1>
-              <p className="text-gray-600 mt-2">
+              <p className="text-gray-600 mt-2  text-sm">
                 Manage your incoming connection requests
               </p>
             </div>
             
-            <div className="flex items-center gap-4 mt-4 md:mt-0">
-              <div className="text-right">
+            <div className="flex  gap-4 mt-4 md:mt-0">
+              <div className="md:text-right text-left">
                 <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
                 <div className="text-sm text-gray-500">Total Requests</div>
               </div>

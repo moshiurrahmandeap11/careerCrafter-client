@@ -50,6 +50,7 @@ import ConnectionsPage from "../../components/network-components/ConnectionsPage
 import SuggestionCard from "../../components/network-components/SuggestionCard";
 import SuggetionConnectPage from "../../pages/myNetwork/MyNetoworkPage/SuggetionConnectPage";
 import VideoInterview from "../../pages/mock-interview/VideoInterview/VideoInterview";
+import Companies from "../../pages/Companies/Companies";
 
 
 
@@ -188,6 +189,10 @@ export const route = createBrowserRouter([
       {
         path:'/learning-path',
         element: <LearningPath />
+      },
+      {
+        path: '/companies',
+        Component: Companies,
       }
     ],
   },

@@ -34,10 +34,10 @@ const MyNetwork = () => {
   );
 
   return (
-    <div className="p-4 max-w-7xl mx-auto">
+    <div className="">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">Browse All Users</h1>
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-sm">
           Discover and connect with professionals in your network
         </p>
         <div className="mt-2 text-sm text-gray-500">

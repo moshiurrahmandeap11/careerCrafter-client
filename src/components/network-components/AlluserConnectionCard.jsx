@@ -122,11 +122,11 @@ const AlluserConnectionCard = ({ user }) => {
   };
 
   return (
-    <div className="bg-white shadow-md rounded-xl p-5 flex flex-col md:flex-row items-center justify-between transition-all duration-200 border border-gray-100 hover:shadow-lg">
+    <div className="bg-white shadow-md rounded-xl md:p-5 p-3 flex flex-col md:flex-row items-center justify-between transition-all duration-200 border border-gray-100 hover:shadow-lg">
       {/* Left side */}
       <div className="flex items-center gap-4 w-full md:w-auto">
         <div className="relative">
-          <div className="w-20 h-20 rounded-full overflow-hidden mb-4 bg-gray-200">
+          <div className="w-15 h-15 md:w-20 md:h-20 rounded-full overflow-hidden mb-4 bg-gray-200">
             {user.profileImage ? (
               <img
                 src={user.profileImage}
@@ -134,7 +134,7 @@ const AlluserConnectionCard = ({ user }) => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-3xl border-2 border-white shadow-sm">
+              <div className="w-15 h-15 md:w-20 md:h-20 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-3xl border-2 border-white shadow-sm">
                 {user.fullName ? user.fullName.charAt(0).toUpperCase() : "?"}
               </div>
             )}
@@ -150,7 +150,6 @@ const AlluserConnectionCard = ({ user }) => {
           <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
             {fullName}
           </h2>
-          <p className="text-gray-500 text-sm mt-1">{email}</p>
           <p className="text-blue-500 text-sm capitalize font-medium mt-1">
             {role}
           </p>
@@ -176,7 +175,7 @@ const AlluserConnectionCard = ({ user }) => {
       </div>
 
       {/* Right side buttons */}
-      <div className="flex flex-row gap-2 mt-4 md:mt-0 w-full md:w-auto">
+      <div className="flex flex-row md:flex-col gap-2 mt-4 md:mt-0 w-full justify-between md:w-auto">
         <MainButton
           onClick={() => handleConnect(email)}
           disabled={isConnected || isLoading}
