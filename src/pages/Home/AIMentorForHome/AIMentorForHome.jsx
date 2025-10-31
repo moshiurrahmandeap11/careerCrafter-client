@@ -358,7 +358,6 @@ What career challenge can I help you with today?`
             <p className="text-md md:text-lg mb-8 opacity-95 leading-relaxed">
               {motivationalMessages[currentMessage].description}
             </p>
-
             <button
               onClick={handleYesClick}
               className={`bg-gradient-to-r ${motivationalMessages[currentMessage].buttonColor} text-white px-12 py-6 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center gap-4 mx-auto group`}
@@ -441,7 +440,7 @@ What career challenge can I help you with today?`
             >
               <div
                 className={`max-w-[85%] rounded-3xl px-5 py-4 backdrop-blur-sm ${msg.role === "user"
-                  ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
+                  ? "bg-blue-600 text-white shadow-lg"
                   : "bg-white/90 text-gray-800 border border-white/50 shadow-lg"
                   }`}
               >
