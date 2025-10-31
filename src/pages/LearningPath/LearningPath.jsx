@@ -62,10 +62,6 @@ const LearningPath = () => {
     }
   };
 
-  const handleSavePath = () => {
-    dispatch(saveLearningPath());
-  };
-
   const toggleStageDetails = (index) => {
     setShowDetails(prev => ({
       ...prev,
@@ -221,12 +217,6 @@ const LearningPath = () => {
               className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
               Create New Path
-            </button>
-            <button
-              onClick={handleSavePath}
-              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-            >
-              Save This Path
             </button>
           </div>
         </div>
