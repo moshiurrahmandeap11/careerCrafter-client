@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosIntense = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/v1", 
+  baseURL: import.meta.env.VITE_API_URL || "https://careercrafter-serverv2-ujga.onrender.com/v1", 
   headers: {
     "Content-Type": "application/json",
   },
