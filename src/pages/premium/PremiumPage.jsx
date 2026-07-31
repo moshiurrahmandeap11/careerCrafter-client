@@ -57,7 +57,7 @@ import useAuth from '../../hooks/UseAuth/useAuth';
 import axiosIntense from '../../hooks/AxiosIntense/axiosIntense';
 
 // Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_REACT_APP_STRIPE_PUBLISHABLE_KEY);
+const stripePromise = loadStripe(import.meta.env.VITE_REACT_APP_STRIPE_PUBLISHABLE_KEY || "pk_test_dummy");
 
 const PremiumPage = () => {
   return (
